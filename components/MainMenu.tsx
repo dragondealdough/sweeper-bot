@@ -301,8 +301,8 @@ const MainMenu: React.FC<MainMenuProps> = ({
                 <p className="absolute bottom-6 text-amber-200/40 text-xs tracking-wider animate-pulse">
                     Click anywhere to start music ♪
                 </p>
-                {/* Version Number */}
-                <div className="absolute bottom-2 right-2 text-white/20 text-[10px] font-mono pointer-events-none">
+                {/* Version Number - Moved to Top Left for mobile safety */}
+                <div className="absolute top-4 left-4 text-white/20 text-[10px] font-mono pointer-events-none select-none z-50">
                     {APP_VERSION}
                 </div>
             </div>
