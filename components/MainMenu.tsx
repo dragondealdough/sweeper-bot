@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { GameSettings } from '../hooks/useGameSettings';
+import { APP_VERSION } from '../constants';
 
 interface MainMenuProps {
     hasSave: boolean;
@@ -300,6 +301,10 @@ const MainMenu: React.FC<MainMenuProps> = ({
                 <p className="absolute bottom-6 text-amber-200/40 text-xs tracking-wider animate-pulse">
                     Click anywhere to start music ♪
                 </p>
+                {/* Version Number */}
+                <div className="absolute bottom-2 right-2 text-white/20 text-[10px] font-mono pointer-events-none">
+                    {APP_VERSION}
+                </div>
             </div>
 
             {/* CSS Animations */}
