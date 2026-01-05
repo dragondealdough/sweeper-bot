@@ -116,7 +116,7 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible }) => {
                             className="absolute bottom-6 right-28 z-10"
                             size="w-20 h-20"
                             color="bg-green-600 border-2 border-green-400/30"
-                            label="E"
+                            icon="✋"
                         />
 
                         {/* 3. Utility Action: FLAG / Z (Smallest, top of arc to prevent accidental press) */}
