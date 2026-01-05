@@ -1,0 +1,129 @@
+
+import { useCallback } from 'react';
+import { GameStatus, Inventory, Direction, PlayerPosition } from '../types';
+import { DAY_DURATION_MS, GRID_CONFIG } from '../constants';
+
+export const useGameActions = (
+  setCoins: React.Dispatch<React.SetStateAction<number>>,
+  setInventory: React.Dispatch<React.SetStateAction<Inventory>>,
+  setMessage: React.Dispatch<React.SetStateAction<string | null>>,
+  setDayTime: React.Dispatch<React.SetStateAction<number>>,
+  setDayCount: React.Dispatch<React.SetStateAction<number>>,
+  setRopeLength: React.Dispatch<React.SetStateAction<number>>,
+  playerRef: React.MutableRefObject<PlayerPosition>,
+  setPlayer: React.Dispatch<React.SetStateAction<PlayerPosition>>,
+  timeRef: React.MutableRefObject<number>,
+  gridRef: React.MutableRefObject<any[][]>,
+  ROPE_X: number,
+  OVERWORLD_FLOOR_Y: number
+) => {
+  const handleSleep = useCallback((forced = false, currentDayCount: number) => {
+    timeRef.current = DAY_DURATION_MS;
+    setDayTime(DAY_DURATION_MS);
+    setDayCount(prev => prev + 1);
+    const startPos = { x: 8, y: OVERWORLD_FLOOR_Y, vx: 0, vy: 0, facing: Direction.DOWN, isClimbing: false };
+    playerRef.current = startPos;
+    setPlayer(startPos);
+    if (!forced) {
+        setMessage("WELL RESTED - DAY " + (currentDayCount + 1));
+        setTimeout(() => setMessage(null), 2000);
+    }
+  }, [setDayTime, setDayCount, setPlayer, setMessage, timeRef, OVERWORLD_FLOOR_Y, playerRef]);
+
+  const handlePassOut = useCallback((currentCoins: number, currentDayCount: number) => {
+    setMessage("EXHAUSTION - SKIPPING TO NEXT DAY");
+    setCoins(Math.max(0, currentCoins - 20));
+    setTimeout(() => { 
+      setMessage(null); 
+      handleSleep(true, currentDayCount); 
+    }, 2000);
+  }, [setCoins, setMessage, handleSleep]);
+
+  const handlePlayerDeath = useCallback((currentDayCount: number) => {
+    setMessage("CRITICAL INJURY - EMERGENCY EVAC");
+    setCoins(c => Math.floor(c * 0.75));
+    setTimeout(() => { 
+      setMessage(null); 
+      handleSleep(true, currentDayCount); 
+    }, 3000);
+  }, [setCoins, setMessage, handleSleep]);
+
+  const handleShopBuy = useCallback((id: any, price: number, coins: number, ropeLength: number) => {
+    if (coins < price) return;
+    if (id === 'ROPE') {
+        const extensionAmount = 5; 
+        let obstructed = false;
+        for (let i = 0; i < extensionAmount; i++) {
+            const ty = ropeLength + i;
+            if (ty >= GRID_CONFIG.ROWS || !gridRef.current[ty]?.[ROPE_X]?.isRevealed || gridRef.current[ty]?.[ROPE_X]?.item === 'SILVER_BLOCK') { 
+              obstructed = true; 
+              break; 
+            }
+        }
+        if (obstructed) { 
+          setMessage("PATH OBSTRUCTED - CLEAR ROCK FIRST"); 
+          setTimeout(() => setMessage(null), 2000); 
+          return; 
+        }
+        setRopeLength(prev => prev + extensionAmount);
+    }
+    if (price > 0) setCoins(c => c - price);
+    if (id === 'CHARGE') setInventory(prev => ({ ...prev, disarmCharges: prev.disarmCharges + 1 }));
+    if (id === 'KIT') setInventory(prev => ({ ...prev, disarmKits: prev.disarmKits + 1 }));
+    if (id === 'PICKAXE') {
+      setInventory(prev => ({ ...prev, hasPickaxe: true }));
+      setMessage("+1 PICKAXE ⛏️ - YOU CAN NOW MINE!");
+      setTimeout(() => setMessage(null), 2000);
+    }
+  }, [setCoins, setInventory, setMessage, setRopeLength, gridRef, ROPE_X]);
+
+  const handleShopSell = useCallback((id: 'SCRAP' | 'GEM' | 'COAL', price: number) => {
+    setInventory(prev => {
+        if (id === 'SCRAP' && prev.scrapMetal > 0) { setCoins(c => c + price); return { ...prev, scrapMetal: prev.scrapMetal - 1 }; }
+        if (id === 'GEM' && prev.gems > 0) { setCoins(c => c + price); return { ...prev, gems: prev.gems - 1 }; }
+        if (id === 'COAL' && prev.coal > 0) { setCoins(c => c + price); return { ...prev, coal: prev.coal - 1 }; }
+        return prev;
+    });
+  }, [setCoins, setInventory]);
+
+  const handleContribute = useCallback((id: string, material: 'stone' | 'silver') => {
+    setInventory(prev => {
+      const newInv = { ...prev };
+      
+      if (id === 'WISHING_WELL') {
+        const requirements = { stone: 10, silver: 4 };
+        const progress = { ...prev.wishingWellProgress };
+        
+        if (material === 'stone' && prev.stone > 0 && progress.stone < requirements.stone) {
+          newInv.stone = prev.stone - 1;
+          progress.stone += 1;
+          setMessage(`+1 STONE CONTRIBUTED (${progress.stone}/${requirements.stone})`);
+        } else if (material === 'silver' && prev.silverBlocks > 0 && progress.silver < requirements.silver) {
+          newInv.silverBlocks = prev.silverBlocks - 1;
+          progress.silver += 1;
+          setMessage(`+1 SILVER CONTRIBUTED (${progress.silver}/${requirements.silver})`);
+        } else {
+          return prev; // No change
+        }
+        
+        newInv.wishingWellProgress = progress;
+        
+        // Check if complete
+        if (progress.stone >= requirements.stone && progress.silver >= requirements.silver) {
+          newInv.wishingWellBuilt = true;
+          setTimeout(() => {
+            setMessage("⛲ WISHING WELL CONSTRUCTED!");
+            setTimeout(() => setMessage(null), 3000);
+          }, 500);
+        } else {
+          setTimeout(() => setMessage(null), 1500);
+        }
+      }
+      
+      return newInv;
+    });
+  }, [setInventory, setMessage]);
+
+  return { handleSleep, handlePassOut, handlePlayerDeath, handleShopBuy, handleShopSell, handleContribute };
+};
+

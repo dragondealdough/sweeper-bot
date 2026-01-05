@@ -1,0 +1,5 @@
+{
+  "name": "DugSweeper: Deep Mines",
+  "description": "A fusion of Dig Dug and Minesweeper. Dig through a 2D grid, use logic to identify mines, and flag your way to the bottom without blowing up.",
+  "requestFramePermissions": []
+}

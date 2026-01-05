@@ -1,0 +1,56 @@
+
+@layer base {
+  :root {
+    --primary: #4a3728;
+    --accent: #c6a664;
+    --bg: #fafaf9;
+  }
+  
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  h1, h2, h3, .serif {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+.coffee-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.coffee-card:hover {
+  transform: translateY(-8px);
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: currentColor;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.hero-overlay {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease forwards;
+}
