@@ -299,6 +299,25 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
     <div
       className="fixed inset-0 z-[150] flex justify-center bg-black/80 backdrop-blur-sm pt-0 pb-0 sm:pt-10 sm:pb-10"
     >
+      {/* Styles for custom scrollbar within this component scope */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 12px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #1e293b; 
+          border-left: 1px solid #334155;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background-color: #d97706; /* amber-600 */
+          border: 2px solid #1e293b;
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background-color: #fbbf24; /* amber-400 */
+        }
+      `}</style>
+
       {/* Cursor Pointer */}
       {!showTutorialMessage && (
         <div
@@ -338,7 +357,14 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           >
             ← CLOSE
           </button>
-          <h2 className="text-xl font-black text-black uppercase tracking-tighter flex-1 text-right">Commissary Terminal</h2>
+
+          <div className="flex-1 text-right flex flex-col items-end">
+            <h2 className="text-xl font-black text-black uppercase tracking-tighter leading-none">Commissary</h2>
+            <div className="flex items-center gap-1 bg-black/20 px-2 rounded-full mt-1">
+              <span className="text-[10px] text-black font-bold uppercase tracking-widest">CREDITS:</span>
+              <span className="text-sm font-black text-white">${coins}</span>
+            </div>
+          </div>
         </div>
 
         {/* Tabs - Fixed below header */}
@@ -361,12 +387,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           </button>
         </div>
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          <div className="flex justify-between items-center mb-6 bg-black/40 p-3 border border-slate-700 sticky top-0 backdrop-blur-md z-10">
-            <span className="text-[10px] text-slate-500 uppercase font-bold">Available Credits</span>
-            <span className="text-xl font-black text-yellow-400">${coins}</span>
-          </div>
+        {/* Scrollable Content Area - Custom Scrollbar applied */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+
+          {/* Removed Sticky Header - Box is gone, credits are in header now */}
 
           {currentItems.map((item, index) => {
             const isPickaxe = item.id === 'PICKAXE';
@@ -425,9 +449,8 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           })}
         </div>
 
-        <div className="p-4 bg-black/20 text-center shrink-0">
-          <p className="text-[8px] text-slate-500 uppercase">Authorized mining equipment only. No refunds.</p>
-        </div>
+        {/* Footer Removed as requested */}
+
       </div>
 
       {/* Tutorial Message Overlay - center-bottom */}
