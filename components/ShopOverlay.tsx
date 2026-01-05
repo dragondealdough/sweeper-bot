@@ -160,6 +160,45 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   const sellTabRef = useRef<HTMLButtonElement>(null);
   const [selectedElement, setSelectedElement] = useState<'ITEM' | 'CLOSE' | 'BUY_TAB' | 'SELL_TAB'>('ITEM');
 
+  // Scroll arrow visibility state
+  const [showScrollArrows, setShowScrollArrows] = useState({ up: false, down: false });
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll handler for buttons
+  const scrollBy = (amount: number) => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ top: amount, behavior: 'smooth' });
+    }
+  };
+
+  // Check scroll position to toggle arrows
+  const checkScroll = useCallback(() => {
+    if (scrollContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+      setShowScrollArrows({
+        up: scrollTop > 10,
+        down: scrollTop < scrollHeight - clientHeight - 10
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.addEventListener('scroll', checkScroll);
+      // Initial check
+      checkScroll();
+      window.addEventListener('resize', checkScroll);
+      // Trigger check after a short delay to ensure layout is complete
+      const timer = setTimeout(checkScroll, 100);
+      return () => {
+        el.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+        clearTimeout(timer);
+      };
+    }
+  }, [checkScroll, currentItems, tab]);
+
   // Check if we should show tutorial messages - just check if there's a message to show
   const showTutorialMessage = tutorialState?.showingMessage && tutorialState?.currentMessage;
 
