@@ -110,7 +110,6 @@ const RecyclingOverlay: React.FC<RecyclingOverlayProps> = ({ inventory, onRecycl
   }, [selectedButton]);
 
   return (
-  return (
     <div
       className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in font-mono"
       style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
