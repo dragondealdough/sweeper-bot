@@ -9,6 +9,7 @@ interface TouchButtonProps {
     color?: string;
     disabled?: boolean;
     size?: string; // Tailwind size classes (e.g. w-20 h-20)
+    style?: React.CSSProperties; // Inline styles (for absolute positioning)
 }
 
 const TouchButton: React.FC<TouchButtonProps> = ({
@@ -18,7 +19,8 @@ const TouchButton: React.FC<TouchButtonProps> = ({
     icon,
     color = 'bg-stone-700',
     disabled,
-    size = 'w-16 h-16'
+    size = 'w-16 h-16',
+    style
 }) => {
     const isPressed = useRef(false);
     const [active, setActive] = useState(false);
@@ -63,7 +65,7 @@ const TouchButton: React.FC<TouchButtonProps> = ({
                 ${active ? 'scale-95 brightness-110 shadow-[inset_0_2px_8px_rgba(0,0,0,0.4)]' : 'shadow-[0_4px_10px_rgba(0,0,0,0.4)] border-b-4 border-black/20 active:border-b-0 active:translate-y-1'}
                 ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer'}
             `}
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+            style={{ ...style, WebkitTapHighlightColor: 'transparent' }}
             onTouchStart={handleStart}
             onTouchEnd={handleEnd}
             onMouseDown={handleStart}

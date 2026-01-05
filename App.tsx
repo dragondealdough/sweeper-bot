@@ -389,7 +389,7 @@ const App: React.FC = () => {
   const showConstructionPrompt = state.player.y < 0 && Math.abs(state.player.x - CONSTRUCTION_X) < 2 && !state.isConstructionOpen;
 
   return (
-    <div className="h-screen w-screen bg-black overflow-hidden relative">
+    <div className="h-[100dvh] w-screen bg-black overflow-hidden relative">
       {/* Scaled game wrapper - centers the scaled content */}
       <div
         className="relative bg-black text-stone-200 font-mono cursor-none overflow-hidden"
