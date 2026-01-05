@@ -133,7 +133,8 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible }) => {
                     </div>
                 </div>
             </div>
-            );
+        </div>
+    );
 };
 
-            export default TouchControls;
+export default TouchControls;
