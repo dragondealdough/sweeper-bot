@@ -66,13 +66,15 @@ const App: React.FC = () => {
       const newScale = Math.min(scaleX, scaleY);
 
       // Clamp between 0.4 (minimum readable) and 1.5 (slight upscale allowed)
-      setScale(Math.max(0.4, Math.min(1.5, newScale)));
+      // On mobile, Apply a 1.3x zoom multiplier to get the camera closer
+      const mobileMultiplier = isMobile ? 1.3 : 1;
+      setScale(Math.max(0.4, Math.min(1.5, newScale * mobileMultiplier)));
     };
 
     calculateScale();
     window.addEventListener('resize', calculateScale);
     return () => window.removeEventListener('resize', calculateScale);
-  }, []);
+  }, [isMobile]);
 
   const ROPE_X = 8;
   const HOUSE_X = -2;  // Moved left to make room for rope mechanism
