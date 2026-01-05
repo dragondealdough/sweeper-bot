@@ -296,7 +296,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   }, [selectedIndex, selectedElement, showTutorialMessage]);
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 pt-24">
       {/* Cursor Pointer */}
       {!showTutorialMessage && (
         <div
@@ -312,7 +312,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
       )}
 
       <div className="w-full max-w-md bg-slate-900 border-4 border-amber-600 shadow-[0_0_50px_rgba(217,119,6,0.3)] rounded-sm overflow-hidden">
-        <div className="bg-amber-600 p-4 pt-12 md:pt-4 flex justify-between items-center">
+        <div className="bg-amber-600 p-4 flex justify-between items-center">
           <h2 className="text-xl font-black text-black uppercase tracking-tighter">Commissary Terminal</h2>
           <button
             ref={closeButtonRef}
@@ -323,10 +323,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
               onClose();
             }}
             className={`text-black font-black px-3 py-1 transition-all ${tutorialHighlightCloseButton
-                ? 'bg-green-500 ring-4 ring-green-400/50 animate-pulse shadow-lg'
-                : selectedElement === 'CLOSE'
-                  ? 'bg-black/20 ring-2 ring-black/50'
-                  : 'hover:bg-black/10'
+              ? 'bg-green-500 ring-4 ring-green-400/50 animate-pulse shadow-lg'
+              : selectedElement === 'CLOSE'
+                ? 'bg-black/20 ring-2 ring-black/50'
+                : 'hover:bg-black/10'
               }`}
           >
             CLOSE
@@ -368,10 +368,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
                 key={item.id}
                 ref={(el) => { itemRefs.current[index] = el; }}
                 className={`group relative flex items-center gap-4 bg-slate-800 p-3 border transition-all ${shouldHighlight
-                    ? 'border-green-400 ring-4 ring-green-400/50 animate-pulse bg-green-900/30'
-                    : selectedIndex === index && selectedElement === 'ITEM'
-                      ? 'border-amber-400 ring-2 ring-amber-400/50'
-                      : 'border-slate-700 hover:border-amber-500'
+                  ? 'border-green-400 ring-4 ring-green-400/50 animate-pulse bg-green-900/30'
+                  : selectedIndex === index && selectedElement === 'ITEM'
+                    ? 'border-amber-400 ring-2 ring-amber-400/50'
+                    : 'border-slate-700 hover:border-amber-500'
                   }`}
               >
                 {/* Free badge for pickaxe */}
@@ -396,10 +396,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
                   disabled={tab === 'BUY' ? coins < item.price : (item as any).count <= 0}
                   onClick={() => tab === 'BUY' ? onBuy(item.id as any, item.price) : onSell(item.id as any, item.price)}
                   className={`px-4 py-2 font-black text-xs uppercase transition-all flex items-center gap-2 ${isPickaxe
-                      ? 'bg-green-500 text-black hover:bg-green-400 shadow-lg'
-                      : (tab === 'BUY' ? coins >= item.price : (item as any).count > 0)
-                        ? 'bg-amber-600 text-black hover:bg-amber-500'
-                        : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    ? 'bg-green-500 text-black hover:bg-green-400 shadow-lg'
+                    : (tab === 'BUY' ? coins >= item.price : (item as any).count > 0)
+                      ? 'bg-amber-600 text-black hover:bg-amber-500'
+                      : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                     }`}
                 >
                   {isPickaxe ? (

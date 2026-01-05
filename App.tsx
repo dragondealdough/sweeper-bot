@@ -66,8 +66,8 @@ const App: React.FC = () => {
       const newScale = Math.min(scaleX, scaleY);
 
       // Clamp between 0.4 (minimum readable) and 1.5 (slight upscale allowed)
-      // On mobile, Apply a 1.3x zoom multiplier to get the camera closer
-      const mobileMultiplier = isMobile ? 1.3 : 1;
+      // On mobile, Apply a 1.6x zoom multiplier to get the camera closer (User request)
+      const mobileMultiplier = isMobile ? 1.6 : 1;
       setScale(Math.max(0.4, Math.min(1.5, newScale * mobileMultiplier)));
     };
 
