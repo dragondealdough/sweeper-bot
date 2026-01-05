@@ -77,7 +77,7 @@ const renderTextWithBold = (text: string, isMobile: boolean) => {
       .replace(/disarm the flagged explosive with spacebar/i, 'disarm the flagged explosive with the Blue Pickaxe Button')
       .replace(/press spacebar/i, 'press the Blue Pickaxe Button')
       .replace(/press E/i, 'press the Green Button')
-      .replace(/arrow keys/i, 'the D-Pad')
+      .replace(/arrow keys/i, 'the Virtual Joystick')
       .replace(/\[(\w+)\]/g, '$1'); // Remove brackets from keys like [E]
   }
 
@@ -170,6 +170,7 @@ const renderTextWithBold = (text: string, isMobile: boolean) => {
       lower === 'blue pickaxe button' ||
       lower === 'red flag button' ||
       lower === 'green button' ||
+      lower === 'virtual joystick' ||
       lower === 'd-pad') {
       return <strong key={i} className="font-bold text-amber-400">{part}</strong>;
     }
