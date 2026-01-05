@@ -99,11 +99,11 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible }) => {
                     <VirtualJoystick size={150} className="opacity-80 hover:opacity-100 transition-opacity" />
                 </div>
 
-                {/* RIGHT: Action Cluster (Arc Layout) - Pushed closer to edge */}
-                <div className="relative w-1/3 h-full flex items-end justify-end pb-4 pr-2">
-                    <div className="relative w-40 h-40">
+                {/* RIGHT: Action Cluster (Arc Layout) - Pushed ALL THE WAY to the right edge */}
+                <div className="absolute right-4 bottom-8 w-48 h-48 pointer-events-none">
+                    <div className="relative w-full h-full pointer-events-auto">
 
-                        {/* 1. Primary Action: MINE / SPACE (Bottom Right) */}
+                        {/* 1. Primary Action: MINE / SPACE (Bottom Right) - The Anchor */}
                         <TouchButton
                             keys={[' ']}
                             className="absolute bottom-0 right-0 z-20 opacity-60 active:opacity-100"
@@ -112,20 +112,20 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible }) => {
                             icon="⛏️" // Pickaxe
                         />
 
-                        {/* 2. Secondary Action: INTERACT / HAND (Middle Left) */}
+                        {/* 2. Secondary Action: INTERACT / HAND (Middle Left) - Tucked closer */}
                         <TouchButton
                             keys={['e', 'E', 'Enter']}
-                            className="absolute bottom-8 right-24 z-10 opacity-60 active:opacity-100"
-                            size="w-20 h-20"
+                            className="absolute bottom-6 right-24 z-10 opacity-60 active:opacity-100"
+                            size="w-16 h-16" // Slightly smaller for ergonomics
                             color="bg-green-600 border-2 border-green-400/30"
                             icon="✋"
                         />
 
-                        {/* 3. Utility Action: FLAG / Z (Top Right) */}
+                        {/* 3. Utility Action: FLAG / Z (Top Right) - Vertical Stack */}
                         <TouchButton
                             keys={['z', 'Z']}
-                            className="absolute bottom-24 right-4 z-10 opacity-60 active:opacity-100"
-                            size="w-20 h-20"
+                            className="absolute bottom-24 right-2 z-10 opacity-60 active:opacity-100"
+                            size="w-16 h-16" // Slightly smaller
                             color="bg-red-600 border-2 border-red-400/30"
                             icon="🚩"
                         />
