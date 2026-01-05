@@ -160,6 +160,26 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   const sellTabRef = useRef<HTMLButtonElement>(null);
   const [selectedElement, setSelectedElement] = useState<'ITEM' | 'CLOSE' | 'BUY_TAB' | 'SELL_TAB'>('ITEM');
 
+
+  // Check if we should show tutorial messages - just check if there's a message to show
+  const showTutorialMessage = tutorialState?.showingMessage && tutorialState?.currentMessage;
+
+  const buyItems = [
+    // Free pickaxe for tutorial
+    ...(showFreePickaxe ? [{ id: 'PICKAXE', name: 'Mining Pickaxe', price: 0, icon: '⛏️', desc: 'FREE! Essential mining tool.', isFree: true }] : []),
+    { id: 'CHARGE', name: 'Disarm Charge', price: 5, icon: '🧨', desc: '+1 charge to current kit.' },
+    { id: 'KIT', name: 'Disarm Kit', price: 25, icon: '🧰', desc: 'Spare kit with 3 charges. Auto-equips when empty.' },
+    { id: 'ROPE', name: 'Elevator Cable', price: 10, icon: '🪢', desc: 'Extends elevator depth by 5m (5 tiles).' },
+  ];
+
+  const sellItems = [
+    { id: 'SCRAP', name: 'Scrap Metal', price: 5, icon: '⚙️', count: inventory.scrapMetal },
+    { id: 'GEM', name: 'Gemstone', price: 20, icon: '💎', count: inventory.gems },
+    { id: 'COAL', name: 'Coal Chunk', price: 10, icon: '⬛', count: inventory.coal },
+  ];
+
+  const currentItems = tab === 'BUY' ? buyItems : sellItems;
+
   // Scroll arrow visibility state
   const [showScrollArrows, setShowScrollArrows] = useState({ up: false, down: false });
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -198,25 +218,6 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
       };
     }
   }, [checkScroll, currentItems, tab]);
-
-  // Check if we should show tutorial messages - just check if there's a message to show
-  const showTutorialMessage = tutorialState?.showingMessage && tutorialState?.currentMessage;
-
-  const buyItems = [
-    // Free pickaxe for tutorial
-    ...(showFreePickaxe ? [{ id: 'PICKAXE', name: 'Mining Pickaxe', price: 0, icon: '⛏️', desc: 'FREE! Essential mining tool.', isFree: true }] : []),
-    { id: 'CHARGE', name: 'Disarm Charge', price: 5, icon: '🧨', desc: '+1 charge to current kit.' },
-    { id: 'KIT', name: 'Disarm Kit', price: 25, icon: '🧰', desc: 'Spare kit with 3 charges. Auto-equips when empty.' },
-    { id: 'ROPE', name: 'Elevator Cable', price: 10, icon: '🪢', desc: 'Extends elevator depth by 5m (5 tiles).' },
-  ];
-
-  const sellItems = [
-    { id: 'SCRAP', name: 'Scrap Metal', price: 5, icon: '⚙️', count: inventory.scrapMetal },
-    { id: 'GEM', name: 'Gemstone', price: 20, icon: '💎', count: inventory.gems },
-    { id: 'COAL', name: 'Coal Chunk', price: 10, icon: '⬛', count: inventory.coal },
-  ];
-
-  const currentItems = tab === 'BUY' ? buyItems : sellItems;
 
   const updateCursorPosition = (element: HTMLElement | null) => {
     if (element) {
