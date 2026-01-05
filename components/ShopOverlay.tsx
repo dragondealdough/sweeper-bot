@@ -296,7 +296,6 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   }, [selectedIndex, selectedElement, showTutorialMessage]);
 
   return (
-  return (
     <div
       className="fixed inset-0 z-[150] flex justify-center bg-black/80 backdrop-blur-sm pt-0 pb-0 sm:pt-10 sm:pb-10"
     >
