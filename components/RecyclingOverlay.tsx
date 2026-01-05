@@ -110,7 +110,11 @@ const RecyclingOverlay: React.FC<RecyclingOverlayProps> = ({ inventory, onRecycl
   }, [selectedButton]);
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in font-mono">
+  return (
+    <div
+      className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in font-mono"
+      style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
+    >
       {/* Cursor Pointer */}
       <div
         className="fixed z-[151] pointer-events-none transition-all duration-150"
@@ -124,18 +128,18 @@ const RecyclingOverlay: React.FC<RecyclingOverlayProps> = ({ inventory, onRecycl
       </div>
 
       <div className="w-full max-w-md bg-stone-900 border-4 border-lime-600 shadow-[0_0_50px_rgba(101,163,13,0.3)] rounded-sm overflow-hidden">
-        <div className="bg-lime-900/80 p-4 flex justify-between items-center border-b border-lime-700">
-          <h2 className="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-2">
-            <span>♻️</span> Material Processing
-          </h2>
+        <div className="bg-lime-900/80 p-4 flex items-center gap-4 border-b border-lime-700">
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            className={`text-white font-black px-3 py-1 transition-all ${selectedButton === 'close' ? 'bg-lime-700/50 ring-2 ring-lime-400' : 'hover:text-lime-400'
+            className={`text-white font-black px-3 py-1 transition-all border-2 border-white/30 ${selectedButton === 'close' ? 'bg-lime-700/50 ring-2 ring-lime-400' : 'hover:text-lime-400'
               }`}
           >
-            CLOSE
+            ← CLOSE
           </button>
+          <h2 className="text-xl font-black text-white uppercase tracking-tighter flex-1 text-right flex items-center justify-end gap-2">
+            <span>♻️</span> Material Processing
+          </h2>
         </div>
 
         <div className="p-8 flex flex-col items-center gap-8 bg-[radial-gradient(circle_at_center,rgba(60,60,60,0.5),rgba(20,20,20,0.8))]">

@@ -296,7 +296,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   }, [selectedIndex, selectedElement, showTutorialMessage]);
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 pt-24">
+    <div
+      className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4"
+      style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
+    >
       {/* Cursor Pointer */}
       {!showTutorialMessage && (
         <div
@@ -312,8 +315,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
       )}
 
       <div className="w-full max-w-md bg-slate-900 border-4 border-amber-600 shadow-[0_0_50px_rgba(217,119,6,0.3)] rounded-sm overflow-hidden">
-        <div className="bg-amber-600 p-4 flex justify-between items-center">
-          <h2 className="text-xl font-black text-black uppercase tracking-tighter">Commissary Terminal</h2>
+        <div className="bg-amber-600 p-4 flex items-center gap-4">
           <button
             ref={closeButtonRef}
             onClick={() => {
@@ -322,15 +324,16 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
               }
               onClose();
             }}
-            className={`text-black font-black px-3 py-1 transition-all ${tutorialHighlightCloseButton
+            className={`text-black font-black px-3 py-1 transition-all border-2 border-black ${tutorialHighlightCloseButton
               ? 'bg-green-500 ring-4 ring-green-400/50 animate-pulse shadow-lg'
               : selectedElement === 'CLOSE'
                 ? 'bg-black/20 ring-2 ring-black/50'
                 : 'hover:bg-black/10'
               }`}
           >
-            CLOSE
+            ← CLOSE
           </button>
+          <h2 className="text-xl font-black text-black uppercase tracking-tighter flex-1 text-right">Commissary Terminal</h2>
         </div>
 
         {/* Tabs */}

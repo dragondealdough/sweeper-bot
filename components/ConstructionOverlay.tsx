@@ -34,7 +34,7 @@ const useTypingEffect = (text: string, speed: number = 30) => {
 
     // For very fast speeds, type multiple characters per interval
     const charsPerInterval = speed <= 1 ? 2 : 1;
-    
+
     intervalRef.current = setInterval(() => {
       if (currentIndex < text.length) {
         const nextIndex = Math.min(currentIndex + charsPerInterval, text.length);
@@ -70,7 +70,7 @@ const useTypingEffect = (text: string, speed: number = 30) => {
 // Helper to render text with bold "wishing well"
 const renderTextWithBold = (text: string) => {
   const parts = text.split(/(wishing well)/i);
-  return parts.map((part, i) => 
+  return parts.map((part, i) =>
     part.toLowerCase() === 'wishing well' ? (
       <strong key={i} className="font-bold text-amber-400">{part}</strong>
     ) : (
@@ -85,7 +85,7 @@ const TutorialMessageDisplay: React.FC<{
   onAdvance: () => void;
 }> = ({ message, onAdvance }) => {
   const { displayedText, isComplete, skip } = useTypingEffect(message.text, 1);
-  
+
   // Only show button when typing is complete AND we've displayed the full current message
   const shouldShowButton = isComplete && displayedText === message.text;
 
@@ -103,7 +103,7 @@ const TutorialMessageDisplay: React.FC<{
         }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isComplete, skip, onAdvance]);
@@ -115,12 +115,12 @@ const TutorialMessageDisplay: React.FC<{
           <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
             <span className="text-[10px] font-black text-black uppercase tracking-wider">📖 Guide</span>
           </div>
-          
+
           <p className="text-sm text-white font-medium leading-relaxed mt-1 min-h-[3rem]">
             {renderTextWithBold(displayedText)}
             {!isComplete && <span className="inline-block w-1 h-4 bg-amber-500 ml-1 animate-pulse">|</span>}
           </p>
-          
+
           {shouldShowButton && (
             <div className="flex justify-end mt-3 pt-2 border-t border-stone-700/50 animate-in fade-in duration-300">
               <button
@@ -156,9 +156,9 @@ interface BuildingRequirement {
   progress: { stone: number; silver: number };
 }
 
-const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({ 
-  inventory, 
-  onContribute, 
+const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
+  inventory,
+  onContribute,
   onClose,
   tutorialState,
   onTutorialAdvance,
@@ -171,12 +171,12 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [selectedElement, setSelectedElement] = useState<'ITEM' | 'CLOSE'>('ITEM');
-  
+
   const projects: BuildingRequirement[] = [
-    { 
-      id: 'WISHING_WELL', 
-      name: 'Wishing Well', 
-      icon: '⛲', 
+    {
+      id: 'WISHING_WELL',
+      name: 'Wishing Well',
+      icon: '⛲',
       desc: 'Generates $1 every minute from tourists.',
       requirements: { stone: 10, silver: 4 },
       built: inventory.wishingWellBuilt,
@@ -236,7 +236,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
         } else {
           const project = projects[selectedIndex];
           if (project && !project.built) {
-            const canContribute = selectedMaterial === 'stone' 
+            const canContribute = selectedMaterial === 'stone'
               ? (inventory.stone > 0 && project.progress.stone < project.requirements.stone)
               : (inventory.silverBlocks > 0 && project.progress.silver < project.requirements.silver);
             if (canContribute) {
@@ -246,7 +246,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
         }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIndex, selectedElement, selectedMaterial, inventory, projects, onContribute, onClose, showTutorialMessage, highlightCloseButton, onTutorialAdvance]);
@@ -268,13 +268,16 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
   }, [selectedIndex, selectedElement, showTutorialMessage]);
 
   return (
-    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-mono">
+    <div
+      className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4"
+      style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
+    >
       {/* Cursor Pointer */}
       {!showTutorialMessage && (
-        <div 
+        <div
           className="fixed z-[151] pointer-events-none transition-all duration-150"
-          style={{ 
-            top: `${cursorPosition.top}px`, 
+          style={{
+            top: `${cursorPosition.top}px`,
             left: `${cursorPosition.left}px`,
             transform: 'translateY(-50%)'
           }}
@@ -284,28 +287,27 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
       )}
 
       <div className="w-full max-w-lg bg-stone-900 border-4 border-orange-700 shadow-[0_0_50px_rgba(194,65,12,0.3)] rounded-sm overflow-hidden">
-        <div className="bg-orange-700 p-4 flex justify-between items-center">
-          <h2 className="text-xl font-black text-white uppercase tracking-tighter">Construction Site</h2>
-          <button 
+        <div className="bg-orange-700 p-4 flex items-center gap-4">
+          <button
             ref={closeButtonRef}
             onClick={() => {
               if (highlightCloseButton && onTutorialAdvance) {
                 onTutorialAdvance();
               }
               onClose();
-            }} 
-            className={`text-white font-black px-3 py-1 transition-all ${
-              highlightCloseButton
+            }}
+            className={`text-white font-black px-3 py-1 transition-all border-2 border-white/30 ${highlightCloseButton
                 ? 'bg-green-500 ring-4 ring-green-400/50 animate-pulse shadow-lg'
-                : selectedElement === 'CLOSE' 
-                  ? 'bg-black/20 ring-2 ring-white/50' 
+                : selectedElement === 'CLOSE'
+                  ? 'bg-black/20 ring-2 ring-white/50'
                   : 'hover:bg-black/10'
-            }`}
+              }`}
           >
-            CLOSE
+            ← CLOSE
           </button>
+          <h2 className="text-xl font-black text-white uppercase tracking-tighter flex-1 text-right">Construction Site</h2>
         </div>
-        
+
         <div className="p-6 space-y-4 bg-[radial-gradient(circle_at_center,rgba(60,60,60,0.5),rgba(20,20,20,0.8))]">
           {/* Materials Available */}
           <div className="flex gap-4 mb-6 bg-black/40 p-3 border border-stone-700">
@@ -322,18 +324,17 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
           {projects.map((project, index) => {
             const stoneComplete = project.progress.stone >= project.requirements.stone;
             const silverComplete = project.progress.silver >= project.requirements.silver;
-            const totalProgress = ((project.progress.stone + project.progress.silver) / 
+            const totalProgress = ((project.progress.stone + project.progress.silver) /
               (project.requirements.stone + project.requirements.silver)) * 100;
-            
+
             return (
-              <div 
+              <div
                 key={project.id}
                 ref={(el) => { itemRefs.current[index] = el; }}
-                className={`group relative bg-stone-800 p-4 border transition-all ${
-                  selectedIndex === index && selectedElement === 'ITEM'
-                    ? 'border-orange-500 ring-2 ring-orange-500/50' 
+                className={`group relative bg-stone-800 p-4 border transition-all ${selectedIndex === index && selectedElement === 'ITEM'
+                    ? 'border-orange-500 ring-2 ring-orange-500/50'
                     : 'border-stone-700 hover:border-orange-600'
-                }`}
+                  }`}
               >
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-3">
@@ -351,7 +352,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
                 {!project.built && (
                   <>
                     <div className="h-2 bg-stone-900 rounded-full overflow-hidden mb-3">
-                      <div 
+                      <div
                         className="h-full bg-gradient-to-r from-orange-600 to-orange-400 transition-all duration-300"
                         style={{ width: `${totalProgress}%` }}
                       />
@@ -367,11 +368,10 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
                           }
                         }}
                         disabled={stoneComplete || inventory.stone === 0}
-                        className={`flex-1 p-3 rounded transition-all ${
-                          selectedIndex === index && selectedElement === 'ITEM' && selectedMaterial === 'stone'
+                        className={`flex-1 p-3 rounded transition-all ${selectedIndex === index && selectedElement === 'ITEM' && selectedMaterial === 'stone'
                             ? 'ring-2 ring-orange-400 bg-stone-700'
                             : 'bg-stone-900'
-                        } ${stoneComplete ? 'opacity-60' : ''}`}
+                          } ${stoneComplete ? 'opacity-60' : ''}`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-lg">🪨</span>
@@ -380,7 +380,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
                           </span>
                         </div>
                         <div className="h-1 bg-stone-800 rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className={`h-full transition-all ${stoneComplete ? 'bg-green-500' : 'bg-stone-500'}`}
                             style={{ width: `${(project.progress.stone / project.requirements.stone) * 100}%` }}
                           />
@@ -399,11 +399,10 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
                           }
                         }}
                         disabled={silverComplete || inventory.silverBlocks === 0}
-                        className={`flex-1 p-3 rounded transition-all ${
-                          selectedIndex === index && selectedElement === 'ITEM' && selectedMaterial === 'silver'
+                        className={`flex-1 p-3 rounded transition-all ${selectedIndex === index && selectedElement === 'ITEM' && selectedMaterial === 'silver'
                             ? 'ring-2 ring-orange-400 bg-stone-700'
                             : 'bg-stone-900'
-                        } ${silverComplete ? 'opacity-60' : ''}`}
+                          } ${silverComplete ? 'opacity-60' : ''}`}
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-lg">🥈</span>
@@ -412,7 +411,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
                           </span>
                         </div>
                         <div className="h-1 bg-stone-800 rounded-full overflow-hidden">
-                          <div 
+                          <div
                             className={`h-full transition-all ${silverComplete ? 'bg-green-500' : 'bg-stone-500'}`}
                             style={{ width: `${(project.progress.silver / project.requirements.silver) * 100}%` }}
                           />
@@ -429,17 +428,17 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
             );
           })}
         </div>
-        
+
         <div className="p-4 bg-black/20 text-center border-t border-stone-800">
           <p className="text-[8px] text-stone-500 uppercase tracking-widest">Contribute materials to complete construction projects</p>
         </div>
       </div>
-      
+
       {/* Tutorial Message Display */}
       {showTutorialMessage && tutorialState?.currentMessage && (
-        <TutorialMessageDisplay 
+        <TutorialMessageDisplay
           message={tutorialState.currentMessage}
-          onAdvance={onTutorialAdvance || (() => {})}
+          onAdvance={onTutorialAdvance || (() => { })}
         />
       )}
     </div>
