@@ -29,7 +29,7 @@ import TouchControls from './components/TouchControls';
 const App: React.FC = () => {
   const state = useGameState();
   const tutorial = useTutorial();
-  const { isMobile } = useDeviceDetection();
+  const { isMobile, isLandscape } = useDeviceDetection();
   const { settings, updateSetting, resetSettings } = useGameSettings();
   const saveSystem = useSaveGame();
   const { startMusic, startMenuMusic } = useMusic({
@@ -519,6 +519,19 @@ const App: React.FC = () => {
 
       {/* Mobile Touch Controls */}
       <TouchControls visible={isMobile} />
+
+      {/* Landscape Enforcement Overlay */}
+      {isMobile && !isLandscape && (
+        <div className="fixed inset-0 z-[200] bg-stone-950 flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
+          <div className="text-6xl mb-6 animate-pulse">📱</div>
+          <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">Rotate Your Device</h2>
+          <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed">
+            Sweeper Bot requires a wider view to detect deep mines safely.
+            <br /><br />
+            Please rotate to <span className="text-white font-bold">Landscape Mode</span>.
+          </p>
+        </div>
+      )}
 
     </div>
   );
