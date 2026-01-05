@@ -296,9 +296,9 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   }, [selectedIndex, selectedElement, showTutorialMessage]);
 
   return (
+  return (
     <div
-      className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4"
-      style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
+      className="fixed inset-0 z-[150] flex justify-center bg-black/80 backdrop-blur-sm pt-0 pb-0 sm:pt-10 sm:pb-10"
     >
       {/* Cursor Pointer */}
       {!showTutorialMessage && (
@@ -314,8 +314,14 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
         </div>
       )}
 
-      <div className="w-full max-w-md bg-slate-900 border-4 border-amber-600 shadow-[0_0_50px_rgba(217,119,6,0.3)] rounded-sm overflow-hidden">
-        <div className="bg-amber-600 p-4 flex items-center gap-4">
+      {/* Main Modal - Full Height on Mobile, Centered on Desktop */}
+      <div className="w-full max-w-md bg-slate-900 border-x-4 sm:border-4 border-amber-600 shadow-[0_0_50px_rgba(217,119,6,0.3)] sm:rounded-sm overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[90vh]">
+
+        {/* Header with Safe Area Padding */}
+        <div
+          className="bg-amber-600 px-4 pb-4 flex items-center gap-4 shrink-0"
+          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+        >
           <button
             ref={closeButtonRef}
             onClick={() => {
@@ -336,8 +342,8 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           <h2 className="text-xl font-black text-black uppercase tracking-tighter flex-1 text-right">Commissary Terminal</h2>
         </div>
 
-        {/* Tabs */}
-        <div className="flex bg-slate-800 border-b border-slate-700">
+        {/* Tabs - Fixed below header */}
+        <div className="flex bg-slate-800 border-b border-slate-700 shrink-0">
           <button
             ref={buyTabRef}
             onClick={() => { setTab('BUY'); setSelectedElement('BUY_TAB'); }}
@@ -356,8 +362,9 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="flex justify-between items-center mb-6 bg-black/40 p-3 border border-slate-700">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex justify-between items-center mb-6 bg-black/40 p-3 border border-slate-700 sticky top-0 backdrop-blur-md z-10">
             <span className="text-[10px] text-slate-500 uppercase font-bold">Available Credits</span>
             <span className="text-xl font-black text-yellow-400">${coins}</span>
           </div>
@@ -419,7 +426,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           })}
         </div>
 
-        <div className="p-4 bg-black/20 text-center">
+        <div className="p-4 bg-black/20 text-center shrink-0">
           <p className="text-[8px] text-slate-500 uppercase">Authorized mining equipment only. No refunds.</p>
         </div>
       </div>
