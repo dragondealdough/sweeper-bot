@@ -68,7 +68,11 @@ const App: React.FC = () => {
       // Clamp between 0.4 (minimum readable) and 1.5 (slight upscale allowed)
       // On mobile, Apply a 1.6x zoom multiplier to get the camera closer (User request)
       const mobileMultiplier = isMobile ? 1.6 : 1;
-      setScale(Math.max(0.4, Math.min(1.5, newScale * mobileMultiplier)));
+
+      // Dynamic Zoom: Zoom in 20% more when inside the mine (y >= 0)
+      const mineMultiplier = (state.player.y >= 0) ? 1.2 : 1.0;
+
+      setScale(Math.max(0.4, Math.min(1.5, newScale * mobileMultiplier * mineMultiplier)));
     };
 
     calculateScale();

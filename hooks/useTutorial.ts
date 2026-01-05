@@ -56,6 +56,7 @@ export type TutorialStep =
   | 'RECYCLER_WAIT_1'
   | 'RECYCLER_WAIT_2'
   | 'RECYCLER_WAIT_3'
+  | 'MINE_COLLECT_WAIT'  // New waiting step
   | 'COMPLETED';
 
 interface TutorialMessage {
@@ -111,7 +112,8 @@ const TUTORIAL_MESSAGES: Record<TutorialStep, TutorialMessage | null> = {
   MINE_HIT_MINE_2: { text: "Fear not, it looks like by some kind of miracle all your circuits and bolts are in-tact!", buttonText: "Phew!", character: 'narrator' },
   MINE_EXPLAIN_NUMBERS: { text: "Progress! I bet you've already figured out what those numbers mean. Each number tells you how many mines are hidden in the adjacent tiles (up, down, left, right, and diagonally). Use this information to safely navigate the mine!", buttonText: "Makes sense!", character: 'narrator' },
   MINE_COLLECT_1: { text: "Now, I know you think explosives should be avoided, but did you know they can also be collected and recycled?", buttonText: "Really?", character: 'narrator' },
-  MINE_COLLECT_2: { text: "Alright, time for some hands-on practice! Find a tile you suspect contains an explosive—use those number hints to guide you. When you've found one, mark it with Z to flag it, then break it open with SPACEBAR. I'll wait right here.", buttonText: "Working on it...", character: 'narrator' },
+  MINE_COLLECT_2: { text: "Alright, time for some hands-on practice!", buttonText: "Let's do it!", character: 'narrator' },
+  MINE_COLLECT_WAIT: null, // Hidden step while waiting for collection
   MINE_COLLECTED: { text: "You're a natural! Well, I mean you're programmed to do this but a little compliment never hurt anybody, right?", buttonText: "Thanks!", character: 'narrator' },
   MINE_CHARGES_1: { text: "By the way, see that Disarm Kit display on the left? Each kit gives you 3 charges to safely collect explosives.", buttonText: "I see it!", character: 'narrator' },
   MINE_CHARGES_2: { text: "If you try to collect an explosive without any charges left…well, I think you can guess what happens!", buttonText: "Kaboom!", character: 'narrator' },
@@ -212,7 +214,7 @@ export const useTutorial = () => {
   // Hint messages for waiting states
   const HINT_MESSAGES: Record<string, string> = {
     'MINE_INTRO_9': '💡 Hint: Select a tile with arrow keys, then press SPACEBAR to mine it!',
-    'MINE_COLLECT_2': '💡 Hint: Find a tile you suspect has a mine, press Z to flag it, then SPACEBAR to collect it!',
+    'MINE_COLLECT_WAIT': '💡 Hint: Find a tile you suspect has a mine, press Z to flag it, then SPACEBAR to collect it!',
     'RECYCLER_INTRO': '💡 Hint: Select a mine and press E to start recycling!',
   };
 
@@ -225,7 +227,7 @@ export const useTutorial = () => {
     }
 
     // Check if we're in a waiting state (step active but no message showing)
-    const waitingSteps = ['MINE_INTRO_9', 'MINE_COLLECT_2', 'RECYCLER_INTRO'];
+    const waitingSteps = ['MINE_INTRO_9', 'MINE_COLLECT_WAIT', 'RECYCLER_INTRO'];
     const isWaiting = waitingSteps.includes(tutorialState.currentStep) &&
       !tutorialState.showingMessage &&
       !tutorialState.hintMessage &&
@@ -466,7 +468,7 @@ export const useTutorial = () => {
       const mineSteps: TutorialStep[] = ['MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
         'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9',
         'MINE_HIT_MINE_1', 'MINE_HIT_MINE_2', 'MINE_EXPLAIN_NUMBERS',
-        'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECTED',
+        'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECT_WAIT', 'MINE_COLLECTED',
         'MINE_CHARGES_1', 'MINE_CHARGES_2',
         'ARROW_TO_RECYCLER', 'RECYCLER_INTRO', 'RECYCLER_PROCESSING',
         'RECYCLER_WAIT_1', 'RECYCLER_WAIT_2', 'RECYCLER_WAIT_3'];
@@ -614,8 +616,17 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_COLLECT_2') {
-          // Don't dismiss - keep message on screen until player collects a mine
-          // The message will be dismissed by onMineCollected callback
+          // Transition to hidden wait step
+          return {
+            ...prev,
+            currentStep: 'MINE_COLLECT_WAIT',
+            showingMessage: false,
+            currentMessage: null,
+          };
+        }
+
+        if (prev.currentStep === 'MINE_COLLECT_WAIT') {
+          // Keep waiting until mined
           return prev;
         }
 

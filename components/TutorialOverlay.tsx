@@ -632,13 +632,14 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           style={{
             // Timer is in top bar: left-64 (16rem = 256px) + coins (~80px) + divider + gap
             // Approximate position: sidebar (256px) + coins area (~100px) + gap
-            left: `calc(256px + 120px)`, // Position after sidebar and coins
-            top: `70px`, // Just below the top bar (bar is ~60px + some padding)
+            // MUST apply scale to position because GameHUD is scaled relative to origin
+            left: `calc(${(256 + 120) * scale}px)`,
+            top: `${70 * scale}px`, // Just below the top bar (bar is ~60px + some padding)
           }}
         >
           <div className="flex flex-col items-center">
-            <div className="text-amber-500 text-3xl mb-0.5">↑</div>
-            <div className="bg-amber-500 text-black font-bold px-3 py-1 rounded-lg shadow-lg text-xs uppercase tracking-wider whitespace-nowrap">
+            <div className="text-amber-500 text-3xl mb-0.5" style={{ transform: `scale(${scale})` }}>↑</div>
+            <div className="bg-amber-500 text-black font-bold px-3 py-1 rounded-lg shadow-lg text-xs uppercase tracking-wider whitespace-nowrap" style={{ transform: `scale(${scale})` }}>
               Look! The Timer!
             </div>
           </div>
