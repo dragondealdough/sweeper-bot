@@ -302,19 +302,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
       {/* Styles for custom scrollbar within this component scope */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 12px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #1e293b; 
-          border-left: 1px solid #334155;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #d97706; /* amber-600 */
-          border: 2px solid #1e293b;
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: #fbbf24; /* amber-400 */
+          width: 0px; /* Hide default scrollbar, we use buttons now */
         }
       `}</style>
 
@@ -332,13 +320,13 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
         </div>
       )}
 
-      {/* Main Modal - Full Height on Mobile, Centered on Desktop */}
-      <div className="w-full max-w-md bg-slate-900 border-x-4 sm:border-4 border-amber-600 shadow-[0_0_50px_rgba(217,119,6,0.3)] sm:rounded-sm overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[90vh]">
+      {/* Main Modal - Wider (max-w-2xl) for Grid Layout */}
+      <div className="w-full max-w-2xl bg-slate-900 border-x-4 sm:border-4 border-amber-600 shadow-[0_0_50px_rgba(217,119,6,0.3)] sm:rounded-sm overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[90vh]">
 
         {/* Header with Safe Area Padding */}
         <div
-          className="bg-amber-600 px-4 pb-4 flex items-center gap-4 shrink-0"
-          style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
+          className="bg-amber-600 px-3 pb-3 flex items-center gap-3 shrink-0"
+          style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
         >
           <button
             ref={closeButtonRef}
@@ -348,7 +336,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
               }
               onClose();
             }}
-            className={`text-black font-black px-3 py-1 transition-all border-2 border-black ${tutorialHighlightCloseButton
+            className={`text-black font-black px-2 py-1 text-xs transition-all border-2 border-black ${tutorialHighlightCloseButton
               ? 'bg-green-500 ring-4 ring-green-400/50 animate-pulse shadow-lg'
               : selectedElement === 'CLOSE'
                 ? 'bg-black/20 ring-2 ring-black/50'
@@ -359,20 +347,20 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           </button>
 
           <div className="flex-1 text-right flex flex-col items-end">
-            <h2 className="text-xl font-black text-black uppercase tracking-tighter leading-none">Commissary</h2>
+            <h2 className="text-lg font-black text-black uppercase tracking-tighter leading-none">Commissary</h2>
             <div className="flex items-center gap-1 bg-black/20 px-2 rounded-full mt-1">
-              <span className="text-[10px] text-black font-bold uppercase tracking-widest">CREDITS:</span>
-              <span className="text-sm font-black text-white">${coins}</span>
+              <span className="text-[9px] text-black font-bold uppercase tracking-widest">CREDITS:</span>
+              <span className="text-xs font-black text-white">${coins}</span>
             </div>
           </div>
         </div>
 
-        {/* Tabs - Fixed below header */}
+        {/* Tabs - Smaller & Fixed below header */}
         <div className="flex bg-slate-800 border-b border-slate-700 shrink-0">
           <button
             ref={buyTabRef}
             onClick={() => { setTab('BUY'); setSelectedElement('BUY_TAB'); }}
-            className={`flex-1 py-3 font-black text-xs uppercase tracking-widest transition-all ${tab === 'BUY' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 font-black text-[10px] uppercase tracking-widest transition-all ${tab === 'BUY' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
               } ${selectedElement === 'BUY_TAB' ? 'ring-2 ring-inset ring-white' : ''}`}
           >
             BUY EQUIPMENT
@@ -380,76 +368,108 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           <button
             ref={sellTabRef}
             onClick={() => { setTab('SELL'); setSelectedElement('SELL_TAB'); }}
-            className={`flex-1 py-3 font-black text-xs uppercase tracking-widest transition-all ${tab === 'SELL' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 font-black text-[10px] uppercase tracking-widest transition-all ${tab === 'SELL' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
               } ${selectedElement === 'SELL_TAB' ? 'ring-2 ring-inset ring-white' : ''}`}
           >
             SELL MATERIALS
           </button>
         </div>
 
-        {/* Scrollable Content Area - Custom Scrollbar applied */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        {/* Content Wrapper - Flex Row for List + Scroll Controls */}
+        <div className="flex-1 relative overflow-hidden flex bg-black/20 p-2 gap-2">
 
-          {/* Removed Sticky Header - Box is gone, credits are in header now */}
+          {/* Scrollable Content Area - Recessed Screen Look */}
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto p-2 custom-scrollbar bg-black/40 border border-slate-700/50 shadow-inner rounded-sm"
+          >
+            <div className="grid grid-cols-2 gap-3 pb-8"> {/* Extra padding for bottom visibility */}
+              {currentItems.map((item, index) => {
+                const isPickaxe = item.id === 'PICKAXE';
+                const shouldHighlight = tutorialHighlightPickaxe && isPickaxe;
 
-          {currentItems.map((item, index) => {
-            const isPickaxe = item.id === 'PICKAXE';
-            const shouldHighlight = tutorialHighlightPickaxe && isPickaxe;
+                return (
+                  <div
+                    key={item.id}
+                    ref={(el) => { itemRefs.current[index] = el; }}
+                    className={`group relative flex flex-col gap-2 bg-slate-800 p-3 border transition-all h-full ${shouldHighlight
+                      ? 'border-green-400 ring-4 ring-green-400/50 animate-pulse bg-green-900/30'
+                      : selectedIndex === index && selectedElement === 'ITEM'
+                        ? 'border-amber-400 ring-2 ring-amber-400/50'
+                        : 'border-slate-700 hover:border-amber-500'
+                      }`}
+                  >
+                    {/* Free badge for pickaxe */}
+                    {isPickaxe && (
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-black text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-lg z-10">
+                        FREE!
+                      </div>
+                    )}
 
-            return (
-              <div
-                key={item.id}
-                ref={(el) => { itemRefs.current[index] = el; }}
-                className={`group relative flex items-center gap-4 bg-slate-800 p-3 border transition-all ${shouldHighlight
-                  ? 'border-green-400 ring-4 ring-green-400/50 animate-pulse bg-green-900/30'
-                  : selectedIndex === index && selectedElement === 'ITEM'
-                    ? 'border-amber-400 ring-2 ring-amber-400/50'
-                    : 'border-slate-700 hover:border-amber-500'
-                  }`}
-              >
-                {/* Free badge for pickaxe */}
-                {isPickaxe && (
-                  <div className="absolute -top-2 -right-2 bg-green-500 text-black text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg">
-                    FREE!
-                  </div>
-                )}
-
-                <div className="text-3xl">{item.icon}</div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold text-white uppercase">{item.name}</div>
-                  {tab === 'SELL' ? (
-                    <div className="text-[9px] text-amber-500 uppercase tracking-tight">Owned: {(item as any).count}</div>
-                  ) : (
-                    <div className={`text-[9px] uppercase tracking-tight ${isPickaxe ? 'text-green-400' : 'text-slate-400'}`}>
-                      {(item as any).desc}
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl shrink-0">{item.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-white uppercase truncate leading-tight">{item.name}</div>
+                        {tab === 'SELL' ? (
+                          <div className="text-[8px] text-amber-500 uppercase tracking-tight">Owned: {(item as any).count}</div>
+                        ) : (
+                          <div className={`text-[8px] uppercase tracking-tight leading-tight line-clamp-2 ${isPickaxe ? 'text-green-400' : 'text-slate-400'}`}>
+                            {(item as any).desc}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-                <button
-                  disabled={tab === 'BUY' ? coins < item.price : (item as any).count <= 0}
-                  onClick={() => tab === 'BUY' ? onBuy(item.id as any, item.price) : onSell(item.id as any, item.price)}
-                  className={`px-4 py-2 font-black text-xs uppercase transition-all flex items-center gap-2 ${isPickaxe
-                    ? 'bg-green-500 text-black hover:bg-green-400 shadow-lg'
-                    : (tab === 'BUY' ? coins >= item.price : (item as any).count > 0)
-                      ? 'bg-amber-600 text-black hover:bg-amber-500'
-                      : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                    }`}
-                >
-                  {isPickaxe ? (
-                    <>
-                      TAKE
-                      <span className="text-[10px] opacity-70">[E]</span>
-                    </>
-                  ) : (
-                    `$${item.price}`
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
 
-        {/* Footer Removed as requested */}
+                    <button
+                      disabled={tab === 'BUY' ? coins < item.price : (item as any).count <= 0}
+                      onClick={() => tab === 'BUY' ? onBuy(item.id as any, item.price) : onSell(item.id as any, item.price)}
+                      className={`w-full py-1.5 font-black text-[10px] uppercase transition-all flex items-center justify-center gap-1 mt-auto ${isPickaxe
+                        ? 'bg-green-500 text-black hover:bg-green-400 shadow-lg'
+                        : (tab === 'BUY' ? coins >= item.price : (item as any).count > 0)
+                          ? 'bg-amber-600 text-black hover:bg-amber-500'
+                          : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                        }`}
+                    >
+                      {isPickaxe ? (
+                        <>
+                          TAKE IT
+                          <span className="opacity-70">[E]</span>
+                        </>
+                      ) : (
+                        `$${item.price}`
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Explicit Scroll Control Bar */}
+          <div className="w-12 bg-slate-800 border-l border-slate-700 flex flex-col shrink-0">
+            <button
+              onMouseDown={() => scrollBy(-100)} // Repeat on hold could be added, simplified for now
+              onClick={() => scrollBy(-100)}
+              className={`flex-1 flex items-center justify-center text-amber-500 hover:bg-slate-700 transition-colors border-b border-slate-700 ${showScrollArrows.up ? 'opacity-100' : 'opacity-30'}`}
+            >
+              <span className="text-2xl font-black">▲</span>
+            </button>
+
+            {/* Visual Track graphic */}
+            <div className="h-4 bg-black/40 flex items-center justify-center">
+              <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+            </div>
+
+            <button
+              onMouseDown={() => scrollBy(100)}
+              onClick={() => scrollBy(100)}
+              className={`flex-1 flex items-center justify-center text-amber-500 hover:bg-slate-700 transition-colors border-t border-slate-700 ${showScrollArrows.down ? 'opacity-100' : 'opacity-30'}`}
+            >
+              <span className="text-2xl font-black">▼</span>
+            </button>
+          </div>
+
+        </div>
 
       </div>
 
