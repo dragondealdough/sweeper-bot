@@ -34,7 +34,7 @@ const useTypingEffect = (text: string, speed: number = 30) => {
 
     // For very fast speeds, type multiple characters per interval
     const charsPerInterval = speed <= 1 ? 2 : 1;
-    
+
     intervalRef.current = setInterval(() => {
       if (currentIndex < text.length) {
         const nextIndex = Math.min(currentIndex + charsPerInterval, text.length);
@@ -73,7 +73,7 @@ const TutorialMessageDisplay: React.FC<{
   onAdvance: () => void;
 }> = ({ message, onAdvance }) => {
   const { displayedText, isComplete, skip } = useTypingEffect(message.text, 1);
-  
+
   // Only show button when typing is complete AND we've displayed the full current message
   const shouldShowButton = isComplete && displayedText === message.text;
 
@@ -91,7 +91,7 @@ const TutorialMessageDisplay: React.FC<{
         }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isComplete, skip, onAdvance]);
@@ -103,12 +103,12 @@ const TutorialMessageDisplay: React.FC<{
           <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
             <span className="text-[10px] font-black text-black uppercase tracking-wider">📖 Guide</span>
           </div>
-          
+
           <p className="text-sm text-white font-medium leading-relaxed mt-1 min-h-[3rem]">
             {displayedText}
             {!isComplete && <span className="inline-block w-1 h-4 bg-amber-500 ml-1 animate-pulse">|</span>}
           </p>
-          
+
           {shouldShowButton && (
             <div className="flex justify-end mt-3 pt-2 border-t border-stone-700/50 animate-in fade-in duration-300">
               <button
@@ -139,11 +139,11 @@ interface ShopOverlayProps {
   onTutorialAdvance?: () => void;
 }
 
-const ShopOverlay: React.FC<ShopOverlayProps> = ({ 
-  coins, 
-  inventory, 
-  onBuy, 
-  onSell, 
+const ShopOverlay: React.FC<ShopOverlayProps> = ({
+  coins,
+  inventory,
+  onBuy,
+  onSell,
   onClose,
   tutorialHighlightPickaxe = false,
   tutorialHighlightCloseButton = false,
@@ -159,7 +159,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   const buyTabRef = useRef<HTMLButtonElement>(null);
   const sellTabRef = useRef<HTMLButtonElement>(null);
   const [selectedElement, setSelectedElement] = useState<'ITEM' | 'CLOSE' | 'BUY_TAB' | 'SELL_TAB'>('ITEM');
-  
+
   // Check if we should show tutorial messages - just check if there's a message to show
   const showTutorialMessage = tutorialState?.showingMessage && tutorialState?.currentMessage;
 
@@ -270,7 +270,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
         }
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIndex, selectedElement, tab, coins, currentItems, onBuy, onSell, onClose, showTutorialMessage, onTutorialAdvance, tutorialHighlightCloseButton]);
@@ -285,7 +285,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   useEffect(() => {
     // Don't update cursor position when tutorial messages are showing
     if (showTutorialMessage) return;
-    
+
     const timer = setTimeout(() => {
       if (selectedElement === 'CLOSE') updateCursorPosition(closeButtonRef.current);
       else if (selectedElement === 'BUY_TAB') updateCursorPosition(buyTabRef.current);
@@ -299,10 +299,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       {/* Cursor Pointer */}
       {!showTutorialMessage && (
-        <div 
+        <div
           className="fixed z-[151] pointer-events-none transition-all duration-150"
-          style={{ 
-            top: `${cursorPosition.top}px`, 
+          style={{
+            top: `${cursorPosition.top}px`,
             left: `${cursorPosition.left}px`,
             transform: 'translateY(-50%)'
           }}
@@ -312,23 +312,22 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
       )}
 
       <div className="w-full max-w-md bg-slate-900 border-4 border-amber-600 shadow-[0_0_50px_rgba(217,119,6,0.3)] rounded-sm overflow-hidden">
-        <div className="bg-amber-600 p-4 flex justify-between items-center">
+        <div className="bg-amber-600 p-4 pt-12 md:pt-4 flex justify-between items-center">
           <h2 className="text-xl font-black text-black uppercase tracking-tighter">Commissary Terminal</h2>
-          <button 
+          <button
             ref={closeButtonRef}
             onClick={() => {
               if (tutorialHighlightCloseButton && onTutorialAdvance) {
                 onTutorialAdvance();
               }
               onClose();
-            }} 
-            className={`text-black font-black px-3 py-1 transition-all ${
-              tutorialHighlightCloseButton
+            }}
+            className={`text-black font-black px-3 py-1 transition-all ${tutorialHighlightCloseButton
                 ? 'bg-green-500 ring-4 ring-green-400/50 animate-pulse shadow-lg'
-                : selectedElement === 'CLOSE' 
-                  ? 'bg-black/20 ring-2 ring-black/50' 
+                : selectedElement === 'CLOSE'
+                  ? 'bg-black/20 ring-2 ring-black/50'
                   : 'hover:bg-black/10'
-            }`}
+              }`}
           >
             CLOSE
           </button>
@@ -336,26 +335,24 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
 
         {/* Tabs */}
         <div className="flex bg-slate-800 border-b border-slate-700">
-          <button 
+          <button
             ref={buyTabRef}
             onClick={() => { setTab('BUY'); setSelectedElement('BUY_TAB'); }}
-            className={`flex-1 py-3 font-black text-xs uppercase tracking-widest transition-all ${
-              tab === 'BUY' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
-            } ${selectedElement === 'BUY_TAB' ? 'ring-2 ring-inset ring-white' : ''}`}
+            className={`flex-1 py-3 font-black text-xs uppercase tracking-widest transition-all ${tab === 'BUY' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
+              } ${selectedElement === 'BUY_TAB' ? 'ring-2 ring-inset ring-white' : ''}`}
           >
             BUY EQUIPMENT
           </button>
-          <button 
+          <button
             ref={sellTabRef}
             onClick={() => { setTab('SELL'); setSelectedElement('SELL_TAB'); }}
-            className={`flex-1 py-3 font-black text-xs uppercase tracking-widest transition-all ${
-              tab === 'SELL' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
-            } ${selectedElement === 'SELL_TAB' ? 'ring-2 ring-inset ring-white' : ''}`}
+            className={`flex-1 py-3 font-black text-xs uppercase tracking-widest transition-all ${tab === 'SELL' ? 'bg-amber-600 text-black' : 'text-slate-400 hover:text-white'
+              } ${selectedElement === 'SELL_TAB' ? 'ring-2 ring-inset ring-white' : ''}`}
           >
             SELL MATERIALS
           </button>
         </div>
-        
+
         <div className="p-6 space-y-4">
           <div className="flex justify-between items-center mb-6 bg-black/40 p-3 border border-slate-700">
             <span className="text-[10px] text-slate-500 uppercase font-bold">Available Credits</span>
@@ -365,18 +362,17 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           {currentItems.map((item, index) => {
             const isPickaxe = item.id === 'PICKAXE';
             const shouldHighlight = tutorialHighlightPickaxe && isPickaxe;
-            
+
             return (
-              <div 
+              <div
                 key={item.id}
                 ref={(el) => { itemRefs.current[index] = el; }}
-                className={`group relative flex items-center gap-4 bg-slate-800 p-3 border transition-all ${
-                  shouldHighlight
+                className={`group relative flex items-center gap-4 bg-slate-800 p-3 border transition-all ${shouldHighlight
                     ? 'border-green-400 ring-4 ring-green-400/50 animate-pulse bg-green-900/30'
                     : selectedIndex === index && selectedElement === 'ITEM'
-                      ? 'border-amber-400 ring-2 ring-amber-400/50' 
+                      ? 'border-amber-400 ring-2 ring-amber-400/50'
                       : 'border-slate-700 hover:border-amber-500'
-                }`}
+                  }`}
               >
                 {/* Free badge for pickaxe */}
                 {isPickaxe && (
@@ -384,28 +380,27 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
                     FREE!
                   </div>
                 )}
-                
+
                 <div className="text-3xl">{item.icon}</div>
                 <div className="flex-1">
                   <div className="text-sm font-bold text-white uppercase">{item.name}</div>
                   {tab === 'SELL' ? (
-                     <div className="text-[9px] text-amber-500 uppercase tracking-tight">Owned: {(item as any).count}</div>
+                    <div className="text-[9px] text-amber-500 uppercase tracking-tight">Owned: {(item as any).count}</div>
                   ) : (
                     <div className={`text-[9px] uppercase tracking-tight ${isPickaxe ? 'text-green-400' : 'text-slate-400'}`}>
                       {(item as any).desc}
                     </div>
                   )}
                 </div>
-                <button 
+                <button
                   disabled={tab === 'BUY' ? coins < item.price : (item as any).count <= 0}
                   onClick={() => tab === 'BUY' ? onBuy(item.id as any, item.price) : onSell(item.id as any, item.price)}
-                  className={`px-4 py-2 font-black text-xs uppercase transition-all flex items-center gap-2 ${
-                    isPickaxe
+                  className={`px-4 py-2 font-black text-xs uppercase transition-all flex items-center gap-2 ${isPickaxe
                       ? 'bg-green-500 text-black hover:bg-green-400 shadow-lg'
                       : (tab === 'BUY' ? coins >= item.price : (item as any).count > 0)
-                        ? 'bg-amber-600 text-black hover:bg-amber-500' 
+                        ? 'bg-amber-600 text-black hover:bg-amber-500'
                         : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   {isPickaxe ? (
                     <>
@@ -420,7 +415,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
             );
           })}
         </div>
-        
+
         <div className="p-4 bg-black/20 text-center">
           <p className="text-[8px] text-slate-500 uppercase">Authorized mining equipment only. No refunds.</p>
         </div>
@@ -428,7 +423,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
 
       {/* Tutorial Message Overlay - center-bottom */}
       {showTutorialMessage && tutorialState?.currentMessage && (
-        <TutorialMessageDisplay 
+        <TutorialMessageDisplay
           message={tutorialState.currentMessage}
           onAdvance={onTutorialAdvance}
         />

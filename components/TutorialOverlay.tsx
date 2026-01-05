@@ -407,8 +407,20 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [tutorialState.showingMessage, isComplete, skip, onDismiss]);
 
+  // Check if we should show the dimming backdrop
+  // We show it when a message is displayed, BUT NOT if it's an "interactive" hint or we are in a middle of a task (which usually don't have blocking messages)
+  // Simple heuristic: If showingMessage is true, we usually want focus.
+  const showBackdrop = tutorialState.showingMessage &&
+    tutorialState.currentMessage &&
+    !isShopOpen &&
+    !isConstructionOpen;
+
   return (
     <>
+      {/* Dimming Backdrop for Tutorial Focus */}
+      {showBackdrop && (
+        <div className="fixed inset-0 bg-black/40 z-[199] pointer-events-none animate-in fade-in duration-500" />
+      )}
       {/* Message Dialog - center-bottom position (don't show when shop/construction is open - overlays handle that) */}
       {tutorialState.showingMessage && tutorialState.currentMessage && !isShopOpen && !isConstructionOpen && (
         <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4">
