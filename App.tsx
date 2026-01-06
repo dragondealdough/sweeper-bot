@@ -336,7 +336,9 @@ const App: React.FC = () => {
 
     // Convert world target to camera position (top-left of screen)
     const idealX = targetCamX - (vw / 2);
-    const idealY = p.y * GRID_CONFIG.TILE_SIZE - (vh / 2);
+    // Ignore upward movement (jumps) in overworld by clamping Y to 0
+    const trackingY = Math.max(0, p.y);
+    const idealY = trackingY * GRID_CONFIG.TILE_SIZE - (vh / 2);
 
     // Vertical Cam Logic:
     // Sticky Mine Mode: Enter mine mode when deep enough (>2). Exit only when back in overworld (<0).
