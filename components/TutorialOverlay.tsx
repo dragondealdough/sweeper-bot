@@ -734,24 +734,17 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         )}
       </div>
 
-      {/* Arrow pointing to timer in top bar */}
-      {tutorialState.showArrowToTimer && !isAnyMenuOpen && (
-        <div
-          className="fixed z-[190] pointer-events-none animate-bounce"
-          style={{
-            // Timer is in top bar: left-64 (16rem = 256px) + coins (~80px) + divider + gap
-            // Approximate position: sidebar (256px) + coins area (~100px) + gap
       {/* Timer Arrow */}
-          {tutorialState.highlightTimer && (
-            <div className={`absolute ${isMobile ? 'top-[4.5rem] right-12' : 'top-10 right-4'} z-[190] animate-bounce pointer-events-none`}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(225deg)' }}>
-                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <div className="absolute top-10 -right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap">
-                Look! The timer!
-              </div>
-            </div>
-          )}
+      {tutorialState.highlightTimer && (
+        <div className={`absolute ${isMobile ? 'top-[4.5rem] right-12' : 'top-10 right-4'} z-[190] animate-bounce pointer-events-none`}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(225deg)' }}>
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="absolute top-10 -right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap">
+            Look! The timer!
+          </div>
+        </div>
+      )}
 
     </>
   );
