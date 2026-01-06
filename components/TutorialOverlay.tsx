@@ -441,23 +441,22 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
               </p>
 
               {/* Bottom buttons - only show after typing completes */}
-              {shouldShowButton && (
-                <div className="flex justify-between items-center mt-3 pt-2 border-t border-stone-700/50 animate-in fade-in duration-300">
-                  <button
-                    onClick={onSkip}
-                    className="text-stone-500 hover:text-stone-300 text-[10px] uppercase tracking-wider transition-colors"
-                  >
-                    Skip Tutorial
-                  </button>
-                  <button
-                    onClick={onDismiss}
-                    className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-1.5 rounded transition-colors flex items-center gap-2 text-xs"
-                  >
-                    {tutorialState.currentMessage.buttonText}
-                    {!isMobile && <span className="text-[10px] opacity-70">[E]</span>}
-                  </button>
-                </div>
-              )}
+              {/* Bottom buttons - reserved space, fade in */}
+              <div className={`flex justify-between items-center mt-3 pt-2 border-t border-stone-700/50 transition-opacity duration-300 ${shouldShowButton ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+                <button
+                  onClick={onSkip}
+                  className="text-stone-500 hover:text-stone-300 text-[10px] uppercase tracking-wider transition-colors"
+                >
+                  Skip Tutorial
+                </button>
+                <button
+                  onClick={onDismiss}
+                  className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-1.5 rounded transition-colors flex items-center gap-2 text-xs"
+                >
+                  {tutorialState.currentMessage.buttonText}
+                  {!isMobile && <span className="text-[10px] opacity-70">[E]</span>}
+                </button>
+              </div>
             </div>
           </div>
         </div>
