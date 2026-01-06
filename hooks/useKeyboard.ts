@@ -36,6 +36,7 @@ interface KeyboardParams {
   onRecyclerOpen?: () => void;
   tutorialState?: TutorialState;
   depth: number;
+  selectedTarget?: { x: number, y: number } | null;
 }
 
 export const useKeyboard = (params: KeyboardParams) => {
@@ -43,8 +44,7 @@ export const useKeyboard = (params: KeyboardParams) => {
     status, isShopOpen, isRecyclerOpen, isInventoryOpen, isConstructionOpen,
     playerRef, ropeLength, inventory, timeRef, EVENING_THRESHOLD_MS,
     HOUSE_X, SHOP_X, RECYCLER_X, CONSTRUCTION_X, ROPE_X, OVERWORLD_FLOOR_Y,
-    keys, setIsInventoryOpen, setIsShopOpen, setIsRecyclerOpen, setIsConstructionOpen,
-    setMessage, revealTileAt, startClimbing, handleFlagAction, handleSleep, onShopOpen, onConstructionOpen, onConstructionClosed, onRecyclerOpen, tutorialState, depth
+    setMessage, revealTileAt, startClimbing, handleFlagAction, handleSleep, onShopOpen, onConstructionOpen, onConstructionClosed, onRecyclerOpen, tutorialState, depth, selectedTarget
   } = params;
 
   const getTargetTile = useCallback(() => {
@@ -77,7 +77,9 @@ export const useKeyboard = (params: KeyboardParams) => {
       }
 
       if ((e.key.toLowerCase() === 'z' || e.key.toLowerCase() === 'x') && status === GameStatus.PLAYING && !isMenuOpen) {
-        handleFlagAction(target.x, target.y, status, isMenuOpen);
+        // Prioritize manually selected target (e.g. from touch/mouse) over facing direction
+        const flagTarget = selectedTarget || target;
+        handleFlagAction(flagTarget.x, flagTarget.y, status, isMenuOpen);
       }
 
       if (e.key.toLowerCase() === 'e' && status === GameStatus.PLAYING && !isMenuOpen) {

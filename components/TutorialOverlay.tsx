@@ -131,51 +131,78 @@ const renderTextWithBold = (text: string, isMobile: boolean) => {
 
   // Check for "disarm the flagged explosive with spacebar" (Red highlight)
   const disarmPattern = /(disarm the flagged explosive with spacebar|disarm the flagged explosive with the Blue Pickaxe Button)/i;
-  const disarmMatch = processedText.match(disarmPattern);
-  if (disarmMatch) {
-    const before = processedText.substring(0, disarmMatch.index);
-    const match = disarmMatch[0];
-    const after = processedText.substring((disarmMatch.index || 0) + match.length);
-    return (
-      <>
-        {before}
-        <strong className="font-bold text-red-500">{match}</strong>
-        {after}
-      </>
-    );
-  }
+  return (
+    <>
+      {before}
+      <strong className="font-bold text-red-500">{match}</strong>
+      {after}
+    </>
+  );
+}
 
-  // Check for "disarm kit charges"
-  const chargesPattern = /(disarm kit charges)/i;
-  const chargesMatch = processedText.match(chargesPattern);
-  if (chargesMatch) {
-    const before = processedText.substring(0, chargesMatch.index);
-    const match = chargesMatch[0];
-    const after = processedText.substring((chargesMatch.index || 0) + match.length);
-    return (
-      <>
-        {before}
-        <strong className="font-bold text-amber-400">{match}</strong>
-        {after}
-      </>
-    );
-  }
+// Check for "mark the block with Z to plant a red flag" (Red highlight)
+const markFlagPattern = /(mark the block with Z to plant a red flag|mark the block with the Red Flag Button to plant a red flag)/i;
+const markFlagMatch = processedText.match(markFlagPattern);
+if (markFlagMatch) {
+  const before = processedText.substring(0, markFlagMatch.index);
+  const match = markFlagMatch[0];
+  const after = processedText.substring((markFlagMatch.index || 0) + match.length);
+  return (
+    <>
+      {before}
+      <strong className="font-bold text-red-500">{match}</strong>
+      {after}
+    </>
+  );
+}
 
-  // Handle "wishing well"
-  // Also highlight generic mobile terms if found
-  const parts = processedText.split(/(wishing well|Blue Pickaxe Button|Red Flag Button|Green Button|D-Pad)/i);
-  return parts.map((part, i) => {
-    const lower = part.toLowerCase();
-    if (lower === 'wishing well' ||
-      lower === 'blue pickaxe button' ||
-      lower === 'red flag button' ||
-      lower === 'green hand button' ||
-      lower === 'virtual joystick' ||
-      lower === 'd-pad') {
-      return <strong key={i} className="font-bold text-amber-400">{part}</strong>;
-    }
-    return <span key={i}>{part}</span>;
-  });
+// Check for "break it open" (Red highlight)
+const breakPattern = /(break it open)/i;
+const breakMatch = processedText.match(breakPattern);
+if (breakMatch) {
+  const before = processedText.substring(0, breakMatch.index);
+  const match = breakMatch[0];
+  const after = processedText.substring((breakMatch.index || 0) + match.length);
+  return (
+    <>
+      {before}
+      <strong className="font-bold text-red-500">{match}</strong>
+      {after}
+    </>
+  );
+}
+
+// Check for "disarm kit charges"
+const chargesPattern = /(disarm kit charges)/i;
+const chargesMatch = processedText.match(chargesPattern);
+if (chargesMatch) {
+  const before = processedText.substring(0, chargesMatch.index);
+  const match = chargesMatch[0];
+  const after = processedText.substring((chargesMatch.index || 0) + match.length);
+  return (
+    <>
+      {before}
+      <strong className="font-bold text-amber-400">{match}</strong>
+      {after}
+    </>
+  );
+}
+
+// Handle "wishing well"
+// Also highlight generic mobile terms if found
+const parts = processedText.split(/(wishing well|Blue Pickaxe Button|Red Flag Button|Green Button|D-Pad)/i);
+return parts.map((part, i) => {
+  const lower = part.toLowerCase();
+  if (lower === 'wishing well' ||
+    lower === 'blue pickaxe button' ||
+    lower === 'red flag button' ||
+    lower === 'green hand button' ||
+    lower === 'virtual joystick' ||
+    lower === 'd-pad') {
+    return <strong key={i} className="font-bold text-amber-400">{part}</strong>;
+  }
+  return <span key={i}>{part}</span>;
+});
 };
 
 interface TutorialOverlayProps {
@@ -446,10 +473,10 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                 {isTaskStep && onToggleTaskMinimized && (
                   <button
                     onClick={onToggleTaskMinimized}
-                    className="bg-white hover:bg-stone-200 px-2 py-0.5 rounded-full transition-colors"
+                    className="bg-white hover:bg-stone-200 px-2 py-0.5 rounded-full transition-colors animate-pulse border border-red-400 shadow-md"
                     title="Minimize task"
                   >
-                    <span className="text-[10px] font-bold text-black">−</span>
+                    <span className="text-[10px] font-bold text-black flex items-center justify-center w-2 h-2">−</span>
                   </button>
                 )}
               </div>

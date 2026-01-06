@@ -207,7 +207,8 @@ const App: React.FC = () => {
     onConstructionClosed: tutorial.onConstructionClosed,
     onRecyclerOpen: tutorial.onRecyclerOpened,
     tutorialState: tutorial.tutorialState,
-    depth: state.depth
+    depth: state.depth,
+    selectedTarget: mining.selectedTarget
   });
 
   const initGame = useCallback(() => {
