@@ -282,8 +282,9 @@ const App: React.FC = () => {
     const idealY = p.y * GRID_CONFIG.TILE_SIZE - (vh / 2);
 
     // Clamp Y to game bounds
-    const minCamY = -10 * GRID_CONFIG.TILE_SIZE;
-    const maxCamY = (GRID_CONFIG.ROWS * GRID_CONFIG.TILE_SIZE) - vh + 100;
+    // Relaxed minCamY to ensure camera can center on player at y=0 (requires ~ -400 camera Y)
+    const minCamY = -20 * GRID_CONFIG.TILE_SIZE;
+    const maxCamY = (GRID_CONFIG.ROWS * GRID_CONFIG.TILE_SIZE) - (vh / 2); // Allow scrolling to bottom
     const clampedY = Math.max(minCamY, Math.min(idealY, maxCamY));
 
     // Smooth Lerp - Faster vertical tracking (0.3) to keep player centered
