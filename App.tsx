@@ -111,12 +111,31 @@ const App: React.FC = () => {
     state.timeRef, { current: [] } as any, ROPE_X, OVERWORLD_FLOOR_Y
   );
 
+  // Flash effect state for mine explosion
+  const [explosionFlash, setExplosionFlash] = useState(false);
+
+  // Intercept the tutorial's mine hit handler to inject visual effects first
+  const handleMineHitWithEffects = useCallback(() => {
+    // 1. Trigger Screen Shake
+    if (state.setScreenShake) state.setScreenShake(1);
+
+    // 2. Trigger White Flash
+    setExplosionFlash(true);
+
+    // 3. Wait for effects to subside (1s) before showing tutorial text
+    setTimeout(() => {
+      if (state.setScreenShake) state.setScreenShake(0);
+      setExplosionFlash(false);
+      tutorial.onMineHit();
+    }, 1200);
+  }, [state.setScreenShake, tutorial.onMineHit]);
+
   const mining = useMining(
     ROPE_X, state.setDepth, state.setStatus, state.setInventory,
     state.setMessage, () => actions.handlePlayerDeath(state.dayCount),
     state.setWorldItems,
     tutorial.tutorialState,
-    tutorial.onMineHit,
+    handleMineHitWithEffects, // Use our intercepted handler
     tutorial.onTileRevealed,
     tutorial.onMineCollected,
     state.setScreenShake,
@@ -610,6 +629,11 @@ const App: React.FC = () => {
       }} onClose={() => state.setIsRecyclerOpen(false)} onOpen={() => tutorial.checkRecyclerMines(state.inventory.defusedMines)} />}
       {state.isInventoryOpen && <InventoryOverlay inventory={state.inventory} onClose={() => state.setIsInventoryOpen(false)} />}
       {state.isConstructionOpen && <ConstructionOverlay inventory={state.inventory} onContribute={actionsWithGrid.handleContribute} onClose={() => { tutorial.onConstructionClosed(); state.setIsConstructionOpen(false); }} tutorialState={tutorial.tutorialState} onTutorialAdvance={tutorial.dismissMessage} />}
+
+      {/* Explosion White Flash Overlay */}
+      <div
+        className={`fixed inset-0 bg-white z-[300] pointer-events-none transition-opacity duration-1000 ease-out ${explosionFlash ? 'opacity-100' : 'opacity-0'}`}
+      />
 
       {/* Tutorial Overlay */}
       {state.status === GameStatus.PLAYING && (
