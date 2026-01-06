@@ -112,7 +112,7 @@ const TUTORIAL_MESSAGES: Record<TutorialStep, TutorialMessage | null> = {
   MINE_HIT_MINE_2: { text: "Fear not, it looks like by some kind of miracle all your circuits and bolts are in-tact!", buttonText: "Phew!", character: 'narrator' },
   MINE_EXPLAIN_NUMBERS: { text: "Progress! I bet you've already figured out what those numbers mean. Each number tells you how many mines are hidden in the adjacent tiles (up, down, left, right, and diagonally). Use this information to safely navigate the mine!", buttonText: "Makes sense!", character: 'narrator' },
   MINE_COLLECT_1: { text: "Now, I know you think explosives should be avoided, but did you know they can also be collected and recycled?", buttonText: "Really?", character: 'narrator' },
-  MINE_COLLECT_2: { text: "Alright, time for some hands-on practice!", buttonText: "Let's do it!", character: 'narrator' },
+  MINE_COLLECT_2: { text: "Here's the trick: First, mark the block with Z to plant a red flag. Then, break it open with the pickaxe to safely collect the explosive!", buttonText: "Got it!", character: 'narrator' },
   MINE_COLLECT_WAIT: null, // Hidden step while waiting for collection
   MINE_COLLECTED: { text: "You're a natural! Well, I mean you're programmed to do this but a little compliment never hurt anybody, right?", buttonText: "Thanks!", character: 'narrator' },
   MINE_CHARGES_1: { text: "By the way, see that Disarm Kit display on the left? Each kit gives you 3 charges to safely collect explosives.", buttonText: "I see it!", character: 'narrator' },
