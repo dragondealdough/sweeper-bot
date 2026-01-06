@@ -93,14 +93,15 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7 })
         <div className="fixed inset-0 pointer-events-none z-[100] flex flex-col justify-end select-none touch-none overflow-hidden" style={{ opacity }}>
 
             {/* Controls Container - Pushed properly to edges for landscape ergonomics */}
-            <div className="flex justify-between items-end w-full h-full pointer-events-auto">
+            <div className="flex justify-between items-end w-full h-full pointer-events-none">
 
-                {/* LEFT: Virtual Joystick */}
-                <div className="relative w-1/3 h-full flex items-end justify-start pb-2 pl-2">
+                {/* LEFT: Virtual Joystick - Needs events */}
+                <div className="relative w-1/3 h-full flex items-end justify-start pb-2 pl-2 pointer-events-auto">
                     <VirtualJoystick size={150} className="opacity-80 hover:opacity-100 transition-opacity" />
                 </div>
 
                 {/* RIGHT: Action Cluster (Vertical Edge Stack) - Escaping parent padding with fixed positioning */}
+                {/* Note: This container is already fixed and pointer-events-none, with children auto */}
                 <div className="fixed bottom-0 right-0 w-32 h-screen pointer-events-none flex flex-col justify-end items-end pb-8 pr-6 gap-6 z-[101]">
 
                     {/* 3. Utility Action: FLAG / Z (Top) */}
