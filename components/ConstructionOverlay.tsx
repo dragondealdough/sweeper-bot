@@ -121,17 +121,15 @@ const TutorialMessageDisplay: React.FC<{
             {!isComplete && <span className="inline-block w-1 h-4 bg-amber-500 ml-1 animate-pulse">|</span>}
           </p>
 
-          {shouldShowButton && (
-            <div className="flex justify-end mt-3 pt-2 border-t border-stone-700/50 animate-in fade-in duration-300">
-              <button
-                onClick={onAdvance}
-                className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-1.5 rounded text-xs transition-colors flex items-center gap-2"
-              >
-                {message.buttonText}
-                <span className="text-[10px] opacity-70">[E]</span>
-              </button>
-            </div>
-          )}
+          <div className={`flex justify-end mt-3 pt-2 border-t border-stone-700/50 transition-opacity duration-300 ${shouldShowButton ? 'opacity-100' : 'opacity-0'}`}>
+            <button
+              onClick={shouldShowButton ? onAdvance : undefined}
+              className={`bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-1.5 rounded text-xs transition-colors flex items-center gap-2 ${shouldShowButton ? 'cursor-pointer' : 'cursor-default'}`}
+            >
+              {message.buttonText}
+              <span className="text-[10px] opacity-70">[E]</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
