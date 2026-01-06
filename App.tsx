@@ -154,6 +154,36 @@ const App: React.FC = () => {
     // No-op - kept for compatibility with usePhysics
   }, []);
 
+  // Smart flag handler: if target tile is already revealed (or invalid), try flagging the tile under the player
+  // This helps when the player is standing ON the mine they want to flag
+  const smartHandleFlagAction = useCallback((tx: number, ty: number, status: GameStatus, isMenuOpen: boolean) => {
+    const grid = mining.gridRef.current;
+    if (!grid) return;
+
+    const targetTile = grid[ty]?.[tx];
+
+    // If target is valid and HIDDEN, flag it normally
+    if (targetTile && !targetTile.isRevealed) {
+      mining.handleFlagAction(tx, ty, status, isMenuOpen);
+      return;
+    }
+
+    // Fallback: Check player tile
+    const p = state.playerRef.current;
+    const pTx = Math.floor(p.x + 0.5);
+    const pTy = Math.floor(p.y + 0.5);
+    const playerTile = grid[pTy]?.[pTx];
+
+    // If player is standing on a hidden tile, flag that instead
+    if (playerTile && !playerTile.isRevealed) {
+      mining.handleFlagAction(pTx, pTy, status, isMenuOpen);
+      return;
+    }
+
+    // Otherwise try target anyway (standard behavior)
+    mining.handleFlagAction(tx, ty, status, isMenuOpen);
+  }, [mining.handleFlagAction, mining.gridRef, state.playerRef]);
+
   const { getTargetTile } = useKeyboard({
     status: state.status, isShopOpen: state.isShopOpen, isRecyclerOpen: state.isRecyclerOpen,
     isInventoryOpen: state.isInventoryOpen, isConstructionOpen: state.isConstructionOpen,
@@ -163,7 +193,7 @@ const App: React.FC = () => {
     setIsInventoryOpen: state.setIsInventoryOpen, setIsShopOpen: state.setIsShopOpen,
     setIsRecyclerOpen: state.setIsRecyclerOpen, setIsConstructionOpen: state.setIsConstructionOpen,
     setMessage: state.setMessage, revealTileAt: mining.revealTileAt, startClimbing,
-    handleFlagAction: mining.handleFlagAction,
+    handleFlagAction: smartHandleFlagAction,
     handleSleep: () => actionsWithGrid.handleSleep(false, state.dayCount),
     onShopOpen: tutorial.onShopOpened,
     onConstructionOpen: tutorial.onConstructionOpened,
