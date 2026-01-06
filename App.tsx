@@ -332,21 +332,14 @@ const App: React.FC = () => {
     // Player's target position in world coordinates
     let targetCamX = (p.x * GRID_CONFIG.TILE_SIZE) + (GRID_CONFIG.TILE_SIZE / 2);
 
-    // In the mine, we want to follow the player but clamp to prevent showing void
+    // In the mine, track player but gently clamp to avoid too much void on edges
     if (p.y >= 0) {
-      // Calculate clamping bounds based on visible width
-      const minCenter = visibleWidth / 2;
-      const maxCenter = MINE_WIDTH - (visibleWidth / 2);
-
-      // If viewport is wider than mine (minCenter > maxCenter), 
-      // swap bounds to allow tracking while keeping mine visible
-      if (minCenter > maxCenter) {
-        // Viewport wider than mine - allow panning but clamp within swapped bounds
-        targetCamX = Math.max(maxCenter, Math.min(targetCamX, minCenter));
-      } else {
-        // Normal case - clamp to mine bounds
-        targetCamX = Math.max(minCenter, Math.min(targetCamX, maxCenter));
-      }
+      // Only clamp if showing too much void - allow player to be anywhere on screen
+      // Minimum camera center = 0 (left edge of mine visible at screen left)
+      // Maximum camera center = MINE_WIDTH (right edge of mine visible at screen right)
+      const minCenter = 0;
+      const maxCenter = MINE_WIDTH;
+      targetCamX = Math.max(minCenter, Math.min(targetCamX, maxCenter));
     }
 
     // Convert world target to camera position (top-left of screen, in game units)
