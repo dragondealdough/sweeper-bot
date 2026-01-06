@@ -67,16 +67,16 @@ const useTypingEffect = (text: string, speed: number = 30) => {
   return { displayedText, isComplete, skip };
 };
 
-// Helper to render text with bold "wishing well"
+// Helper to render text with bold "wishing well" and materials
 const renderTextWithBold = (text: string) => {
-  const parts = text.split(/(wishing well)/i);
-  return parts.map((part, i) =>
-    part.toLowerCase() === 'wishing well' ? (
-      <strong key={i} className="font-bold text-amber-400">{part}</strong>
-    ) : (
-      <span key={i}>{part}</span>
-    )
-  );
+  const parts = text.split(/(wishing well|10 Stone|4 Silver)/i);
+  return parts.map((part, i) => {
+    const lower = part.toLowerCase();
+    if (lower === 'wishing well' || lower === '10 stone' || lower === '4 silver') {
+      return <strong key={i} className="font-bold text-amber-400">{part}</strong>;
+    }
+    return <span key={i}>{part}</span>;
+  });
 };
 
 // Tutorial message display component with typing effect
