@@ -703,4 +703,3 @@ const AppWithBoundary = () => (
 );
 
 export default AppWithBoundary;
-```
