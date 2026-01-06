@@ -436,7 +436,16 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   // AND it's not a "task step" where the player must complete an action first
   const currentMessageText = tutorialState.currentMessage?.text || '';
   const isTaskStep = tutorialState.currentStep === 'MINE_INTRO_9' || tutorialState.currentStep === 'MINE_COLLECT_2';
-  const shouldShowButton = isComplete && displayedText === currentMessageText && !isTaskStep;
+
+  // Anti-spam delay: Don't show button immediately even if text is short/instant
+  const [canInterAct, setCanInteract] = useState(false);
+  useEffect(() => {
+    setCanInteract(false);
+    const timer = setTimeout(() => setCanInteract(true), 1000); // 1s delay before button appears
+    return () => clearTimeout(timer);
+  }, [tutorialState.currentStep]);
+
+  const shouldShowButton = isComplete && displayedText === currentMessageText && !isTaskStep && canInterAct;
 
   // Handle E key: skip typing animation if in progress, otherwise advance
   useEffect(() => {
@@ -482,7 +491,8 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4 animate-in fade-in duration-300">
           <div className="pointer-events-auto max-w-lg w-full">
             {/* Speech bubble - white border for task steps */}
-            <div className={`relative bg-stone-900/95 border-2 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4 ${isTaskStep ? 'border-white' : 'border-amber-500'}`}>
+            {/* key added to force re-mount on step change, preventing stale state and double-clicks */}
+            <div key={tutorialState.currentStep} className={`relative bg-stone-900/95 border-2 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4 ${isTaskStep ? 'border-white' : 'border-amber-500'}`}>
               {/* Character indicator - shows "❗ Task" for task steps, "📖 Guide" otherwise */}
               <div className="absolute -top-2.5 left-4 flex items-center gap-1">
                 <div className={`px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-white' : 'bg-amber-500'}`}>
