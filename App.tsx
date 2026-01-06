@@ -282,8 +282,9 @@ const App: React.FC = () => {
     const idealY = p.y * GRID_CONFIG.TILE_SIZE - (vh / 2);
 
     // Clamp Y to game bounds
-    // Relaxed minCamY to ensure camera can center on player at y=0 (requires ~ -400 camera Y)
-    const minCamY = -20 * GRID_CONFIG.TILE_SIZE;
+    // Dynamic minCamY: If player is deep in the mine (> 2 tiles), restrict camera to mine-only view (y>=0)
+    // Otherwise allow viewing the overworld/sky
+    const minCamY = (p.y > 2) ? 0 : -20 * GRID_CONFIG.TILE_SIZE;
     const maxCamY = (GRID_CONFIG.ROWS * GRID_CONFIG.TILE_SIZE) - (vh / 2); // Allow scrolling to bottom
     const clampedY = Math.max(minCamY, Math.min(idealY, maxCamY));
 
