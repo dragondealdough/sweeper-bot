@@ -332,6 +332,10 @@ const App: React.FC = () => {
     }
   }, [state.player.x, state.player.y, mining.selectedTarget, mining.revealTileAt, state.inventory, state.depth, mining.grid]);
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+  };
+
   const update = useCallback(() => {
     const delta = 16.66;
     updateTimers({
@@ -664,34 +668,6 @@ const App: React.FC = () => {
       {/* Mobile Touch Controls */}
       <TouchControls visible={isMobile} opacity={settings.controlOpacity / 100} />
 
-      {/* DIAGNOSTIC OVERLAY - FORCE INLINE STYLES */}
-      {DEBUG_MODE && (
-        <div
-          className="fixed top-0 left-0 z-[99999] bg-black/80 text-lime-400 p-2 text-[10px] pointer-events-none font-mono"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            zIndex: 99999,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            color: '#a3e635', // Lime 400
-            padding: '8px',
-            fontSize: '12px',
-            fontFamily: 'monospace',
-            pointerEvents: 'none',
-            border: '2px solid red'
-          }}
-        >
-          <div>v1.1.71 INLINE STYLE MODE</div>
-          <div>Size: {window.innerWidth}x{window.innerHeight}</div>
-          <div>Scale: {scale.toFixed(3)}</div>
-          <div>IsMobile: {isMobile.toString()}</div>
-          <div>Compact: {isCompact.toString()}</div>
-          <div>Player: {state.player.x.toFixed(1)}, {state.player.y.toFixed(1)}</div>
-          <div>Cam: {state.camera.x.toFixed(0)}, {state.camera.y.toFixed(0)}</div>
-          <div className="w-4 h-4 bg-red-500 border border-white mt-1" title="CSS Probe"></div>
-        </div>
-      )}
     </div>
   );
 };
