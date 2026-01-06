@@ -72,7 +72,7 @@ const TutorialMessageDisplay: React.FC<{
   message: { text: string; buttonText: string };
   onAdvance: () => void;
 }> = ({ message, onAdvance }) => {
-  const { displayedText, isComplete, skip } = useTypingEffect(message.text, 1);
+  const { displayedText, isComplete, skip } = useTypingEffect(message.text, 2);
 
   // Only show button when typing is complete AND we've displayed the full current message
   const shouldShowButton = isComplete && displayedText === message.text;

@@ -379,7 +379,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   // Typing effect for tutorial messages
   const { displayedText, isComplete, skip } = useTypingEffect(
     tutorialState.currentMessage?.text || '',
-    1
+    2
   );
 
   // Only show button when typing is complete AND we've displayed the full current message
