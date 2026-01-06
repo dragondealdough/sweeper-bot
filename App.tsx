@@ -367,7 +367,7 @@ const App: React.FC = () => {
 
     // If in mine mode, strictly clamp Y to 0 (mine entrance). Otherwise allow overworld view (-20 tiles).
     const minCamY = isMineModeRef.current ? 0 : -20 * GRID_CONFIG.TILE_SIZE;
-    const maxCamY = (GRID_CONFIG.ROWS * GRID_CONFIG.TILE_SIZE) - (vh / 2); // Allow scrolling to bottom
+    const maxCamY = (GRID_CONFIG.ROWS * GRID_CONFIG.TILE_SIZE) - (visibleHeight / 2); // Allow scrolling to bottom
     const clampedY = Math.max(minCamY, Math.min(idealY, maxCamY));
 
     // Smooth Lerp - Faster vertical tracking (0.3) to keep player centered
