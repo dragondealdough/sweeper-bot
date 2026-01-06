@@ -1,28 +1,31 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React from 'react';
 
 interface Props {
-    children: ReactNode;
+    children: React.ReactNode;
 }
 
 interface State {
     hasError: boolean;
     error: Error | null;
-    errorInfo: ErrorInfo | null;
+    errorInfo: React.ErrorInfo | null;
 }
 
-class ErrorBoundary extends Component<Props, State> {
-    public state: State = {
-        hasError: false,
-        error: null,
-        errorInfo: null
-    };
+class ErrorBoundary extends React.Component<Props, State> {
+    constructor(props: Props) {
+        super(props);
+        this.state = {
+            hasError: false,
+            error: null,
+            errorInfo: null
+        };
+    }
 
-    public static getDerivedStateFromError(error: Error): State {
+    public static getDerivedStateFromError(error: Error): Partial<State> {
         return { hasError: true, error, errorInfo: null };
     }
 
-    public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         console.error("Uncaught error:", error, errorInfo);
         this.setState({ error, errorInfo });
     }

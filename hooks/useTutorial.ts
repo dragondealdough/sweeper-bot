@@ -59,7 +59,7 @@ export type TutorialStep =
   | 'MINE_COLLECT_WAIT'  // New waiting step
   | 'COMPLETED';
 
-interface TutorialMessage {
+export interface TutorialMessage {
   text: string;
   buttonText: string;
   character?: 'narrator' | 'robot';

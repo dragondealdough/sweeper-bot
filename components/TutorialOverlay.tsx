@@ -147,12 +147,14 @@ const renderTextWithBold = (text: string, isMobile: boolean) => {
     );
   }
 
-  // Handle "wishing well"
+  // Handle "wishing well", "10 Stone", "4 Silver"
   // Also highlight generic mobile terms if found
-  const parts = processedText.split(/(wishing well|Blue Pickaxe Button|Red Flag Button|Green Button|D-Pad)/i);
+  const parts = processedText.split(/(wishing well|10 Stone|4 Silver|Blue Pickaxe Button|Red Flag Button|Green Button|D-Pad)/i);
   return parts.map((part, i) => {
     const lower = part.toLowerCase();
     if (lower === 'wishing well' ||
+      lower === '10 stone' ||
+      lower === '4 silver' ||
       lower === 'blue pickaxe button' ||
       lower === 'red flag button' ||
       lower === 'green hand button' ||
@@ -388,6 +390,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           onAdvance={onDismiss}
           renderText={(text) => renderTextWithBold(text, isMobile)}
           isTaskStep={isTaskStep}
+          onMinimize={isTaskStep ? onToggleTaskMinimized : undefined}
         />
       )}
 

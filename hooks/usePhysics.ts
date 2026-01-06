@@ -1,5 +1,5 @@
 
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { PlayerPosition, Direction, Inventory, WorldItem, TileState } from '../types';
 import { PHYSICS, OVERWORLD_MIN_X, OVERWORLD_MAX_X, GRID_CONFIG } from '../constants';
 

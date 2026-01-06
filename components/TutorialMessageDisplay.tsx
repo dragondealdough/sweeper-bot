@@ -7,13 +7,15 @@ interface TutorialMessageDisplayProps {
     onAdvance: () => void;
     renderText?: (text: string) => React.ReactNode;
     isTaskStep?: boolean;
+    onMinimize?: () => void;
 }
 
 const TutorialMessageDisplay: React.FC<TutorialMessageDisplayProps> = ({
     message,
     onAdvance,
     renderText,
-    isTaskStep = false
+    isTaskStep = false,
+    onMinimize
 }) => {
     const { displayedText, isComplete, skip } = useTypingEffect(message.text, 2);
 
@@ -53,13 +55,23 @@ const TutorialMessageDisplay: React.FC<TutorialMessageDisplayProps> = ({
             <div className="pointer-events-auto max-w-lg w-full">
                 {/* key added to force re-mount on message change, preventing stale state */}
                 <div key={message.text} className={`relative bg-stone-900/95 border-2 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4 ${isTaskStep ? 'border-white' : 'border-amber-500'}`}>
-                    {/* Character indicator */}
+                    {/* Character indicator with minimize button for task steps */}
                     <div className="absolute -top-2.5 left-4 flex items-center gap-1">
                         <div className={`px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-white' : 'bg-amber-500'}`}>
                             <span className={`text-[10px] font-black uppercase tracking-wider ${isTaskStep ? 'text-black' : 'text-black'}`}>
                                 {isTaskStep ? '❗ Task' : (message.character === 'narrator' ? '📖 Guide' : '🤖 Unit 734')}
                             </span>
                         </div>
+                        {/* Minimize button for task steps */}
+                        {isTaskStep && onMinimize && (
+                            <button
+                                onClick={onMinimize}
+                                className="bg-white hover:bg-gray-200 text-black font-bold w-5 h-5 rounded-full text-[10px] flex items-center justify-center transition-colors"
+                                title="Minimize task"
+                            >
+                                −
+                            </button>
+                        )}
                     </div>
 
                     <p className="text-sm text-white font-medium leading-relaxed mt-1 min-h-[3rem]">
@@ -83,3 +95,4 @@ const TutorialMessageDisplay: React.FC<TutorialMessageDisplayProps> = ({
 };
 
 export default TutorialMessageDisplay;
+
