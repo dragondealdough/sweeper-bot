@@ -1096,6 +1096,7 @@ export const useTutorial = () => {
           currentStep: 'MINE_HIT_MINE_1',
           showingMessage: true,
           currentMessage: mineHit1,
+          taskMinimized: false, // Ensure alert is visible!
         };
       }
       return prev;
