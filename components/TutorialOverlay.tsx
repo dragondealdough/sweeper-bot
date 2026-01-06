@@ -430,22 +430,22 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       {isTaskStep && tutorialState.taskMinimized && tutorialState.showingMessage && onToggleTaskMinimized && (
         <button
           onClick={onToggleTaskMinimized}
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-red-500 hover:bg-red-400 text-black font-black px-3 py-1.5 rounded-full shadow-lg border-2 border-red-300 animate-pulse transition-all hover:scale-105 flex items-center gap-1"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] bg-white hover:bg-stone-100 text-black font-black px-4 py-2 rounded-lg shadow-lg border-2 border-white animate-pulse transition-all hover:scale-105 flex items-center gap-2"
           title="Show task"
         >
           <span className="text-sm">❗</span>
           <span className="text-xs uppercase tracking-wider">Task</span>
         </button>
       )}
-      {/* Message Dialog - positioned at bottom normally, but at TOP for task steps to avoid obscuring gameplay */}
+      {/* Message Dialog - positioned at bottom for all messages */}
       {/* Hide if task is minimized */}
       {tutorialState.showingMessage && tutorialState.currentMessage && !isShopOpen && !isConstructionOpen && !tutorialState.taskMinimized && (
-        <div className={`fixed inset-x-0 z-[200] flex justify-center pointer-events-none px-4 ${isTaskStep ? 'top-4' : 'bottom-8'} ${isTaskStep ? 'animate-in slide-in-from-top-4' : 'animate-in fade-in'} duration-300`}>
+        <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4 animate-in fade-in duration-300">
           <div className="pointer-events-auto max-w-lg w-full">
-            {/* Speech bubble */}
-            <div className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
+            {/* Speech bubble - white border for task steps */}
+            <div className={`relative bg-stone-900/95 border-2 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4 ${isTaskStep ? 'border-white' : 'border-amber-500'}`}>
               {/* Character indicator - shows "❗ Task" for task steps, "📖 Guide" otherwise */}
-              <div className={`absolute -top-2.5 left-4 px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-red-500' : 'bg-amber-500'}`}>
+              <div className={`absolute -top-2.5 left-4 px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-white' : 'bg-amber-500'}`}>
                 <span className="text-[10px] font-black text-black uppercase tracking-wider">
                   {isTaskStep ? '❗ Task' : (tutorialState.currentMessage.character === 'narrator' ? '📖 Guide' : '🤖 You')}
                 </span>
