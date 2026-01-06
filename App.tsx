@@ -40,7 +40,6 @@ const App: React.FC = () => {
   const [scale, setScale] = useState(1);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
-  const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   const [hasSave, setHasSave] = useState(false);
 
   // Camera State Ref for sticky mode (Mine vs Overworld)
