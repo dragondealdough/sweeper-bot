@@ -307,10 +307,15 @@ const App: React.FC = () => {
     });
 
     // --- CAMERA LOGIC ---
-    // viewportRef is on the game area (after sidebar), so use directly
-    const vw = viewportRef.current?.clientWidth || (VIRTUAL_WIDTH - 256);
-    const vh = viewportRef.current?.clientHeight || VIRTUAL_HEIGHT;
+    // Use actual window dimensions for visible viewport (in screen pixels)
+    // then divide by scale to get game units
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
     const currentScale = scaleRef.current || 1;
+
+    // Effective visible viewport in game units
+    const visibleWidth = screenWidth / currentScale;
+    const visibleHeight = screenHeight / currentScale;
 
     const p = state.playerRef.current;
 
@@ -322,12 +327,9 @@ const App: React.FC = () => {
 
     // In the mine, we want to follow the player but clamp to prevent showing void
     if (p.y >= 0) {
-      // Calculate effective viewport width in game units (accounting for zoom)
-      const effectiveVW = vw / currentScale;
-
-      // Calculate clamping bounds
-      const minCenter = effectiveVW / 2;
-      const maxCenter = MINE_WIDTH - (effectiveVW / 2);
+      // Calculate clamping bounds based on visible width
+      const minCenter = visibleWidth / 2;
+      const maxCenter = MINE_WIDTH - (visibleWidth / 2);
 
       // If viewport is wider than mine (minCenter > maxCenter), 
       // swap bounds to allow tracking while keeping mine visible
@@ -341,10 +343,10 @@ const App: React.FC = () => {
     }
 
     // Convert world target to camera position (top-left of screen, in game units)
-    const idealX = targetCamX - (vw / currentScale / 2);
+    const idealX = targetCamX - (visibleWidth / 2);
     // Ignore upward movement (jumps) in overworld by clamping Y to 0
     const trackingY = Math.max(0, p.y);
-    const idealY = trackingY * GRID_CONFIG.TILE_SIZE - (vh / 2);
+    const idealY = trackingY * GRID_CONFIG.TILE_SIZE - (visibleHeight / 2);
 
     // Vertical Cam Logic:
     // Sticky Mine Mode: Enter mine mode when deep enough (>2). Exit only when back in overworld (<0).
