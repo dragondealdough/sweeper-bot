@@ -69,8 +69,9 @@ const App: React.FC = () => {
       // On mobile, Apply a 1.6x zoom multiplier to get the camera closer (User request)
       const mobileMultiplier = isMobile ? 1.6 : 1;
 
-      // Dynamic Zoom: Zoom in 20% more when inside the mine (y >= 0)
-      const mineMultiplier = (state.player.y >= 0) ? 1.2 : 1.0;
+      // Dynamic Zoom: Zoom in ~45% more when inside the mine (y >= 0)
+      // Base mobile zoom 1.6 * 1.2 = 1.92. New request: "Another 20%" -> 1.44 mine multiplier.
+      const mineMultiplier = (state.player.y >= 0) ? 1.44 : 1.0;
 
       setScale(Math.max(0.4, Math.min(1.5, newScale * mobileMultiplier * mineMultiplier)));
     };
@@ -78,7 +79,7 @@ const App: React.FC = () => {
     calculateScale();
     window.addEventListener('resize', calculateScale);
     return () => window.removeEventListener('resize', calculateScale);
-  }, [isMobile]);
+  }, [isMobile, state.player.y]); // Added dependency on player.y to trigger zoom change
 
   const ROPE_X = 8;
   const HOUSE_X = -2;  // Moved left to make room for rope mechanism
@@ -285,9 +286,9 @@ const App: React.FC = () => {
     const maxCamY = (GRID_CONFIG.ROWS * GRID_CONFIG.TILE_SIZE) - vh + 100;
     const clampedY = Math.max(minCamY, Math.min(idealY, maxCamY));
 
-    // Smooth Lerp
+    // Smooth Lerp - Faster vertical tracking (0.3) to keep player centered
     state.cameraRef.current.x += (idealX - state.cameraRef.current.x) * 0.1;
-    state.cameraRef.current.y += (clampedY - state.cameraRef.current.y) * 0.2;
+    state.cameraRef.current.y += (clampedY - state.cameraRef.current.y) * 0.3;
 
     state.setCamera({ x: state.cameraRef.current.x, y: state.cameraRef.current.y });
     state.requestRef.current = requestAnimationFrame(update);
