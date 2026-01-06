@@ -318,29 +318,29 @@ const App: React.FC = () => {
     });
 
     // --- CAMERA LOGIC ---
-    // The viewportRef is on the game content area (after sidebar, in game units)
-    // Its clientWidth/clientHeight gives us the visible viewport in game coordinates directly
-    const visibleWidth = viewportRef.current?.clientWidth || (VIRTUAL_WIDTH - 256);
-    const visibleHeight = viewportRef.current?.clientHeight || VIRTUAL_HEIGHT;
+    // Calculate the actual visible viewport in game units
+    // viewportRef gives us the container size, but when scaled, we see less of it
+    const containerWidth = viewportRef.current?.clientWidth || (VIRTUAL_WIDTH - 256);
+    const containerHeight = viewportRef.current?.clientHeight || VIRTUAL_HEIGHT;
     const currentScale = scaleRef.current || 1;
+
+    // Actual visible area in game units = container size (already game units, no division needed)
+    // But when zoomed in (scale > 1), the container is visually larger than the screen
+    // So visible game units = screen pixels / scale
+    // However, the container is INSIDE the scaled element, so its reported width is correct for camera math
+    const visibleWidth = containerWidth;
+    const visibleHeight = containerHeight;
 
     const p = state.playerRef.current;
 
     // Mine dimensions
     const MINE_WIDTH = GRID_CONFIG.COLUMNS * GRID_CONFIG.TILE_SIZE;
 
-    // Player's target position in world coordinates
+    // Player's target position in world coordinates (center of player tile)
     let targetCamX = (p.x * GRID_CONFIG.TILE_SIZE) + (GRID_CONFIG.TILE_SIZE / 2);
 
-    // In the mine, track player but gently clamp to avoid too much void on edges
-    if (p.y >= 0) {
-      // Only clamp if showing too much void - allow player to be anywhere on screen
-      // Minimum camera center = 0 (left edge of mine visible at screen left)
-      // Maximum camera center = MINE_WIDTH (right edge of mine visible at screen right)
-      const minCenter = 0;
-      const maxCenter = MINE_WIDTH;
-      targetCamX = Math.max(minCenter, Math.min(targetCamX, maxCenter));
-    }
+    // No special clamping for mine - just track player directly like overworld
+    // (The mine's void edges are acceptable)
 
     // Convert world target to camera position (top-left of screen, in game units)
     const idealX = targetCamX - (visibleWidth / 2);
