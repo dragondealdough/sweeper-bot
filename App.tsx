@@ -487,6 +487,7 @@ const App: React.FC = () => {
               <div
                 className="w-full h-full will-change-transform"
                 style={{ transform: `translate3d(${-state.camera.x}px, ${-state.camera.y}px, 0)` }}
+                onContextMenu={handleContextMenu}
               >
                 <div className={`w-full h-full ${state.screenShake > 0 && settings.screenShake ? 'animate-shake' : ''}`}>
                   <OverworldSection dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} DAY_DURATION_MS={DAY_DURATION_MS} ROPE_X={ROPE_X} HOUSE_X={HOUSE_X} SHOP_X={SHOP_X} RECYCLER_X={RECYCLER_X} CONSTRUCTION_X={CONSTRUCTION_X} ropeLength={state.ropeLength} inventory={state.inventory} isShopOpen={state.isShopOpen} isRecyclerOpen={state.isRecyclerOpen} isConstructionOpen={state.isConstructionOpen} recyclingDisplay={state.recyclingDisplay} tutorialState={tutorial.tutorialState} playerX={state.player.x} getSkyGradient={() => {
