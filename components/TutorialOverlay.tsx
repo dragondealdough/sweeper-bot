@@ -457,8 +457,8 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         if (!isComplete) {
           // Skip the typing animation
           skip();
-        } else {
-          // Already complete, advance to next message
+        } else if (shouldShowButton) {
+          // Only advance if button is actually interactive/visible
           onDismiss();
         }
       }
@@ -466,7 +466,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tutorialState.showingMessage, isComplete, skip, onDismiss]);
+  }, [tutorialState.showingMessage, isComplete, skip, onDismiss, shouldShowButton]);
 
   // Check if we should show the dimming backdrop
   // We show it when a message is displayed, BUT NOT if it's an "interactive" hint or we are in a middle of a task (which usually don't have blocking messages)
