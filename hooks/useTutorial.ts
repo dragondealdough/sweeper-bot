@@ -542,13 +542,9 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_INTRO_9') {
-          // Hide dialogue, show persistent task hint, wait for player to mine
-          return {
-            ...prev,
-            showingMessage: false,
-            currentMessage: null,
-            hintMessage: "Select a block and press SPACEBAR to mine it!",
-          };
+          // Keep the dialogue visible - just remove the button so it can't be skipped
+          // The message will stay on screen until player mines a block
+          return prev; // Do nothing - keep current state with message showing
         }
 
         if (prev.currentStep === 'MINE_HIT_MINE_1') {
@@ -593,14 +589,8 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_COLLECT_2') {
-          // Transition to wait step, show persistent task hint
-          return {
-            ...prev,
-            currentStep: 'MINE_COLLECT_WAIT',
-            showingMessage: false,
-            currentMessage: null,
-            hintMessage: "Press Z to flag a suspected mine, then SPACEBAR to collect it!",
-          };
+          // Keep the dialogue visible - it can't be skipped until player collects a mine
+          return prev; // Do nothing - keep current state with message showing
         }
 
         if (prev.currentStep === 'MINE_COLLECT_WAIT') {

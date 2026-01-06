@@ -383,8 +383,10 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   );
 
   // Only show button when typing is complete AND we've displayed the full current message
+  // AND it's not a "task step" where the player must complete an action first
   const currentMessageText = tutorialState.currentMessage?.text || '';
-  const shouldShowButton = isComplete && displayedText === currentMessageText;
+  const isTaskStep = tutorialState.currentStep === 'MINE_INTRO_9' || tutorialState.currentStep === 'MINE_COLLECT_2';
+  const shouldShowButton = isComplete && displayedText === currentMessageText && !isTaskStep;
 
   // Handle E key: skip typing animation if in progress, otherwise advance
   useEffect(() => {
