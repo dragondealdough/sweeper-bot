@@ -445,22 +445,23 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
             {/* Speech bubble - white border for task steps */}
             <div className={`relative bg-stone-900/95 border-2 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4 ${isTaskStep ? 'border-white' : 'border-amber-500'}`}>
               {/* Character indicator - shows "❗ Task" for task steps, "📖 Guide" otherwise */}
-              <div className={`absolute -top-2.5 left-4 px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-white' : 'bg-amber-500'}`}>
-                <span className="text-[10px] font-black text-black uppercase tracking-wider">
-                  {isTaskStep ? '❗ Task' : (tutorialState.currentMessage.character === 'narrator' ? '📖 Guide' : '🤖 You')}
-                </span>
+              <div className="absolute -top-2.5 left-4 flex items-center gap-1">
+                <div className={`px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-white' : 'bg-amber-500'}`}>
+                  <span className="text-[10px] font-black text-black uppercase tracking-wider">
+                    {isTaskStep ? '❗ Task' : (tutorialState.currentMessage.character === 'narrator' ? '📖 Guide' : '🤖 You')}
+                  </span>
+                </div>
+                {/* Minimize button for task steps - right next to Task tab */}
+                {isTaskStep && onToggleTaskMinimized && (
+                  <button
+                    onClick={onToggleTaskMinimized}
+                    className="bg-white hover:bg-stone-200 px-2 py-0.5 rounded-full transition-colors"
+                    title="Minimize task"
+                  >
+                    <span className="text-[10px] font-bold text-black">−</span>
+                  </button>
+                )}
               </div>
-
-              {/* Minimize button for task steps */}
-              {isTaskStep && onToggleTaskMinimized && (
-                <button
-                  onClick={onToggleTaskMinimized}
-                  className="absolute -top-2.5 right-4 bg-stone-700 hover:bg-stone-600 px-2 py-0.5 rounded-full transition-colors"
-                  title="Minimize task"
-                >
-                  <span className="text-[10px] font-bold text-white">−</span>
-                </button>
-              )}
 
               {/* Message text with typing effect */}
               <p className="text-sm text-white font-medium leading-relaxed mt-1 min-h-[3rem]">

@@ -107,7 +107,7 @@ const TUTORIAL_MESSAGES: Record<TutorialStep, TutorialMessage | null> = {
   MINE_INTRO_6: { text: "You will wake up the next day, and the mine will be completely reset (no, we don't know why)", buttonText: "Weird...", character: 'narrator' },
   MINE_INTRO_7: { text: "But fear not…any progress you made inside the mine is recorded and, in my opinion, THAT is far more valuable than any rocks and gems!", buttonText: "That's good!", character: 'narrator' },
   MINE_INTRO_8: { text: "More on that later, though. For now, I bet you can't wait to smash things down here. Go on, give that pickaxe its first taste of rock.", buttonText: "Let's do it!", character: 'narrator' },
-  MINE_INTRO_9: { text: "Highlight a block, and press spacebar to whack it", buttonText: "Got it!", character: 'narrator' },
+  MINE_INTRO_9: { text: "Highlight a block, and press spacebar to whack it! (Tip: You can hide this popup with the − button)", buttonText: "Got it!", character: 'narrator' },
   MINE_HIT_MINE_1: { text: "Ah! I probably should have warned you about this. There are a lot of explosives hidden in these rocks and it seems you found out the hard way.", buttonText: "Oops!", character: 'narrator' },
   MINE_HIT_MINE_2: { text: "Fear not, it looks like by some kind of miracle all your circuits and bolts are in-tact!", buttonText: "Phew!", character: 'narrator' },
   MINE_EXPLAIN_NUMBERS: { text: "Progress! I bet you've already figured out what those numbers mean. Each number tells you how many mines are hidden in the adjacent tiles (up, down, left, right, and diagonally). Use this information to safely navigate the mine!", buttonText: "Makes sense!", character: 'narrator' },
