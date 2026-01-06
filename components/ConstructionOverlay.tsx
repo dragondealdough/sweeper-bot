@@ -165,6 +165,19 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
 }) => {
   const showTutorialMessage = tutorialState?.showingMessage && tutorialState?.currentMessage;
   const highlightCloseButton = tutorialState?.highlightCloseButton || false;
+
+  const projects: BuildingRequirement[] = [
+    {
+      id: 'WISHING_WELL',
+      name: 'Wishing Well',
+      icon: '⛲',
+      desc: 'Generates $1 every minute from tourists.',
+      requirements: { stone: 10, silver: 4 },
+      built: inventory.wishingWellBuilt,
+      progress: inventory.wishingWellProgress
+    },
+  ];
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [cursorPosition, setCursorPosition] = useState({ top: 0, left: 0 });
   const [selectedMaterial, setSelectedMaterial] = useState<'stone' | 'silver'>('stone');
@@ -207,21 +220,9 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
         clearTimeout(timer);
       };
     }
-  }, [checkScroll, projects]); // Re-run when projects list changes
+  }, [checkScroll]); // Removed projects dependency as it's a new array on every render
 
   const [selectedElement, setSelectedElement] = useState<'ITEM' | 'CLOSE'>('ITEM');
-
-  const projects: BuildingRequirement[] = [
-    {
-      id: 'WISHING_WELL',
-      name: 'Wishing Well',
-      icon: '⛲',
-      desc: 'Generates $1 every minute from tourists.',
-      requirements: { stone: 10, silver: 4 },
-      built: inventory.wishingWellBuilt,
-      progress: inventory.wishingWellProgress
-    },
-  ];
 
   const updateCursorPosition = (element: HTMLElement | null) => {
     if (element) {
