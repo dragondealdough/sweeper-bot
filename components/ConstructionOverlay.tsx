@@ -307,8 +307,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4"
-      style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
+      className="fixed inset-0 z-[150] flex justify-center bg-black/80 backdrop-blur-sm pt-0 pb-0 sm:pt-10 sm:pb-10"
     >
       {/* Cursor Pointer */}
       {!showTutorialMessage && (
@@ -324,7 +323,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
         </div>
       )}
 
-      <div className="w-full max-w-2xl bg-stone-900 border-x-4 sm:border-4 border-orange-700 shadow-[0_0_50px_rgba(194,65,12,0.3)] sm:rounded-sm overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[85vh]">
+      <div className="w-full max-w-2xl bg-stone-900 border-x-4 sm:border-4 border-orange-700 shadow-[0_0_50px_rgba(194,65,12,0.3)] sm:rounded-sm overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[90vh]">
 
         {/* Header with Safe Area Padding */}
         <div

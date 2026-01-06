@@ -40,7 +40,11 @@ const App: React.FC = () => {
   const [scale, setScale] = useState(1);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
+  const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   const [hasSave, setHasSave] = useState(false);
+
+  // Camera State Ref for sticky mode (Mine vs Overworld)
+  const isMineModeRef = useRef(false);
 
   // Check for save game on mount
   useEffect(() => {
@@ -267,24 +271,42 @@ const App: React.FC = () => {
     const p = state.playerRef.current;
 
     // Mine center for camera targeting
-    const MINE_CENTER = (GRID_CONFIG.COLUMNS * GRID_CONFIG.TILE_SIZE) / 2; // 320px
+    const MINE_WIDTH = GRID_CONFIG.COLUMNS * GRID_CONFIG.TILE_SIZE;
+    const MINE_CENTER = MINE_WIDTH / 2;
 
-    // Default: Center on the mine grid
-    let targetCamX = MINE_CENTER;
+    // Horizontal Cam Logic:
+    // If in Overworld (y < 0), track player freely.
+    // If in Mine (y >= 0), track player but clamp to mine bounds (so we don't see black void sides).
+    // If viewport is wider than mine, center the mine.
+    let targetCamX = (p.x * GRID_CONFIG.TILE_SIZE) + (GRID_CONFIG.TILE_SIZE / 2);
 
-    // If in Overworld (y < 0), track player horizontally.
-    if (p.y < 0) {
-      targetCamX = (p.x * GRID_CONFIG.TILE_SIZE) + (GRID_CONFIG.TILE_SIZE / 2);
+    if (p.y >= 0) {
+      if (vw >= MINE_WIDTH) {
+        targetCamX = MINE_CENTER;
+      } else {
+        const minX = vw / 2;
+        const maxX = MINE_WIDTH - (vw / 2);
+        // Ensure min <= max (if not, we shouldn't be here due to vw check, but safe guard)
+        if (minX <= maxX) {
+          targetCamX = Math.max(minX, Math.min(targetCamX, maxX));
+        } else {
+          targetCamX = MINE_CENTER;
+        }
+      }
     }
 
     // Convert world target to camera position (top-left of screen)
     const idealX = targetCamX - (vw / 2);
     const idealY = p.y * GRID_CONFIG.TILE_SIZE - (vh / 2);
 
-    // Clamp Y to game bounds
-    // Dynamic minCamY: If player is deep in the mine (> 2 tiles), restrict camera to mine-only view (y>=0)
-    // Otherwise allow viewing the overworld/sky
-    const minCamY = (p.y > 2) ? 0 : -20 * GRID_CONFIG.TILE_SIZE;
+    // Vertical Cam Logic:
+    // Sticky Mine Mode: Enter mine mode when deep enough (>2). Exit only when back in overworld (<0).
+    // This prevents jitter when jumping near the ceiling.
+    if (p.y > 2) isMineModeRef.current = true;
+    if (p.y < 0) isMineModeRef.current = false;
+
+    // If in mine mode, strictly clamp Y to 0 (mine entrance). Otherwise allow overworld view (-20 tiles).
+    const minCamY = isMineModeRef.current ? 0 : -20 * GRID_CONFIG.TILE_SIZE;
     const maxCamY = (GRID_CONFIG.ROWS * GRID_CONFIG.TILE_SIZE) - (vh / 2); // Allow scrolling to bottom
     const clampedY = Math.max(minCamY, Math.min(idealY, maxCamY));
 
