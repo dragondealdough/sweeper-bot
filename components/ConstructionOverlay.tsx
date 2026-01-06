@@ -1,71 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Inventory } from '../types';
 import { TutorialState } from '../hooks/useTutorial';
-
-// Typing effect hook
-const useTypingEffect = (text: string, speed: number = 30) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isComplete, setIsComplete] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const skip = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setDisplayedText(text);
-    setIsComplete(true);
-  }, [text]);
-
-  useEffect(() => {
-    if (!text) {
-      setDisplayedText('');
-      setIsComplete(false);
-      return;
-    }
-
-    setDisplayedText('');
-    setIsComplete(false);
-    let currentIndex = 0;
-
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    // For very fast speeds, type multiple characters per interval
-    const charsPerInterval = speed <= 1 ? 2 : 1;
-
-    intervalRef.current = setInterval(() => {
-      if (currentIndex < text.length) {
-        const nextIndex = Math.min(currentIndex + charsPerInterval, text.length);
-        setDisplayedText(text.slice(0, nextIndex));
-        currentIndex = nextIndex;
-        if (currentIndex >= text.length) {
-          setIsComplete(true);
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-        }
-      } else {
-        setIsComplete(true);
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      }
-    }, speed);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [text, speed]);
-
-  return { displayedText, isComplete, skip };
-};
+import TutorialMessageDisplay from './TutorialMessageDisplay';
 
 // Helper to render text with bold "wishing well" and materials
 const renderTextWithBold = (text: string) => {
@@ -77,71 +13,6 @@ const renderTextWithBold = (text: string) => {
     }
     return <span key={i}>{part}</span>;
   });
-};
-
-// Tutorial message display component with typing effect
-const TutorialMessageDisplay: React.FC<{
-  message: { text: string; buttonText: string };
-  onAdvance: () => void;
-}> = ({ message, onAdvance }) => {
-  const { displayedText, isComplete, skip } = useTypingEffect(message.text, 2);
-
-  // Anti-spam: enforce 1s delay before interaction is allowed
-  const [canInteract, setCanInteract] = useState(false);
-  useEffect(() => {
-    setCanInteract(false);
-    const timer = setTimeout(() => setCanInteract(true), 1000);
-    return () => clearTimeout(timer);
-  }, [message]);
-
-  // Only show button when typing is complete AND we've displayed the full current message
-  const shouldShowButton = isComplete && displayedText === message.text && canInteract;
-
-  // Handle E key: skip typing animation if in progress, otherwise advance
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'e' || e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        if (!isComplete) {
-          // Skip the typing animation
-          skip();
-        } else if (shouldShowButton) {
-          // Only advance if interaction is allowed
-          onAdvance();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isComplete, skip, onAdvance, shouldShowButton]);
-
-  return (
-    <div className="fixed inset-x-0 bottom-8 z-[160] flex justify-center pointer-events-none px-4">
-      <div className="pointer-events-auto max-w-lg w-full">
-        <div key={message.text} className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
-          <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
-            <span className="text-[10px] font-black text-black uppercase tracking-wider">📖 Guide</span>
-          </div>
-
-          <p className="text-sm text-white font-medium leading-relaxed mt-1 min-h-[3rem]">
-            {renderTextWithBold(displayedText)}
-            {!isComplete && <span className="inline-block w-1 h-4 bg-amber-500 ml-1 animate-pulse">|</span>}
-          </p>
-
-          <div className={`flex justify-end mt-3 pt-2 border-t border-stone-700/50 transition-opacity duration-300 ${shouldShowButton ? 'opacity-100' : 'opacity-0'}`}>
-            <button
-              onClick={shouldShowButton ? onAdvance : undefined}
-              className={`bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-1.5 rounded text-xs transition-colors flex items-center gap-2 ${shouldShowButton ? 'cursor-pointer' : 'cursor-default'}`}
-            >
-              {message.buttonText}
-              <span className="text-[10px] opacity-70">[E]</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 interface ConstructionOverlayProps {
@@ -527,6 +398,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
         <TutorialMessageDisplay
           message={tutorialState.currentMessage}
           onAdvance={onTutorialAdvance || (() => { })}
+          renderText={renderTextWithBold}
         />
       )}
     </div>

@@ -1,71 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { TutorialState } from '../hooks/useTutorial';
 import { GRID_CONFIG } from '../constants';
+import TutorialMessageDisplay from './TutorialMessageDisplay';
 
-// Typing effect hook
-const useTypingEffect = (text: string, speed: number = 30) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isComplete, setIsComplete] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const skip = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    setDisplayedText(text);
-    setIsComplete(true);
-  }, [text]);
-
-  useEffect(() => {
-    if (!text) {
-      setDisplayedText('');
-      setIsComplete(false);
-      return;
-    }
-
-    setDisplayedText('');
-    setIsComplete(false);
-    let currentIndex = 0;
-
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    // For very fast speeds, type multiple characters per interval
-    const charsPerInterval = speed <= 1 ? 2 : 1;
-
-    intervalRef.current = setInterval(() => {
-      if (currentIndex < text.length) {
-        const nextIndex = Math.min(currentIndex + charsPerInterval, text.length);
-        setDisplayedText(text.slice(0, nextIndex));
-        currentIndex = nextIndex;
-        if (currentIndex >= text.length) {
-          setIsComplete(true);
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-        }
-      } else {
-        setIsComplete(true);
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      }
-    }, speed);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [text, speed]);
-
-  return { displayedText, isComplete, skip };
-};
 
 // Helper to render text with bold phrases
 const renderTextWithBold = (text: string, isMobile: boolean) => {
@@ -427,334 +365,261 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
   };
   // Typing effect for tutorial messages
-  const { displayedText, isComplete, skip } = useTypingEffect(
-    tutorialState.currentMessage?.text || '',
-    2
-  );
-
-  // Only show button when typing is complete AND we've displayed the full current message
-  // AND it's not a "task step" where the player must complete an action first
-  const currentMessageText = tutorialState.currentMessage?.text || '';
   const isTaskStep = tutorialState.currentStep === 'MINE_INTRO_9' || tutorialState.currentStep === 'MINE_COLLECT_2';
-
-  // Anti-spam delay: Don't show button immediately even if text is short/instant
-  const [canInterAct, setCanInteract] = useState(false);
-  useEffect(() => {
-    setCanInteract(false);
-    const timer = setTimeout(() => setCanInteract(true), 1000); // 1s delay before button appears
-    return () => clearTimeout(timer);
-  }, [tutorialState.currentStep]);
-
-  const shouldShowButton = isComplete && displayedText === currentMessageText && !isTaskStep && canInterAct;
-
-  // Handle E key: skip typing animation if in progress, otherwise advance
-  useEffect(() => {
-    if (!tutorialState.showingMessage) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'e' || e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        if (!isComplete) {
-          // Skip the typing animation
-          skip();
-        } else if (shouldShowButton) {
-          // Only advance if button is actually interactive/visible
-          onDismiss();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tutorialState.showingMessage, isComplete, skip, onDismiss, shouldShowButton]);
 
   // Check if we should show the dimming backdrop
   // We show it when a message is displayed, BUT NOT if it's an "interactive" hint or we are in a middle of a task (which usually don't have blocking messages)
-  // Simple heuristic: If showingMessage is true, we usually want focus.
-  const showBackdrop = tutorialState.showingMessage &&
-    tutorialState.currentMessage &&
-    !isShopOpen &&
-    !isConstructionOpen &&
-    !tutorialState.taskMinimized;
+  const shouldDim = tutorialState.showingMessage && !isTaskStep;
+
+  // Render the message manually if it is a task step to maintain layout, OR use the shared component for standard messages
+  // Actually, we can use the shared component for both, as it supports customization!
 
   return (
     <>
-      {/* Dimming Backdrop for Tutorial Focus */}
-      {showBackdrop && (
-        <div className="fixed inset-0 bg-black/40 z-[199] pointer-events-none animate-in fade-in duration-500" />
-      )}
-
-
-      {/* Message Dialog - positioned at bottom for all messages */}
-      {/* Hide if task is minimized */}
-      {tutorialState.showingMessage && tutorialState.currentMessage && !isShopOpen && !isConstructionOpen && !tutorialState.taskMinimized && (
-        <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4 animate-in fade-in duration-300">
-          <div className="pointer-events-auto max-w-lg w-full">
-            {/* Speech bubble - white border for task steps */}
-            {/* key added to force re-mount on step change, preventing stale state and double-clicks */}
-            <div key={tutorialState.currentStep} className={`relative bg-stone-900/95 border-2 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4 ${isTaskStep ? 'border-white' : 'border-amber-500'}`}>
-              {/* Character indicator - shows "❗ Task" for task steps, "📖 Guide" otherwise */}
-              <div className="absolute -top-2.5 left-4 flex items-center gap-1">
-                <div className={`px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-white' : 'bg-amber-500'}`}>
-                  <span className="text-[10px] font-black text-black uppercase tracking-wider">
-                    {isTaskStep ? '❗ Task' : (tutorialState.currentMessage.character === 'narrator' ? '📖 Guide' : '🤖 You')}
-                  </span>
-                </div>
-                {/* Minimize button for task steps - right next to Task tab */}
-                {isTaskStep && onToggleTaskMinimized && (
-                  <button
-                    onClick={onToggleTaskMinimized}
-                    className="bg-white hover:bg-stone-200 px-2 py-0.5 rounded-full transition-colors animate-pulse border border-red-400 shadow-md"
-                    title="Minimize task"
-                  >
-                    <span className="text-[10px] font-bold text-black flex items-center justify-center w-2 h-2">−</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Message text with typing effect */}
-              <p className="text-sm text-white font-medium leading-relaxed mt-1 min-h-[3rem]">
-                {renderTextWithBold(displayedText, isMobile)}
-                {!isComplete && <span className="inline-block w-1 h-4 bg-amber-500 ml-1 animate-pulse">|</span>}
-              </p>
-
-              {/* Bottom buttons - only show after typing completes */}
-              {/* Bottom buttons - reserved space, fade in */}
-              <div className={`flex justify-between items-center mt-3 pt-2 border-t border-stone-700/50 transition-opacity duration-300 ${shouldShowButton ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-                <button
-                  onClick={onSkip}
-                  className="text-stone-500 hover:text-stone-300 text-[10px] uppercase tracking-wider transition-colors"
-                >
-                  Skip Tutorial
-                </button>
-                <button
-                  onClick={onDismiss}
-                  className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-1.5 rounded transition-colors flex items-center gap-2 text-xs"
-                >
-                  {tutorialState.currentMessage.buttonText}
-                  {!isMobile && <span className="text-[10px] opacity-70">[E]</span>}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Multiple Choice Dialog */}
-      {tutorialState.currentStep === 'POST_SHOP_CHOICE' && tutorialState.showingChoice && !isShopOpen && (
-        <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4">
-          <div className="pointer-events-auto max-w-lg w-full">
-            <div className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
-              <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
-                <span className="text-[10px] font-black text-black uppercase tracking-wider">📖 Guide</span>
-              </div>
-
-              <p className="text-sm text-white font-medium leading-relaxed mt-1 mb-4">
-                What brings people to towns like this?
-              </p>
-
-              <div className="space-y-2">
-                <button
-                  onClick={() => onSelectChoice?.('ROADS')}
-                  className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 0
-                    ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
-                    : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
-                    }`}
-                >
-                  {selectedChoiceIndex === 0 && (
-                    <span className="text-amber-400">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5V19L19 12L8 5Z" />
-                      </svg>
-                    </span>
-                  )}
-                  Roads!
-                </button>
-                <button
-                  onClick={() => onSelectChoice?.('ATTRACTIONS')}
-                  className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 1
-                    ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
-                    : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
-                    }`}
-                >
-                  {selectedChoiceIndex === 1 && (
-                    <span className="text-amber-400">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5V19L19 12L8 5Z" />
-                      </svg>
-                    </span>
-                  )}
-                  Special attractions!
-                </button>
-                <button
-                  onClick={() => onSelectChoice?.('ROBOTS')}
-                  className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 2
-                    ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
-                    : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
-                    }`}
-                >
-                  {selectedChoiceIndex === 2 && (
-                    <span className="text-amber-400">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5V19L19 12L8 5Z" />
-                      </svg>
-                    </span>
-                  )}
-                  Robots!
-                </button>
-              </div>
-              <div className="mt-3 text-[10px] text-stone-400 text-center">
-                Use ↑↓ to select, [E] to choose
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Task/Hint Message - positioned at top, narrator style, non-dismissible for task steps */}
-      {tutorialState.hintMessage && !isShopOpen && !isConstructionOpen && !isRecyclerOpen && !tutorialState.showingMessage && (
-        <div className="fixed inset-x-0 top-24 z-[195] flex justify-center pointer-events-none px-4 animate-in fade-in slide-in-from-top-2 duration-500">
-          {(() => {
-            const isTaskStep = tutorialState.currentStep === 'MINE_INTRO_9' || tutorialState.currentStep === 'MINE_COLLECT_WAIT';
-
-            // Apply mobile text substitutions to hint message
-            let displayText = tutorialState.hintMessage;
-            if (isMobile) {
-              displayText = displayText
-                .replace(/SPACEBAR/gi, 'the BLUE PICKAXE button')
-                .replace(/press Z/gi, 'press the RED FLAG button')
-                .replace(/Select a block/gi, 'Use the JOYSTICK to select a block');
-            }
-
-            return (
-              <div
-                className={`max-w-sm w-full ${isTaskStep ? '' : 'pointer-events-auto cursor-pointer'}`}
-                onClick={isTaskStep ? undefined : () => onDismissHint?.()}
-              >
-                {/* Narrator-style speech bubble */}
-                <div className="relative bg-stone-800/95 border-2 border-amber-400 rounded-xl shadow-2xl overflow-hidden">
-                  {/* Character avatar hint */}
-                  <div className="absolute -top-1 -left-1 w-8 h-8 rounded-full bg-amber-500 border-2 border-amber-300 flex items-center justify-center">
-                    <span className="text-xs">📢</span>
-                  </div>
-                  <div className="pl-8 pr-3 py-3">
-                    <p className="text-sm text-stone-100 font-medium leading-relaxed">
-                      {displayText}
-                    </p>
-                  </div>
-                  {!isTaskStep && (
-                    <div className="text-[9px] text-stone-500 text-right pr-2 pb-1">
-                      Tap to dismiss
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      )}
-
-      {/* No Mines Warning - shows in recycler when player has no mines */}
-      {tutorialState.noMinesToRecycle && tutorialState.currentStep === 'RECYCLER_INTRO' && isRecyclerOpen && (
-        <div className="fixed inset-x-0 bottom-24 z-[195] flex justify-center pointer-events-none px-4 animate-in fade-in duration-300">
-          <div className="max-w-md w-full">
-            <div className="relative bg-red-900/90 border border-red-500 rounded-lg shadow-lg p-3">
-              <p className="text-sm text-red-100 font-medium leading-relaxed">
-                ⚠️ You don't have any mines to recycle! Head back to the mine, flag suspected mines with Z, then break them open to collect them.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Clipping container for HUD arrows - enforces boundaries without cutting off content */}
-      <div
-        className="fixed z-[190] pointer-events-none"
-        style={{
-          left: `${gameplayAreaLeft}px`,
-          top: `${gameplayAreaTop}px`,
-          width: `${viewportWidth}px`,
-          height: `${(VIRTUAL_HEIGHT - TOP_BAR_HEIGHT) * scale}px`,
-          overflow: 'hidden', // Clip any content extending beyond gameplay area
-        }}
-      >
-        {/* HUD arrows positioned within gameplay area */}
-        {shopBubbleVisible && !isAnyMenuOpen && !shopBubbleOnScreen && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              ...getArrowStyle(shopIsRight),
-              top: `${hudArrowY}px`,
-            }}
-          >
-            <div className="flex items-center gap-2 animate-pulse">
-              <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
-                {shopIsRight ? 'Commissary →' : '← Commissary'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {constructionBubbleVisible && !isAnyMenuOpen && !constructionBubbleOnScreen && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              ...getArrowStyle(constructionIsRight),
-              top: `${hudArrowY}px`,
-            }}
-          >
-            <div className="flex items-center gap-2 animate-pulse">
-              <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
-                {constructionIsRight ? 'Construction →' : '← Construction'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {mineBubbleVisible && !isAnyMenuOpen && !mineBubbleOnScreen && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              ...getArrowStyle(ropeIsRight),
-              top: `${hudArrowY}px`,
-            }}
-          >
-            <div className="flex items-center gap-2 animate-pulse">
-              <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
-                {ropeIsRight ? 'Mine →' : '← Mine'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {recyclerBubbleVisible && !isAnyMenuOpen && !recyclerBubbleOnScreen && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              ...getArrowStyle(recyclerIsRight),
-              top: `${hudArrowY}px`,
-            }}
-          >
-            <div className="flex items-center gap-2 animate-pulse">
-              <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
-                {recyclerIsRight ? 'Recycler →' : '← Recycler'}
-              </div>
-            </div>
-          </div>
-        )}
+      {/* Bottom buttons - reserved space, fade in */}
+      <div className={`flex justify-between items-center mt-3 pt-2 border-t border-stone-700/50 transition-opacity duration-300 ${shouldShowButton ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <button
+          onClick={onSkip}
+          className="text-stone-500 hover:text-stone-300 text-[10px] uppercase tracking-wider transition-colors"
+        >
+          Skip Tutorial
+        </button>
+        <button
+          onClick={onDismiss}
+          className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-4 py-1.5 rounded transition-colors flex items-center gap-2 text-xs"
+        >
+          {tutorialState.currentMessage.buttonText}
+          {!isMobile && <span className="text-[10px] opacity-70">[E]</span>}
+        </button>
       </div>
+    </div >
+          </div >
+        </div >
+      )}
 
-      {/* Timer Arrow */}
-      {tutorialState.highlightTimer && (
-        <div className={`absolute ${isMobile ? 'top-[4.5rem] right-12' : 'top-10 right-4'} z-[190] animate-bounce pointer-events-none`}>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(225deg)' }}>
-            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <div className="absolute top-10 -right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap">
-            Look! The timer!
+{/* Multiple Choice Dialog */ }
+{
+  tutorialState.currentStep === 'POST_SHOP_CHOICE' && tutorialState.showingChoice && !isShopOpen && (
+    <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4">
+      <div className="pointer-events-auto max-w-lg w-full">
+        <div className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
+          <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-black text-black uppercase tracking-wider">📖 Guide</span>
+          </div>
+
+          <p className="text-sm text-white font-medium leading-relaxed mt-1 mb-4">
+            What brings people to towns like this?
+          </p>
+
+          <div className="space-y-2">
+            <button
+              onClick={() => onSelectChoice?.('ROADS')}
+              className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 0
+                ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
+                : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
+                }`}
+            >
+              {selectedChoiceIndex === 0 && (
+                <span className="text-amber-400">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5V19L19 12L8 5Z" />
+                  </svg>
+                </span>
+              )}
+              Roads!
+            </button>
+            <button
+              onClick={() => onSelectChoice?.('ATTRACTIONS')}
+              className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 1
+                ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
+                : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
+                }`}
+            >
+              {selectedChoiceIndex === 1 && (
+                <span className="text-amber-400">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5V19L19 12L8 5Z" />
+                  </svg>
+                </span>
+              )}
+              Special attractions!
+            </button>
+            <button
+              onClick={() => onSelectChoice?.('ROBOTS')}
+              className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 2
+                ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
+                : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
+                }`}
+            >
+              {selectedChoiceIndex === 2 && (
+                <span className="text-amber-400">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5V19L19 12L8 5Z" />
+                  </svg>
+                </span>
+              )}
+              Robots!
+            </button>
+          </div>
+          <div className="mt-3 text-[10px] text-stone-400 text-center">
+            Use ↑↓ to select, [E] to choose
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  )
+}
+
+{/* Task/Hint Message - positioned at top, narrator style, non-dismissible for task steps */ }
+{
+  tutorialState.hintMessage && !isShopOpen && !isConstructionOpen && !isRecyclerOpen && !tutorialState.showingMessage && (
+    <div className="fixed inset-x-0 top-24 z-[195] flex justify-center pointer-events-none px-4 animate-in fade-in slide-in-from-top-2 duration-500">
+      {(() => {
+        const isTaskStep = tutorialState.currentStep === 'MINE_INTRO_9' || tutorialState.currentStep === 'MINE_COLLECT_WAIT';
+
+        // Apply mobile text substitutions to hint message
+        let displayText = tutorialState.hintMessage;
+        if (isMobile) {
+          displayText = displayText
+            .replace(/SPACEBAR/gi, 'the BLUE PICKAXE button')
+            .replace(/press Z/gi, 'press the RED FLAG button')
+            .replace(/Select a block/gi, 'Use the JOYSTICK to select a block');
+        }
+
+        return (
+          <div
+            className={`max-w-sm w-full ${isTaskStep ? '' : 'pointer-events-auto cursor-pointer'}`}
+            onClick={isTaskStep ? undefined : () => onDismissHint?.()}
+          >
+            {/* Narrator-style speech bubble */}
+            <div className="relative bg-stone-800/95 border-2 border-amber-400 rounded-xl shadow-2xl overflow-hidden">
+              {/* Character avatar hint */}
+              <div className="absolute -top-1 -left-1 w-8 h-8 rounded-full bg-amber-500 border-2 border-amber-300 flex items-center justify-center">
+                <span className="text-xs">📢</span>
+              </div>
+              <div className="pl-8 pr-3 py-3">
+                <p className="text-sm text-stone-100 font-medium leading-relaxed">
+                  {displayText}
+                </p>
+              </div>
+              {!isTaskStep && (
+                <div className="text-[9px] text-stone-500 text-right pr-2 pb-1">
+                  Tap to dismiss
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  )
+}
+
+{/* No Mines Warning - shows in recycler when player has no mines */ }
+{
+  tutorialState.noMinesToRecycle && tutorialState.currentStep === 'RECYCLER_INTRO' && isRecyclerOpen && (
+    <div className="fixed inset-x-0 bottom-24 z-[195] flex justify-center pointer-events-none px-4 animate-in fade-in duration-300">
+      <div className="max-w-md w-full">
+        <div className="relative bg-red-900/90 border border-red-500 rounded-lg shadow-lg p-3">
+          <p className="text-sm text-red-100 font-medium leading-relaxed">
+            ⚠️ You don't have any mines to recycle! Head back to the mine, flag suspected mines with Z, then break them open to collect them.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+{/* Clipping container for HUD arrows - enforces boundaries without cutting off content */ }
+<div
+  className="fixed z-[190] pointer-events-none"
+  style={{
+    left: `${gameplayAreaLeft}px`,
+    top: `${gameplayAreaTop}px`,
+    width: `${viewportWidth}px`,
+    height: `${(VIRTUAL_HEIGHT - TOP_BAR_HEIGHT) * scale}px`,
+    overflow: 'hidden', // Clip any content extending beyond gameplay area
+  }}
+>
+  {/* HUD arrows positioned within gameplay area */}
+  {shopBubbleVisible && !isAnyMenuOpen && !shopBubbleOnScreen && (
+    <div
+      className="absolute pointer-events-none"
+      style={{
+        ...getArrowStyle(shopIsRight),
+        top: `${hudArrowY}px`,
+      }}
+    >
+      <div className="flex items-center gap-2 animate-pulse">
+        <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
+          {shopIsRight ? 'Commissary →' : '← Commissary'}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {constructionBubbleVisible && !isAnyMenuOpen && !constructionBubbleOnScreen && (
+    <div
+      className="absolute pointer-events-none"
+      style={{
+        ...getArrowStyle(constructionIsRight),
+        top: `${hudArrowY}px`,
+      }}
+    >
+      <div className="flex items-center gap-2 animate-pulse">
+        <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
+          {constructionIsRight ? 'Construction →' : '← Construction'}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {mineBubbleVisible && !isAnyMenuOpen && !mineBubbleOnScreen && (
+    <div
+      className="absolute pointer-events-none"
+      style={{
+        ...getArrowStyle(ropeIsRight),
+        top: `${hudArrowY}px`,
+      }}
+    >
+      <div className="flex items-center gap-2 animate-pulse">
+        <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
+          {ropeIsRight ? 'Mine →' : '← Mine'}
+        </div>
+      </div>
+    </div>
+  )}
+
+  {recyclerBubbleVisible && !isAnyMenuOpen && !recyclerBubbleOnScreen && (
+    <div
+      className="absolute pointer-events-none"
+      style={{
+        ...getArrowStyle(recyclerIsRight),
+        top: `${hudArrowY}px`,
+      }}
+    >
+      <div className="flex items-center gap-2 animate-pulse">
+        <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
+          {recyclerIsRight ? 'Recycler →' : '← Recycler'}
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+
+{/* Timer Arrow */ }
+{
+  tutorialState.highlightTimer && (
+    <div className={`absolute ${isMobile ? 'top-[4.5rem] right-12' : 'top-10 right-4'} z-[190] animate-bounce pointer-events-none`}>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(225deg)' }}>
+        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <div className="absolute top-10 -right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap">
+        Look! The timer!
+      </div>
+    </div>
+  )
+}
 
     </>
   );
