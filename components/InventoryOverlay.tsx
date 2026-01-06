@@ -126,7 +126,11 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
           transform: 'translateY(-50%)'
         }}
       >
-        <span className="text-amber-400 text-2xl font-black drop-shadow-lg">▶</span>
+        <span className="text-amber-400 drop-shadow-lg">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5V19L19 12L8 5Z" />
+          </svg>
+        </span>
       </div>
 
       <div className="w-full max-w-4xl bg-slate-900 border-4 border-slate-600 shadow-2xl rounded-sm overflow-hidden flex flex-col h-[600px]">

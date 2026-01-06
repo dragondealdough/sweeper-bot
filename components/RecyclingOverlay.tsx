@@ -123,7 +123,11 @@ const RecyclingOverlay: React.FC<RecyclingOverlayProps> = ({ inventory, onRecycl
           transform: 'translateY(-50%)'
         }}
       >
-        <span className="text-lime-400 text-2xl font-black drop-shadow-lg">▶</span>
+        <span className="text-lime-400 drop-shadow-lg">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5V19L19 12L8 5Z" />
+          </svg>
+        </span>
       </div>
 
       <div className="w-full max-w-2xl bg-stone-900 border-x-4 sm:border-4 border-lime-600 shadow-[0_0_50px_rgba(101,163,13,0.3)] sm:rounded-sm overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[85vh]">

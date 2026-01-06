@@ -247,102 +247,113 @@ export const useMining = (
             ];
 
             if (tutorialState && mineIntroSteps.includes(tutorialState.currentStep) && onMineHit) {
+                // Trigger screen shake and sound effect via callback
                 onMineHit();
-                return; // Exit early - tutorial handles it, mine PRESERVED
-            }
 
-            // Unflagged mine - explosion! Remove the mine (it exploded)
-            newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, isMine: false };
-            // Update neighbor counts since the mine is gone
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    const ny = y + dy, nx = x + dx;
-                    if (ny >= 0 && ny < GRID_CONFIG.ROWS && nx >= 0 && nx < GRID_CONFIG.COLUMNS) {
-                        newGrid[ny][nx] = { ...newGrid[ny][nx], neighborMines: Math.max(0, newGrid[ny][nx].neighborMines - 1) };
-                    }
+                // Also trigger visual feedback directly if needed
+                const cameraShake = document.getElementById('camera-shake-layer');
+                if (cameraShake) {
+                    cameraShake.classList.add('animate-shake');
+                    setTimeout(() => cameraShake.classList.remove('animate-shake'), 500);
                 }
-            }
-            gridRef.current = newGrid;
-            setGrid(newGrid);
 
-            // Trigger visual effects for mine explosion
-            if (setScreenShake) {
-                setScreenShake(1); // Trigger screen shake
-                setTimeout(() => setScreenShake(0), 500); // Reset after 500ms
+                return;
             }
-            if (setPlayerHitFlash) {
-                setPlayerHitFlash(true); // Flash player red
-                setTimeout(() => setPlayerHitFlash(false), 500); // Reset after 500ms
-            }
+            return; // Exit early - tutorial handles it, mine PRESERVED
+        }
 
-            handlePlayerDeath();
-            return; // Exit early - death handled
-        } else {
-            // Normal tile (not flagged, not mine)
-            const floodFill = (tx: number, ty: number) => {
-                if (tx < 0 || tx >= GRID_CONFIG.COLUMNS || ty < 0 || ty >= GRID_CONFIG.ROWS || newGrid[ty][tx].isRevealed || newGrid[ty][tx].isMine) return;
-                newGrid[ty][tx].isRevealed = true;
-                if (newGrid[ty][tx].neighborMines === 0) {
-                    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) floodFill(tx + dx, ty + dy);
+        // Unflagged mine - explosion! Remove the mine (it exploded)
+        newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, isMine: false };
+        // Update neighbor counts since the mine is gone
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const ny = y + dy, nx = x + dx;
+                if (ny >= 0 && ny < GRID_CONFIG.ROWS && nx >= 0 && nx < GRID_CONFIG.COLUMNS) {
+                    newGrid[ny][nx] = { ...newGrid[ny][nx], neighborMines: Math.max(0, newGrid[ny][nx].neighborMines - 1) };
                 }
-            };
-            newGrid[y][x].isRevealed = true;
-            if (isInitial) {
-                // Drop rates - spawn as world items with gravity
-                const depthFactor = Math.floor(y / 5);
-                const stoneChance = 0.20 + (depthFactor * 0.01);  // 20% base, +1% per 50m
-                const gemChance = 0.10 + (depthFactor * 0.02);    // 10% base, +2% per 50m
-                const coalChance = 0.15 + (depthFactor * 0.025);  // 15% base, +2.5% per 50m
-                const rand = Math.random();
-                let dropType: ItemType | null = null;
-                if (rand < stoneChance) dropType = 'STONE';
-                else if (rand < stoneChance + gemChance) dropType = 'GEM';
-                else if (rand < stoneChance + gemChance + coalChance) dropType = 'COAL';
-                else if (Math.random() < 0.1) dropType = 'COIN';
-
-                if (dropType) {
-                    setWorldItems(prev => [...prev, {
-                        id: `drop-${Date.now()}-${Math.random()}`,
-                        x: x + 0.25,
-                        y,
-                        vy: 0,
-                        type: dropType
-                    }]);
-                }
-            }
-            if (newGrid[y][x].neighborMines === 0) {
-                for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dy !== 0 || dx !== 0) floodFill(x + dx, y + dy);
-            }
-
-            // Check if we're in mine tutorial and successfully revealed a tile - show number explanation
-            if (tutorialState && tutorialState.currentStep === 'MINE_INTRO_9' && onTileRevealed) {
-                onTileRevealed();
             }
         }
         gridRef.current = newGrid;
         setGrid(newGrid);
-        if (y > depth) setDepth(y);
-        if (y === GRID_CONFIG.ROWS - 1) setStatus(GameStatus.WON);
+
+        // Trigger visual effects for mine explosion
+        if (setScreenShake) {
+            setScreenShake(1); // Trigger screen shake
+            setTimeout(() => setScreenShake(0), 500); // Reset after 500ms
+        }
+        if (setPlayerHitFlash) {
+            setPlayerHitFlash(true); // Flash player red
+            setTimeout(() => setPlayerHitFlash(false), 500); // Reset after 500ms
+        }
+
+        handlePlayerDeath();
+        return; // Exit early - death handled
+    } else {
+        // Normal tile (not flagged, not mine)
+        const floodFill = (tx: number, ty: number) => {
+            if (tx < 0 || tx >= GRID_CONFIG.COLUMNS || ty < 0 || ty >= GRID_CONFIG.ROWS || newGrid[ty][tx].isRevealed || newGrid[ty][tx].isMine) return;
+            newGrid[ty][tx].isRevealed = true;
+            if (newGrid[ty][tx].neighborMines === 0) {
+                for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) floodFill(tx + dx, ty + dy);
+            }
+        };
+        newGrid[y][x].isRevealed = true;
+        if(isInitial) {
+            // Drop rates - spawn as world items with gravity
+            const depthFactor = Math.floor(y / 5);
+            const stoneChance = 0.20 + (depthFactor * 0.01);  // 20% base, +1% per 50m
+            const gemChance = 0.10 + (depthFactor * 0.02);    // 10% base, +2% per 50m
+            const coalChance = 0.15 + (depthFactor * 0.025);  // 15% base, +2.5% per 50m
+            const rand = Math.random();
+            let dropType: ItemType | null = null;
+            if (rand < stoneChance) dropType = 'STONE';
+            else if (rand < stoneChance + gemChance) dropType = 'GEM';
+            else if (rand < stoneChance + gemChance + coalChance) dropType = 'COAL';
+            else if (Math.random() < 0.1) dropType = 'COIN';
+
+            if (dropType) {
+                setWorldItems(prev => [...prev, {
+                    id: `drop-${Date.now()}-${Math.random()}`,
+                    x: x + 0.25,
+                    y,
+                    vy: 0,
+                    type: dropType
+                }]);
+            }
+        }
+            if(newGrid[y][x].neighborMines === 0) {
+            for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dy !== 0 || dx !== 0) floodFill(x + dx, y + dy);
+}
+
+// Check if we're in mine tutorial and successfully revealed a tile - show number explanation
+if (tutorialState && tutorialState.currentStep === 'MINE_INTRO_9' && onTileRevealed) {
+    onTileRevealed();
+}
+        }
+gridRef.current = newGrid;
+setGrid(newGrid);
+if (y > depth) setDepth(y);
+if (y === GRID_CONFIG.ROWS - 1) setStatus(GameStatus.WON);
     }, [setDepth, setStatus, setInventory, setMessage, handlePlayerDeath, setWorldItems, tutorialState, onMineHit, onTileRevealed, onMineCollected, setScreenShake, setPlayerHitFlash, onMineAttemptInterrupt]);
 
-    const handleFlagAction = useCallback((tx: number, ty: number, status: GameStatus, isMenuOpen: boolean) => {
-        if (status !== GameStatus.PLAYING || isMenuOpen || ty < 0) return;
-        setGrid(prev => {
-            const newGrid = prev.map(row => row.map(t => ({ ...t })));
-            if (!newGrid[ty][tx].isRevealed) {
-                const wasNotFlagged = newGrid[ty][tx].flag !== FlagType.MINE;
-                newGrid[ty][tx].flag = newGrid[ty][tx].flag === FlagType.MINE ? FlagType.NONE : FlagType.MINE;
+const handleFlagAction = useCallback((tx: number, ty: number, status: GameStatus, isMenuOpen: boolean) => {
+    if (status !== GameStatus.PLAYING || isMenuOpen || ty < 0) return;
+    setGrid(prev => {
+        const newGrid = prev.map(row => row.map(t => ({ ...t })));
+        if (!newGrid[ty][tx].isRevealed) {
+            const wasNotFlagged = newGrid[ty][tx].flag !== FlagType.MINE;
+            newGrid[ty][tx].flag = newGrid[ty][tx].flag === FlagType.MINE ? FlagType.NONE : FlagType.MINE;
 
-                // Call tutorial callback if tile was just flagged (not unflagged)
-                if (wasNotFlagged && newGrid[ty][tx].flag === FlagType.MINE && onTileFlagged) {
-                    onTileFlagged(tx, ty);
-                }
+            // Call tutorial callback if tile was just flagged (not unflagged)
+            if (wasNotFlagged && newGrid[ty][tx].flag === FlagType.MINE && onTileFlagged) {
+                onTileFlagged(tx, ty);
             }
-            gridRef.current = newGrid;
-            return newGrid;
-        });
-    }, [onTileFlagged]);
+        }
+        gridRef.current = newGrid;
+        return newGrid;
+    });
+}, [onTileFlagged]);
 
-    return { grid, setGrid, gridRef, initGrid, revealTileAt, handleFlagAction, selectedTarget, setSelectedTarget };
+return { grid, setGrid, gridRef, initGrid, revealTileAt, handleFlagAction, selectedTarget, setSelectedTarget };
 };
 

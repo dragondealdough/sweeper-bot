@@ -193,6 +193,22 @@ const renderTextWithBold = (text: string, isMobile: boolean) => {
     );
   }
 
+  // Check for "50 Stone and 10 Silver" (Amber highlight for materials)
+  const materialsPattern = /(50 Stone and 10 Silver)/i;
+  const materialsMatch = processedText.match(materialsPattern);
+  if (materialsMatch) {
+    const before = processedText.substring(0, materialsMatch.index);
+    const match = materialsMatch[0];
+    const after = processedText.substring((materialsMatch.index || 0) + match.length);
+    return (
+      <>
+        {before}
+        <strong className="font-bold text-amber-500">{match}</strong>
+        {after}
+      </>
+    );
+  }
+
   // Handle "wishing well"
   // Also highlight generic mobile terms if found
   const parts = processedText.split(/(wishing well|Blue Pickaxe Button|Red Flag Button|Green Button|D-Pad)/i);
@@ -535,7 +551,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                     : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
                     }`}
                 >
-                  {selectedChoiceIndex === 0 && <span className="text-amber-400">▶</span>}
+                  {selectedChoiceIndex === 0 && (
+                    <span className="text-amber-400">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5V19L19 12L8 5Z" />
+                      </svg>
+                    </span>
+                  )}
                   Roads!
                 </button>
                 <button
@@ -545,7 +567,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                     : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
                     }`}
                 >
-                  {selectedChoiceIndex === 1 && <span className="text-amber-400">▶</span>}
+                  {selectedChoiceIndex === 1 && (
+                    <span className="text-amber-400">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5V19L19 12L8 5Z" />
+                      </svg>
+                    </span>
+                  )}
                   Special attractions!
                 </button>
                 <button
@@ -555,7 +583,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                     : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
                     }`}
                 >
-                  {selectedChoiceIndex === 2 && <span className="text-amber-400">▶</span>}
+                  {selectedChoiceIndex === 2 && (
+                    <span className="text-amber-400">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5V19L19 12L8 5Z" />
+                      </svg>
+                    </span>
+                  )}
                   Robots!
                 </button>
               </div>
@@ -707,23 +741,17 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           style={{
             // Timer is in top bar: left-64 (16rem = 256px) + coins (~80px) + divider + gap
             // Approximate position: sidebar (256px) + coins area (~100px) + gap
-            // MUST apply scale to position because GameHUD is scaled relative to origin
-            left: `calc(${(256 + 120) * scale}px)`,
-            top: `${70 * scale}px`, // Just below the top bar (bar is ~60px + some padding)
-          }}
-        >
-          <div className="flex flex-col items-center">
-            <div className="text-amber-500 mb-0.5" style={{ transform: `scale(${scale})` }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="drop-shadow-lg">
-                <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Timer Arrow */}
+          {tutorialState.highlightTimer && (
+            <div className={`absolute ${isMobile ? 'top-[4.5rem] right-12' : 'top-10 right-4'} z-[190] animate-bounce pointer-events-none`}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(225deg)' }}>
+                <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
+              <div className="absolute top-10 -right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap">
+                Look! The timer!
+              </div>
             </div>
-            <div className="bg-amber-500 text-black font-bold px-3 py-1 rounded-lg shadow-lg text-xs uppercase tracking-wider whitespace-nowrap" style={{ transform: `scale(${scale})` }}>
-              Look! The Timer!
-            </div>
-          </div>
-        </div>
-      )}
+          )}
 
     </>
   );

@@ -116,7 +116,7 @@ export const useKeyboard = (params: KeyboardParams) => {
         }
 
         const p = playerRef.current;
-        const nearRope = Math.abs(p.x - ROPE_X) < 0.5;
+        const nearRope = Math.abs(p.x - ROPE_X) < 1.0;
         const atOverworldRope = nearRope && Math.abs(p.y - OVERWORLD_FLOOR_Y) < 0.5;
         const onRopeInMine = nearRope && p.y <= ropeLength && p.y > OVERWORLD_FLOOR_Y && p.y >= 0;
 
