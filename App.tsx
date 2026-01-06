@@ -447,6 +447,21 @@ const App: React.FC = () => {
     }
   }, [state.dayCount, state.status, performAutoSave]);
 
+  // Enforce Landscape Mode Globally (including Start Screen)
+  if (isMobile && !isLandscape) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-stone-950 flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
+        <div className="text-6xl mb-6 animate-pulse">📱</div>
+        <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">Rotate Your Device</h2>
+        <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed">
+          Sweeper Bot requires a wider view to detect deep mines safely.
+          <br /><br />
+          Please rotate to <span className="text-white font-bold">Landscape Mode</span>.
+        </p>
+      </div>
+    );
+  }
+
   if (state.status === GameStatus.START) return (
     <>
       <MainMenu
@@ -633,18 +648,7 @@ const App: React.FC = () => {
       {/* Mobile Touch Controls */}
       <TouchControls visible={isMobile} opacity={settings.controlOpacity / 100} />
 
-      {/* Landscape Enforcement Overlay */}
-      {isMobile && !isLandscape && (
-        <div className="fixed inset-0 z-[200] bg-stone-950 flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
-          <div className="text-6xl mb-6 animate-pulse">📱</div>
-          <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">Rotate Your Device</h2>
-          <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed">
-            Sweeper Bot requires a wider view to detect deep mines safely.
-            <br /><br />
-            Please rotate to <span className="text-white font-bold">Landscape Mode</span>.
-          </p>
-        </div>
-      )}
+
 
     </div>
   );
