@@ -263,8 +263,12 @@ export const useMining = (
             }
 
             // Check if we're in mine intro tutorial - if so, don't kill player, trigger tutorial dialogue instead
-            const mineIntroSteps: string[] = ['MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
-                'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9'];
+            // Extended list to cover all early mine tutorial steps to prevent death before learning to flag
+            const mineIntroSteps: string[] = [
+                'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
+                'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9',
+                'MINE_EXPLAIN_NUMBERS', 'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECT_WAIT'
+            ];
 
             if (tutorialState && mineIntroSteps.includes(tutorialState.currentStep) && onMineHit) {
                 onMineHit();
