@@ -1114,6 +1114,7 @@ export const useTutorial = () => {
           showingMessage: true,
           currentMessage: explainNumbers,
           hintMessage: null, // Clear task hint
+          taskMinimized: false, // Ensure confirmation message is visible
         };
       }
       return prev;
@@ -1135,6 +1136,7 @@ export const useTutorial = () => {
           foundMinePosition: null,
           waitingForFlag: false,
           waitingForDisarm: false,
+          taskMinimized: false, // Ensure message is visible
         };
       }
       return prev;
@@ -1341,6 +1343,7 @@ export const useTutorial = () => {
         },
         waitingForFlag: false,
         waitingForDisarm: true,
+        taskMinimized: false, // Ensure message is visible
       };
     });
   }, []);
