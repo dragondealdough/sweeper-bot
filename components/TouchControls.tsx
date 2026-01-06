@@ -93,10 +93,10 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7 })
         <div className="fixed inset-0 pointer-events-none z-[100] flex flex-col justify-end select-none touch-none overflow-hidden" style={{ opacity }}>
 
             {/* Controls Container - Pushed properly to edges for landscape ergonomics */}
-            <div className="flex justify-between items-end w-full h-full pb-8 px-8 pointer-events-auto">
+            <div className="flex justify-between items-end w-full h-full pointer-events-auto">
 
                 {/* LEFT: Virtual Joystick */}
-                <div className="relative w-1/3 h-full flex items-end justify-start pb-4 pl-4">
+                <div className="relative w-1/3 h-full flex items-end justify-start pb-6 pl-6">
                     <VirtualJoystick size={150} className="opacity-80 hover:opacity-100 transition-opacity" />
                 </div>
 
