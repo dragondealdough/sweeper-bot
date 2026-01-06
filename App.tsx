@@ -57,6 +57,10 @@ const App: React.FC = () => {
   const VIRTUAL_HEIGHT = 800;
 
   // Responsive scaling - calculates scale factor based on viewport size
+  // Enhanced "Compact Mode" check: Treat as mobile layout if strict isMobile is true OR screen width is small (< 1024px)
+  // This ensures the layout adapts (hides sidebar, full width) even if touch detection fails or on small desktop windows
+  const isCompact = isMobile || (typeof window !== 'undefined' && window.innerWidth < 1024);
+
   useEffect(() => {
     const calculateScale = () => {
       const padding = 20; // Small padding around the game
@@ -524,10 +528,10 @@ const App: React.FC = () => {
       >
         <div className="flex w-full h-full">
           <div className="flex-1 relative">
-            <GameHUD coins={state.coins} dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} formatTime={formatTime} depth={state.depth} inventory={state.inventory} setIsInventoryOpen={state.setIsInventoryOpen} message={state.message} flashTimer={tutorial.tutorialState.flashTimer} highlightDisarmKit={tutorial.tutorialState.highlightDisarmKit} isMobile={isMobile} taskMinimized={tutorial.tutorialState.taskMinimized} onToggleTaskMinimized={tutorial.toggleTaskMinimized} />
+            <GameHUD coins={state.coins} dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} formatTime={formatTime} depth={state.depth} inventory={state.inventory} setIsInventoryOpen={state.setIsInventoryOpen} message={state.message} flashTimer={tutorial.tutorialState.flashTimer} highlightDisarmKit={tutorial.tutorialState.highlightDisarmKit} isMobile={isCompact} taskMinimized={tutorial.tutorialState.taskMinimized} onToggleTaskMinimized={tutorial.toggleTaskMinimized} />
 
             {/* Game content area - positioned after sidebar, extends to screen edge to eliminate right border */}
-            <div ref={viewportRef} className={`absolute ${isMobile ? 'left-0' : 'left-64'} top-0 bottom-0 pt-20 overflow-hidden bg-black`} style={{ right: 0 }}>
+            <div ref={viewportRef} className={`absolute ${isCompact ? 'left-0' : 'left-64'} top-0 bottom-0 pt-20 overflow-hidden bg-black`} style={{ right: 0 }}>
               {/* Rendering: Applies calculated X and Y as a negative translation */}
               <div
                 className="w-full h-full will-change-transform"
