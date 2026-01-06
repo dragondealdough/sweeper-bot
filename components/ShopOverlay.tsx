@@ -354,7 +354,9 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
             transform: 'translateY(-50%)'
           }}
         >
-          <span className="text-amber-400 text-2xl font-black drop-shadow-lg">▶</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="drop-shadow-lg text-amber-400">
+            <path d="M5 3L19 12L5 21V3Z" fill="currentColor" stroke="black" strokeWidth="1.5" strokeLinejoin="round" />
+          </svg>
         </div>
       )}
 
@@ -500,7 +502,9 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
               onClick={() => scrollBy(-100)}
               className={`flex-1 flex items-center justify-center text-amber-500 hover:bg-slate-700 transition-colors border-b border-slate-700 ${showScrollArrows.up ? 'opacity-100' : 'opacity-30'}`}
             >
-              <span className="text-2xl font-black">▲</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5L5 15H19L12 5Z" fill="currentColor" />
+              </svg>
             </button>
 
             {/* Visual Track graphic */}
@@ -513,7 +517,9 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
               onClick={() => scrollBy(100)}
               className={`flex-1 flex items-center justify-center text-amber-500 hover:bg-slate-700 transition-colors border-t border-slate-700 ${showScrollArrows.down ? 'opacity-100' : 'opacity-30'}`}
             >
-              <span className="text-2xl font-black">▼</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 19L19 9H5L12 19Z" fill="currentColor" />
+              </svg>
             </button>
           </div>
 

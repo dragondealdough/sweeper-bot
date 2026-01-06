@@ -681,7 +681,11 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           }}
         >
           <div className="flex flex-col items-center">
-            <div className="text-amber-500 text-3xl mb-0.5" style={{ transform: `scale(${scale})` }}>↑</div>
+            <div className="text-amber-500 mb-0.5" style={{ transform: `scale(${scale})` }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="drop-shadow-lg">
+                <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
             <div className="bg-amber-500 text-black font-bold px-3 py-1 rounded-lg shadow-lg text-xs uppercase tracking-wider whitespace-nowrap" style={{ transform: `scale(${scale})` }}>
               Look! The Timer!
             </div>

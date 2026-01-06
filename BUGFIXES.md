@@ -57,6 +57,18 @@
 
 ---
 
+### Mobile Black Screen on Launch
+**Date:** Jan 6, 2026
+**Reported:** Game displayed a black screen after clicking "Begin" on mobile
+**Cause:** 
+1. **Missing CSS:** Production build failed to generate CSS because the project relied on a developer-only CDN script (`cdn.tailwindcss.com`) which doesn't work with bundled JavaScript.
+2. **Runtime Crash:** `ReferenceError: handleContextMenu is not defined` crashed the app immediately upon rendering the main game view.
+**Fix:** 
+1. Installed `tailwindcss`, `postcss`, `autoprefixer` and configured the build pipeline to generate proper CSS.
+2. Defined the missing `handleContextMenu` function in `App.tsx` to prevent the crash.
+
+---
+
 ## Known Issues / TODO
 
 - [ ] Pause menu not yet implemented
