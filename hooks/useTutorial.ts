@@ -176,6 +176,7 @@ export interface TutorialState {
   foundMinePosition?: { x: number; y: number } | null;
   waitingForFlag?: boolean;
   waitingForDisarm?: boolean;
+  taskMinimized?: boolean; // Whether task popup is minimized to HUD
 }
 
 export const useTutorial = () => {
@@ -1181,6 +1182,22 @@ export const useTutorial = () => {
     }));
   }, []);
 
+  // Toggle task popup minimized state
+  const toggleTaskMinimized = useCallback(() => {
+    setTutorialState(prev => ({
+      ...prev,
+      taskMinimized: !prev.taskMinimized,
+    }));
+  }, []);
+
+  // Set task minimized state directly
+  const setTaskMinimized = useCallback((minimized: boolean) => {
+    setTutorialState(prev => ({
+      ...prev,
+      taskMinimized: minimized,
+    }));
+  }, []);
+
   // Called when player returns to overworld during mine tutorial
   const onPlayerReturnedToOverworld = useCallback(() => {
     setTutorialState(prev => {
@@ -1346,6 +1363,8 @@ export const useTutorial = () => {
     completeTutorial,
     skipTutorial,
     dismissHint,
+    toggleTaskMinimized,
+    setTaskMinimized,
     onPlayerReturnedToOverworld,
     checkRecyclerMines,
     skipToTutorialPhase,

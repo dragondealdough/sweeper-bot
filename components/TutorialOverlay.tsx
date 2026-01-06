@@ -183,6 +183,7 @@ interface TutorialOverlayProps {
   onDismiss: () => void;
   onSkip: () => void;
   onDismissHint?: () => void;
+  onToggleTaskMinimized?: () => void;
   onSelectChoice?: (choice: 'ROADS' | 'ATTRACTIONS' | 'ROBOTS') => void;
   SHOP_X: number;
   CONSTRUCTION_X: number;
@@ -203,6 +204,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   onDismiss,
   onSkip,
   onDismissHint,
+  onToggleTaskMinimized,
   onSelectChoice,
   SHOP_X,
   CONSTRUCTION_X,
@@ -423,18 +425,42 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       {showBackdrop && (
         <div className="fixed inset-0 bg-black/40 z-[199] pointer-events-none animate-in fade-in duration-500" />
       )}
+
+      {/* Minimized Task HUD Indicator - shows when task is minimized */}
+      {isTaskStep && tutorialState.taskMinimized && tutorialState.showingMessage && onToggleTaskMinimized && (
+        <button
+          onClick={onToggleTaskMinimized}
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-red-500 hover:bg-red-400 text-black font-black px-3 py-1.5 rounded-full shadow-lg border-2 border-red-300 animate-pulse transition-all hover:scale-105 flex items-center gap-1"
+          title="Show task"
+        >
+          <span className="text-sm">❗</span>
+          <span className="text-xs uppercase tracking-wider">Task</span>
+        </button>
+      )}
       {/* Message Dialog - positioned at bottom normally, but at TOP for task steps to avoid obscuring gameplay */}
-      {tutorialState.showingMessage && tutorialState.currentMessage && !isShopOpen && !isConstructionOpen && (
-        <div className={`fixed inset-x-0 z-[200] flex justify-center pointer-events-none px-4 ${isTaskStep ? 'top-4' : 'bottom-8'}`}>
+      {/* Hide if task is minimized */}
+      {tutorialState.showingMessage && tutorialState.currentMessage && !isShopOpen && !isConstructionOpen && !tutorialState.taskMinimized && (
+        <div className={`fixed inset-x-0 z-[200] flex justify-center pointer-events-none px-4 ${isTaskStep ? 'top-4' : 'bottom-8'} ${isTaskStep ? 'animate-in slide-in-from-top-4' : 'animate-in fade-in'} duration-300`}>
           <div className="pointer-events-auto max-w-lg w-full">
             {/* Speech bubble */}
             <div className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
-              {/* Character indicator */}
-              <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
+              {/* Character indicator - shows "❗ Task" for task steps, "📖 Guide" otherwise */}
+              <div className={`absolute -top-2.5 left-4 px-2 py-0.5 rounded-full ${isTaskStep ? 'bg-red-500' : 'bg-amber-500'}`}>
                 <span className="text-[10px] font-black text-black uppercase tracking-wider">
-                  {tutorialState.currentMessage.character === 'narrator' ? '📖 Guide' : '🤖 You'}
+                  {isTaskStep ? '❗ Task' : (tutorialState.currentMessage.character === 'narrator' ? '📖 Guide' : '🤖 You')}
                 </span>
               </div>
+
+              {/* Minimize button for task steps */}
+              {isTaskStep && onToggleTaskMinimized && (
+                <button
+                  onClick={onToggleTaskMinimized}
+                  className="absolute -top-2.5 right-4 bg-stone-700 hover:bg-stone-600 px-2 py-0.5 rounded-full transition-colors"
+                  title="Minimize task"
+                >
+                  <span className="text-[10px] font-bold text-white">−</span>
+                </button>
+              )}
 
               {/* Message text with typing effect */}
               <p className="text-sm text-white font-medium leading-relaxed mt-1 min-h-[3rem]">

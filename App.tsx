@@ -552,6 +552,7 @@ const App: React.FC = () => {
           onSkip={() => tutorial.skipTutorial(() => state.setInventory(inv => ({ ...inv, hasPickaxe: true })))}
           onSelectChoice={tutorial.selectPostShopChoice}
           onDismissHint={tutorial.dismissHint}
+          onToggleTaskMinimized={tutorial.toggleTaskMinimized}
           SHOP_X={SHOP_X}
           CONSTRUCTION_X={CONSTRUCTION_X}
           ROPE_X={ROPE_X}
