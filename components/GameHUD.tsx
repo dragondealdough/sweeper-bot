@@ -55,6 +55,16 @@ const GameHUD: React.FC<GameHUDProps> = ({
                     {isMobile && (
                         <>
                             <div className="h-4 w-px bg-stone-700" />
+                            <div className="flex items-center gap-1.5 px-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" fill="#ef4444" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <line x1="4" y1="22" x2="4" y2="15" stroke="#78350f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                <span className={`text-sm font-bold font-mono ${inventory.disarmCharges === 0 ? 'text-red-500 animate-pulse' : 'text-stone-300'}`}>
+                                    {inventory.disarmCharges}/3
+                                </span>
+                            </div>
+                            <div className="h-4 w-px bg-stone-700" />
                             <button
                                 onClick={() => setIsInventoryOpen(true)}
                                 className="bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold px-3 py-1 rounded text-xs uppercase border border-stone-700"
