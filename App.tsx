@@ -178,6 +178,17 @@ const App: React.FC = () => {
     const startPos = { x: HOUSE_X, y: OVERWORLD_FLOOR_Y, vx: 0, vy: 0, facing: Direction.DOWN, isClimbing: false };
     state.playerRef.current = startPos;
     state.setPlayer(startPos);
+
+    // Initialize camera to center on player's starting position
+    // Use a rough estimate for initial centering (will be refined by update loop)
+    const initialCamX = (startPos.x * GRID_CONFIG.TILE_SIZE) + (GRID_CONFIG.TILE_SIZE / 2) - (VIRTUAL_WIDTH / 2);
+    const initialCamY = (startPos.y * GRID_CONFIG.TILE_SIZE) - (VIRTUAL_HEIGHT / 2);
+    state.cameraRef.current = { x: initialCamX, y: initialCamY };
+    state.setCamera({ x: initialCamX, y: initialCamY });
+
+    // Reset mine mode ref to false (we're in overworld)
+    isMineModeRef.current = false;
+
     state.setStatus(GameStatus.PLAYING);
     state.setDepth(0);
     state.setCoins(0);
