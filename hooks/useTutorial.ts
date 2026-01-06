@@ -542,12 +542,12 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_INTRO_9') {
-          // Hide message, wait for player to mine (tutorial stays active)
+          // Hide dialogue, show persistent task hint, wait for player to mine
           return {
             ...prev,
             showingMessage: false,
             currentMessage: null,
-            // Keep currentStep as MINE_INTRO_9 and isActive as true
+            hintMessage: "⛏️ TASK: Select a block and press SPACEBAR to mine it!",
           };
         }
 
@@ -593,14 +593,13 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_COLLECT_2') {
-          // Transition to wait step, but show persistent guidance immediately
+          // Transition to wait step, show persistent task hint
           return {
             ...prev,
             currentStep: 'MINE_COLLECT_WAIT',
             showingMessage: false,
             currentMessage: null,
-            // Show persistent hint immediately so user knows what to do
-            hintMessage: "💡 Task: Use the arrow keys to select a tile, 'Z' to flag it, and SPACEBAR to disarm it!",
+            hintMessage: "🚩 TASK: Press Z to flag a suspected mine, then SPACEBAR to collect it!",
           };
         }
 
@@ -1122,6 +1121,7 @@ export const useTutorial = () => {
           currentStep: 'MINE_EXPLAIN_NUMBERS',
           showingMessage: true,
           currentMessage: explainNumbers,
+          hintMessage: null, // Clear task hint
         };
       }
       return prev;
@@ -1130,14 +1130,15 @@ export const useTutorial = () => {
 
   const onMineCollected = useCallback(() => {
     setTutorialState(prev => {
-      // If we're at MINE_COLLECT_2 and a mine was collected, show success message
-      if (prev.currentStep === 'MINE_COLLECT_2') {
+      // If we're at MINE_COLLECT_WAIT (or MINE_COLLECT_2) and a mine was collected, show success message
+      if (prev.currentStep === 'MINE_COLLECT_WAIT' || prev.currentStep === 'MINE_COLLECT_2') {
         const mineCollected = TUTORIAL_MESSAGES['MINE_COLLECTED'];
         return {
           ...prev,
           currentStep: 'MINE_COLLECTED',
           showingMessage: true,
           currentMessage: mineCollected,
+          hintMessage: null, // Clear task hint
           // Clear guided states
           foundMinePosition: null,
           waitingForFlag: false,

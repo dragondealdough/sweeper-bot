@@ -515,22 +515,30 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         </div>
       )}
 
-      {/* Hint Message - subtle reminder when player is stuck */}
+      {/* Task/Hint Message - persistent reminder for task steps */}
       {tutorialState.hintMessage && !isShopOpen && !isConstructionOpen && !isRecyclerOpen && (
         <div className="fixed inset-x-0 bottom-8 z-[195] flex justify-center pointer-events-none px-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div
-            className="pointer-events-auto max-w-md w-full cursor-pointer"
-            onClick={() => onDismissHint?.()}
-          >
-            <div className="relative bg-amber-900/90 border border-amber-600 rounded-lg shadow-lg p-3">
-              <p className="text-sm text-amber-100 font-medium leading-relaxed">
-                {tutorialState.hintMessage}
-              </p>
-              <div className="text-[9px] text-amber-400/70 mt-1 text-right">
-                Click to dismiss
+          {/* Task steps (MINE_INTRO_9, MINE_COLLECT_WAIT) are NOT dismissible */}
+          {(() => {
+            const isTaskStep = tutorialState.currentStep === 'MINE_INTRO_9' || tutorialState.currentStep === 'MINE_COLLECT_WAIT';
+            return (
+              <div
+                className={`max-w-md w-full ${isTaskStep ? '' : 'pointer-events-auto cursor-pointer'}`}
+                onClick={isTaskStep ? undefined : () => onDismissHint?.()}
+              >
+                <div className="relative bg-amber-900/95 border-2 border-amber-500 rounded-lg shadow-xl p-4">
+                  <p className="text-base text-amber-100 font-bold leading-relaxed text-center">
+                    {tutorialState.hintMessage}
+                  </p>
+                  {!isTaskStep && (
+                    <div className="text-[9px] text-amber-400/70 mt-1 text-right">
+                      Click to dismiss
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            );
+          })()}
         </div>
       )}
 
