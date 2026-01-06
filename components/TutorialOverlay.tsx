@@ -423,9 +423,9 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       {showBackdrop && (
         <div className="fixed inset-0 bg-black/40 z-[199] pointer-events-none animate-in fade-in duration-500" />
       )}
-      {/* Message Dialog - center-bottom position (don't show when shop/construction is open - overlays handle that) */}
+      {/* Message Dialog - positioned at bottom normally, but at TOP for task steps to avoid obscuring gameplay */}
       {tutorialState.showingMessage && tutorialState.currentMessage && !isShopOpen && !isConstructionOpen && (
-        <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4">
+        <div className={`fixed inset-x-0 z-[200] flex justify-center pointer-events-none px-4 ${isTaskStep ? 'top-4' : 'bottom-8'}`}>
           <div className="pointer-events-auto max-w-lg w-full">
             {/* Speech bubble */}
             <div className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
