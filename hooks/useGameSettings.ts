@@ -6,6 +6,7 @@ export interface GameSettings {
     musicVolume: number;
     screenShake: boolean;
     particleEffects: boolean;
+    controlOpacity: number;
 }
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -14,6 +15,7 @@ const DEFAULT_SETTINGS: GameSettings = {
     musicVolume: 70,
     screenShake: true,
     particleEffects: true,
+    controlOpacity: 70,
 };
 
 const SETTINGS_KEY = 'sweeper_bot_settings';

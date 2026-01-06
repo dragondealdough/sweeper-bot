@@ -26,6 +26,8 @@ interface MiningSectionProps {
   prompts: PromptState;
   playerHitFlash?: boolean;
   foundMinePosition?: { x: number; y: number } | null;
+  selectedTarget?: { x: number; y: number } | null;
+  onTileClick?: (x: number, y: number) => void;
 }
 
 const MiningSection: React.FC<MiningSectionProps> = ({
@@ -38,6 +40,8 @@ const MiningSection: React.FC<MiningSectionProps> = ({
   playerHitFlash = false,
   prompts,
   foundMinePosition,
+  selectedTarget,
+  onTileClick,
 }) => {
   return (
     <>
@@ -56,6 +60,9 @@ const MiningSection: React.FC<MiningSectionProps> = ({
               key={`${x}-${y}`}
               tile={tile}
               isTargeted={currentTarget.x === x && currentTarget.y === y && player.y >= 0}
+              isSelected={selectedTarget?.x === x && selectedTarget?.y === y}
+              isInRange={Math.abs(x - player.x) < 1.8 && Math.abs(y - player.y) < 1.8}
+              onClick={() => onTileClick && onTileClick(x, y)}
               isSafetyOn={false}
               isHighlighted={foundMinePosition?.x === x && foundMinePosition?.y === y}
             />

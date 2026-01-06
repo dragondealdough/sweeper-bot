@@ -241,6 +241,46 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleDevToolsKey);
   }, [state.status]);
 
+  // Tap-to-Mine Logic
+  const handleTileInteraction = useCallback((x: number, y: number) => {
+    // Only valid for mine tiles
+    if (y < 0) return;
+
+    // Check basic adjacency range (within ~1.5 tiles Chebyshev distance for diagonals or Manhattan for strict)
+    // Relaxed range for mobile gameplay feel
+    const dx = Math.abs(x - state.player.x);
+    const dy = Math.abs(y - state.player.y);
+    const inRange = dx < 1.8 && dy < 1.8;
+
+    // If tapping the already selected target...
+    if (mining.selectedTarget?.x === x && mining.selectedTarget?.y === y) {
+      if (inRange) {
+        // Confirm Mine
+        mining.revealTileAt(x, y, state.inventory, state.depth);
+        mining.setSelectedTarget(null);
+        // Play dig sound? (implicitly handled by reveal logic or listener?)
+        // Haptic feedback
+        if (navigator.vibrate) navigator.vibrate(20);
+      } else {
+        // Out of range feedback - shake selection?
+        // Just keep selected.
+        if (navigator.vibrate) navigator.vibrate(50);
+      }
+    } else {
+      // Select new target
+      mining.setSelectedTarget({ x, y });
+
+      // Clear selection if tapping a revealed tile?
+      // Check grid state directly
+      if (mining.grid[y] && mining.grid[y][x] && mining.grid[y][x].isRevealed) {
+        // If revealed, maybe just ignore or clear?
+        // Allow selecting revealed tiles? Maybe to read info? nothing to read really.
+        // Better: Only select unrevealed tiles.
+        // Unless it's a revealed tile with an item?
+      }
+    }
+  }, [state.player.x, state.player.y, mining.selectedTarget, mining.revealTileAt, state.inventory, state.depth, mining.grid]);
+
   const update = useCallback(() => {
     const delta = 16.66;
     updateTimers({
@@ -461,6 +501,8 @@ const App: React.FC = () => {
                       canSleep: state.timeRef.current <= EVENING_THRESHOLD_MS
                     }}
                     foundMinePosition={tutorial.tutorialState.foundMinePosition}
+                    selectedTarget={mining.selectedTarget}
+                    onTileClick={handleTileInteraction}
                   />
                 </div>
               </div>
@@ -549,7 +591,7 @@ const App: React.FC = () => {
       />
 
       {/* Mobile Touch Controls */}
-      <TouchControls visible={isMobile} />
+      <TouchControls visible={isMobile} opacity={settings.controlOpacity / 100} />
 
       {/* Landscape Enforcement Overlay */}
       {isMobile && !isLandscape && (

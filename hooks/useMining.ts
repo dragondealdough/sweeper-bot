@@ -25,6 +25,7 @@ export const useMining = (
 ) => {
     const [grid, setGrid] = useState<TileState[][]>([]);
     const gridRef = useRef<TileState[][]>([]);
+    const [selectedTarget, setSelectedTarget] = useState<{ x: number, y: number } | null>(null);
 
     const initGrid = useCallback(() => {
         const newGrid: TileState[][] = [];
@@ -338,6 +339,6 @@ export const useMining = (
         });
     }, [onTileFlagged]);
 
-    return { grid, setGrid, gridRef, initGrid, revealTileAt, handleFlagAction };
+    return { grid, setGrid, gridRef, initGrid, revealTileAt, handleFlagAction, selectedTarget, setSelectedTarget };
 };
 

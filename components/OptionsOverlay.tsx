@@ -151,6 +151,16 @@ const OptionsOverlay: React.FC<OptionsOverlayProps> = ({
                             <ControlRow action="Flag Mine" keys="Z / X" />
                             <ControlRow action="Inventory" keys="I" />
                             <ControlRow action="Jump" keys="W / Up Arrow" />
+
+                            <div className="mt-6 pt-6 border-t border-stone-800">
+                                <h3 className="text-stone-400 text-xs uppercase tracking-widest mb-4">Touch Controls</h3>
+                                <VolumeSlider
+                                    label="Button Opacity"
+                                    value={settings.controlOpacity}
+                                    onChange={(v) => onUpdateSetting('controlOpacity', Math.max(10, v))}
+                                />
+                                <p className="text-stone-600 text-xs italic">Minimum visibility is 10%</p>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -83,13 +83,14 @@ const TouchButton: React.FC<TouchButtonProps> = ({
 
 interface TouchControlsProps {
     visible: boolean;
+    opacity?: number;
 }
 
-const TouchControls: React.FC<TouchControlsProps> = ({ visible }) => {
+const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7 }) => {
     if (!visible) return null;
 
     return (
-        <div className="fixed inset-0 pointer-events-none z-[100] flex flex-col justify-end select-none touch-none overflow-hidden">
+        <div className="fixed inset-0 pointer-events-none z-[100] flex flex-col justify-end select-none touch-none overflow-hidden" style={{ opacity }}>
 
             {/* Controls Container - Pushed properly to edges for landscape ergonomics */}
             <div className="flex justify-between items-end w-full h-full pb-8 px-8 pointer-events-auto">

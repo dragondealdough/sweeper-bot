@@ -8,9 +8,12 @@ interface TileProps {
   isTargeted: boolean;
   isSafetyOn: boolean;
   isHighlighted?: boolean;
+  isSelected?: boolean;
+  isInRange?: boolean;
+  onClick?: () => void;
 }
 
-const Tile: React.FC<TileProps> = ({ tile, isTargeted, isHighlighted }) => {
+const Tile: React.FC<TileProps> = ({ tile, isTargeted, isHighlighted, isSelected, isInRange, onClick }) => {
   const { isRevealed, flag, neighborMines, isMine, item } = tile;
 
   let content: React.ReactNode = null;
@@ -65,6 +68,7 @@ const Tile: React.FC<TileProps> = ({ tile, isTargeted, isHighlighted }) => {
 
   return (
     <div
+      onClick={onClick}
       style={{
         width: GRID_CONFIG.TILE_SIZE,
         height: GRID_CONFIG.TILE_SIZE,
@@ -72,15 +76,25 @@ const Tile: React.FC<TileProps> = ({ tile, isTargeted, isHighlighted }) => {
       }}
       className={`
         relative flex items-center justify-center border-[0.5px] border-black/10
-        transition-all duration-150
+        transition-all duration-150 cursor-pointer
         ${!isRevealed && !item ? 'shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)] hover:brightness-110' : ''}
       `}
     >
       {isHighlighted && !isRevealed && (
         <div className="absolute inset-0 border-[3px] border-red-500 z-30 animate-pulse pointer-events-none rounded-sm shadow-[0_0_15px_rgba(239,68,68,0.6)]" />
       )}
-      {isTargeted && (
+      {/* Keyboard Target - Dashed */}
+      {isTargeted && !isSelected && (
         <div className="absolute inset-0 border-[3px] border-dashed border-yellow-400/80 z-20 animate-pulse pointer-events-none rounded-sm shadow-[0_0_10px_rgba(250,204,21,0.5)]" />
+      )}
+      {/* Tap Selection - Solid, Brightness depends on Range */}
+      {isSelected && (
+        <div className={`absolute inset-0 border-[3px] z-20 pointer-events-none rounded-sm transition-all duration-300
+          ${isInRange
+            ? 'border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.9)] animate-pulse'
+            : 'border-white/30 shadow-[0_0_5px_rgba(255,255,255,0.2)]'
+          }
+        `} />
       )}
       {!isRevealed && !item && (
         <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle,rgba(255,255,255,0.8)_1px,transparent_1px)] bg-[size:10px_10px]" />
