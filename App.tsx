@@ -318,29 +318,28 @@ const App: React.FC = () => {
     });
 
     // --- CAMERA LOGIC ---
-    // Calculate the actual visible viewport in game units
-    // viewportRef gives us the container size, but when scaled, we see less of it
-    const containerWidth = viewportRef.current?.clientWidth || (VIRTUAL_WIDTH - 256);
-    const containerHeight = viewportRef.current?.clientHeight || VIRTUAL_HEIGHT;
     const currentScale = scaleRef.current || 1;
 
-    // Actual visible area in game units = container size (already game units, no division needed)
-    // But when zoomed in (scale > 1), the container is visually larger than the screen
-    // So visible game units = screen pixels / scale
-    // However, the container is INSIDE the scaled element, so its reported width is correct for camera math
-    const visibleWidth = containerWidth;
-    const visibleHeight = containerHeight;
+    // Calculate the TRUE visible viewport in game units
+    // The game container is scaled, so when zoomed in (scale > 1), it overflows the screen
+    // What's actually visible on screen:
+    // - Screen pixels for game area = window.innerWidth - (sidebar on screen)
+    // - Sidebar on screen = 256 * scale (it's inside the scaled container)
+    // - Visible game units = screen pixels / scale
+    // Simplified: visibleWidth = (window.innerWidth / scale) - 256
+    const SIDEBAR_WIDTH = 256;
+    const visibleWidth = Math.max(200, (window.innerWidth / currentScale) - SIDEBAR_WIDTH);
+    const visibleHeight = Math.max(200, window.innerHeight / currentScale);
 
     const p = state.playerRef.current;
 
-    // Mine dimensions
+    // Mine dimensions  
     const MINE_WIDTH = GRID_CONFIG.COLUMNS * GRID_CONFIG.TILE_SIZE;
 
     // Player's target position in world coordinates (center of player tile)
     let targetCamX = (p.x * GRID_CONFIG.TILE_SIZE) + (GRID_CONFIG.TILE_SIZE / 2);
 
-    // No special clamping for mine - just track player directly like overworld
-    // (The mine's void edges are acceptable)
+    // No special clamping - just track player directly
 
     // Convert world target to camera position (top-left of screen, in game units)
     const idealX = targetCamX - (visibleWidth / 2);
