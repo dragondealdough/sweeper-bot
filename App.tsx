@@ -518,7 +518,16 @@ const App: React.FC = () => {
   const showConstructionPrompt = state.player.y < 0 && Math.abs(state.player.x - CONSTRUCTION_X) < 2 && !state.isConstructionOpen;
 
   return (
-    <div className="h-[100dvh] w-screen bg-black overflow-hidden relative">
+    <div
+      className="h-[100dvh] w-screen bg-black overflow-hidden relative"
+      style={{
+        height: '100vh',
+        width: '100vw',
+        backgroundColor: '#000000',
+        overflow: 'hidden',
+        position: 'relative'
+      }}
+    >
       {/* Scaled game wrapper - centers the scaled content */}
       <div
         className="relative bg-black text-stone-200 font-mono cursor-none overflow-hidden"
@@ -655,10 +664,25 @@ const App: React.FC = () => {
       {/* Mobile Touch Controls */}
       <TouchControls visible={isMobile} opacity={settings.controlOpacity / 100} />
 
-      {/* DIAGNOSTIC OVERLAY - REMOVE LATER */}
+      {/* DIAGNOSTIC OVERLAY - FORCE INLINE STYLES */}
       {DEBUG_MODE && (
-        <div className="fixed top-0 left-0 z-[99999] bg-black/80 text-lime-400 p-2 text-[10px] pointer-events-none font-mono">
-          <div>v1.1.70 DIAGNOSTIC</div>
+        <div
+          className="fixed top-0 left-0 z-[99999] bg-black/80 text-lime-400 p-2 text-[10px] pointer-events-none font-mono"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 99999,
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            color: '#a3e635', // Lime 400
+            padding: '8px',
+            fontSize: '12px',
+            fontFamily: 'monospace',
+            pointerEvents: 'none',
+            border: '2px solid red'
+          }}
+        >
+          <div>v1.1.71 INLINE STYLE MODE</div>
           <div>Size: {window.innerWidth}x{window.innerHeight}</div>
           <div>Scale: {scale.toFixed(3)}</div>
           <div>IsMobile: {isMobile.toString()}</div>
