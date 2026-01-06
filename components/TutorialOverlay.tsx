@@ -417,7 +417,8 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   const showBackdrop = tutorialState.showingMessage &&
     tutorialState.currentMessage &&
     !isShopOpen &&
-    !isConstructionOpen;
+    !isConstructionOpen &&
+    !tutorialState.taskMinimized;
 
   return (
     <>
@@ -426,17 +427,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         <div className="fixed inset-0 bg-black/40 z-[199] pointer-events-none animate-in fade-in duration-500" />
       )}
 
-      {/* Minimized Task HUD Indicator - shows when task is minimized */}
-      {isTaskStep && tutorialState.taskMinimized && tutorialState.showingMessage && onToggleTaskMinimized && (
-        <button
-          onClick={onToggleTaskMinimized}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[200] bg-white hover:bg-stone-100 text-black font-black px-4 py-2 rounded-lg shadow-lg border-2 border-white animate-pulse transition-all hover:scale-105 flex items-center gap-2"
-          title="Show task"
-        >
-          <span className="text-sm">❗</span>
-          <span className="text-xs uppercase tracking-wider">Task</span>
-        </button>
-      )}
+
       {/* Message Dialog - positioned at bottom for all messages */}
       {/* Hide if task is minimized */}
       {tutorialState.showingMessage && tutorialState.currentMessage && !isShopOpen && !isConstructionOpen && !tutorialState.taskMinimized && (
