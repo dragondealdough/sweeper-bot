@@ -52,29 +52,17 @@ const GameHUD: React.FC<GameHUDProps> = ({
                         </div>
                         <div className="text-[9px] text-stone-500 uppercase tracking-widest ml-1">DAY {dayCount}</div>
                     </div>
-                </div>
-                <div className="h-4 w-px bg-stone-700" />
-
-                {/* Minimized Task Button - shows when task is minimized */}
-                {taskMinimized && onToggleTaskMinimized && (
-                    <>
-                        <button
-                            onClick={onToggleTaskMinimized}
-                            className="bg-white hover:bg-stone-200 text-black font-black px-3 py-1 rounded text-xs uppercase tracking-wider flex items-center gap-1 animate-pulse transition-all hover:scale-105"
-                            title="Show task"
-                        >
-                            <span>❗</span>
-                            <span>Task</span>
-                        </button>
-                        <div className="h-4 w-px bg-stone-700" />
-                    </>
-                )}
-
-                {/* Hide desktop controls on mobile */}
-                {!isMobile && (
-                    <div className="text-[9px] text-stone-500 uppercase tracking-widest hidden lg:block">Controls: [WASD] Move | [Space] Dig | [Z/X] Flag | [E] Interact/Climb | [I] Inventory</div>
+                    <div className="h-4 w-px bg-stone-700" />
+                </>
                 )}
             </div>
+
+            {/* Hide desktop controls on mobile */}
+
+            {/* Hide desktop controls on mobile */}
+            {!isMobile && (
+                <div className="text-[9px] text-stone-500 uppercase tracking-widest hidden lg:block">Controls: [WASD] Move | [Space] Dig | [Z/X] Flag | [E] Interact/Climb | [I] Inventory</div>
+            )}
         </div >
 
             { message && (
