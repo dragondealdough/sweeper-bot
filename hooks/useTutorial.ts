@@ -218,38 +218,15 @@ export const useTutorial = () => {
     'RECYCLER_INTRO': '💡 Hint: Select a mine and press E to start recycling!',
   };
 
-  // Hint timer effect - shows reminder after 15s in waiting states
+  // Hint timer removed as per user request to avoid annoyance
   useEffect(() => {
-    // Clear any existing timer
-    if (hintTimerRef.current) {
-      clearTimeout(hintTimerRef.current);
-      hintTimerRef.current = null;
-    }
-
-    // Check if we're in a waiting state (step active but no message showing)
-    const waitingSteps = ['MINE_INTRO_9', 'MINE_COLLECT_WAIT', 'RECYCLER_INTRO'];
-    const isWaiting = waitingSteps.includes(tutorialState.currentStep) &&
-      !tutorialState.showingMessage &&
-      !tutorialState.hintMessage &&
-      tutorialState.isActive;
-
-    if (isWaiting) {
-      const delay = tutorialState.currentStep === 'RECYCLER_INTRO' ? 10000 : 15000;
-      hintTimerRef.current = setTimeout(() => {
-        setTutorialState(prev => ({
-          ...prev,
-          hintMessage: HINT_MESSAGES[prev.currentStep] || null,
-        }));
-      }, delay);
-    }
-
     return () => {
       if (hintTimerRef.current) {
         clearTimeout(hintTimerRef.current);
         hintTimerRef.current = null;
       }
     };
-  }, [tutorialState.currentStep, tutorialState.showingMessage, tutorialState.hintMessage, tutorialState.isActive]);
+  }, []);
 
   // Start tutorial on first render
   useEffect(() => {
