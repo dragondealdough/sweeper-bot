@@ -319,8 +319,9 @@ const App: React.FC = () => {
 
     // --- CAMERA LOGIC ---
     // Use actual window dimensions for visible viewport (in screen pixels)
-    // then divide by scale to get game units
-    const screenWidth = window.innerWidth;
+    // Subtract sidebar width (256px = left-64) from screen width for game viewport
+    const SIDEBAR_WIDTH = 256;
+    const screenWidth = window.innerWidth - SIDEBAR_WIDTH;
     const screenHeight = window.innerHeight;
     const currentScale = scaleRef.current || 1;
 
