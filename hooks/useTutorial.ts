@@ -547,7 +547,7 @@ export const useTutorial = () => {
             ...prev,
             showingMessage: false,
             currentMessage: null,
-            hintMessage: "⛏️ TASK: Select a block and press SPACEBAR to mine it!",
+            hintMessage: "Select a block and press SPACEBAR to mine it!",
           };
         }
 
@@ -599,7 +599,7 @@ export const useTutorial = () => {
             currentStep: 'MINE_COLLECT_WAIT',
             showingMessage: false,
             currentMessage: null,
-            hintMessage: "🚩 TASK: Press Z to flag a suspected mine, then SPACEBAR to collect it!",
+            hintMessage: "Press Z to flag a suspected mine, then SPACEBAR to collect it!",
           };
         }
 

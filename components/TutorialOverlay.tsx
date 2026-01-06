@@ -515,24 +515,40 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         </div>
       )}
 
-      {/* Task/Hint Message - persistent reminder for task steps */}
-      {tutorialState.hintMessage && !isShopOpen && !isConstructionOpen && !isRecyclerOpen && (
-        <div className="fixed inset-x-0 bottom-8 z-[195] flex justify-center pointer-events-none px-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-          {/* Task steps (MINE_INTRO_9, MINE_COLLECT_WAIT) are NOT dismissible */}
+      {/* Task/Hint Message - positioned at top, narrator style, non-dismissible for task steps */}
+      {tutorialState.hintMessage && !isShopOpen && !isConstructionOpen && !isRecyclerOpen && !tutorialState.showingMessage && (
+        <div className="fixed inset-x-0 top-24 z-[195] flex justify-center pointer-events-none px-4 animate-in fade-in slide-in-from-top-2 duration-500">
           {(() => {
             const isTaskStep = tutorialState.currentStep === 'MINE_INTRO_9' || tutorialState.currentStep === 'MINE_COLLECT_WAIT';
+
+            // Apply mobile text substitutions to hint message
+            let displayText = tutorialState.hintMessage;
+            if (isMobile) {
+              displayText = displayText
+                .replace(/SPACEBAR/gi, 'the BLUE PICKAXE button')
+                .replace(/press Z/gi, 'press the RED FLAG button')
+                .replace(/Select a block/gi, 'Use the JOYSTICK to select a block');
+            }
+
             return (
               <div
-                className={`max-w-md w-full ${isTaskStep ? '' : 'pointer-events-auto cursor-pointer'}`}
+                className={`max-w-sm w-full ${isTaskStep ? '' : 'pointer-events-auto cursor-pointer'}`}
                 onClick={isTaskStep ? undefined : () => onDismissHint?.()}
               >
-                <div className="relative bg-amber-900/95 border-2 border-amber-500 rounded-lg shadow-xl p-4">
-                  <p className="text-base text-amber-100 font-bold leading-relaxed text-center">
-                    {tutorialState.hintMessage}
-                  </p>
+                {/* Narrator-style speech bubble */}
+                <div className="relative bg-stone-800/95 border-2 border-amber-400 rounded-xl shadow-2xl overflow-hidden">
+                  {/* Character avatar hint */}
+                  <div className="absolute -top-1 -left-1 w-8 h-8 rounded-full bg-amber-500 border-2 border-amber-300 flex items-center justify-center">
+                    <span className="text-xs">📢</span>
+                  </div>
+                  <div className="pl-8 pr-3 py-3">
+                    <p className="text-sm text-stone-100 font-medium leading-relaxed">
+                      {displayText}
+                    </p>
+                  </div>
                   {!isTaskStep && (
-                    <div className="text-[9px] text-amber-400/70 mt-1 text-right">
-                      Click to dismiss
+                    <div className="text-[9px] text-stone-500 text-right pr-2 pb-1">
+                      Tap to dismiss
                     </div>
                   )}
                 </div>
