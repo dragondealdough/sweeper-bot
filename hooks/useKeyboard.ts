@@ -40,12 +40,12 @@ interface KeyboardParams {
 }
 
 export const useKeyboard = (params: KeyboardParams) => {
-  const {
-    status, isShopOpen, isRecyclerOpen, isInventoryOpen, isConstructionOpen,
-    playerRef, ropeLength, inventory, timeRef, EVENING_THRESHOLD_MS,
-    HOUSE_X, SHOP_X, RECYCLER_X, CONSTRUCTION_X, ROPE_X, OVERWORLD_FLOOR_Y,
-    setMessage, revealTileAt, startClimbing, handleFlagAction, handleSleep, onShopOpen, onConstructionOpen, onConstructionClosed, onRecyclerOpen, tutorialState, depth, selectedTarget
-  } = params;
+  // Use a ref to store current params so the useEffect event listener doesn't need to re-bind
+  // on every render (which causes dropped inputs if the re-bind happens during a key event).
+  const paramsRef = React.useRef(params);
+  useEffect(() => {
+    paramsRef.current = params;
+  }, [params]);
 
   const getTargetTile = useCallback(() => {
     const p = playerRef.current;
@@ -59,8 +59,28 @@ export const useKeyboard = (params: KeyboardParams) => {
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      // Always use current params from ref
+      const currentParams = paramsRef.current;
+      const {
+        keys, status, isShopOpen, isRecyclerOpen, isInventoryOpen, isConstructionOpen,
+        setIsInventoryOpen, setIsShopOpen, inventory, setMessage, revealTileAt, depth,
+        selectedTarget, handleFlagAction, tutorialState, playerRef, ROPE_X, OVERWORLD_FLOOR_Y, ropeLength,
+        startClimbing, HOUSE_X, SHOP_X, RECYCLER_X, CONSTRUCTION_X, timeRef, EVENING_THRESHOLD_MS,
+        handleSleep, setIsRecyclerOpen, onRecyclerOpen, setIsConstructionOpen, onConstructionOpen, onConstructionClosed,
+        onShopOpen
+      } = currentParams;
+
       keys.current[e.key] = true;
-      const target = getTargetTile();
+
+      // Re-calculate target here to ensure freshness (though getTargetTile uses ref, so it's fine)
+      const p = playerRef.current;
+      let tx = Math.floor(p.x + 0.5), ty = Math.floor(p.y + 0.5);
+      if (p.facing === Direction.UP) ty -= 1;
+      else if (p.facing === Direction.DOWN) ty += 1;
+      else if (p.facing === Direction.LEFT) tx -= 1;
+      else if (p.facing === Direction.RIGHT) tx += 1;
+      const target = { x: tx, y: ty };
+
       const isMenuOpen = isShopOpen || isRecyclerOpen || isInventoryOpen || isConstructionOpen;
 
       if (e.key.toLowerCase() === 'i' && status === GameStatus.PLAYING && !isShopOpen && !isRecyclerOpen && !isConstructionOpen) {
@@ -266,7 +286,9 @@ export const useKeyboard = (params: KeyboardParams) => {
     };
 
     const up = (e: KeyboardEvent) => {
-      keys.current[e.key] = false;
+      // Access params from ref
+      const currentParams = paramsRef.current;
+      currentParams.keys.current[e.key] = false;
     };
 
     window.addEventListener('keydown', down);
@@ -275,7 +297,7 @@ export const useKeyboard = (params: KeyboardParams) => {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-  }, [status, isShopOpen, isRecyclerOpen, isInventoryOpen, isConstructionOpen, inventory, ropeLength, depth, getTargetTile, revealTileAt, startClimbing, handleFlagAction, handleSleep, onShopOpen, onConstructionOpen, onConstructionClosed, tutorialState, params]);
+  }, []); // Empty dependency array - listeners attached ONCE and never re-bound
 
   return { getTargetTile };
 };
