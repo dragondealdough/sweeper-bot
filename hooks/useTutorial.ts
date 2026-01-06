@@ -616,12 +616,14 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_COLLECT_2') {
-          // Transition to hidden wait step
+          // Transition to wait step, but show persistent guidance immediately
           return {
             ...prev,
             currentStep: 'MINE_COLLECT_WAIT',
             showingMessage: false,
             currentMessage: null,
+            // Show persistent hint immediately so user knows what to do
+            hintMessage: "💡 Task: Use the arrow keys to select a tile, 'Z' to flag it, and SPACEBAR to disarm it!",
           };
         }
 

@@ -238,6 +238,19 @@ export const useMining = (
                 return; // Exit early - let tutorial handle it, mine stays intact
             }
 
+            // Check if we're in mine intro tutorial (extended list) - if so, don't kill player OR explode mine!
+            // Trigger tutorial dialogue instead and preserve the state so they can try again
+            const mineIntroSteps: string[] = [
+                'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
+                'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9',
+                'MINE_EXPLAIN_NUMBERS', 'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECT_WAIT'
+            ];
+
+            if (tutorialState && mineIntroSteps.includes(tutorialState.currentStep) && onMineHit) {
+                onMineHit();
+                return; // Exit early - tutorial handles it, mine PRESERVED
+            }
+
             // Unflagged mine - explosion! Remove the mine (it exploded)
             newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, isMine: false };
             // Update neighbor counts since the mine is gone
@@ -260,19 +273,6 @@ export const useMining = (
             if (setPlayerHitFlash) {
                 setPlayerHitFlash(true); // Flash player red
                 setTimeout(() => setPlayerHitFlash(false), 500); // Reset after 500ms
-            }
-
-            // Check if we're in mine intro tutorial - if so, don't kill player, trigger tutorial dialogue instead
-            // Extended list to cover all early mine tutorial steps to prevent death before learning to flag
-            const mineIntroSteps: string[] = [
-                'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
-                'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9',
-                'MINE_EXPLAIN_NUMBERS', 'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECT_WAIT'
-            ];
-
-            if (tutorialState && mineIntroSteps.includes(tutorialState.currentStep) && onMineHit) {
-                onMineHit();
-                return; // Exit early - tutorial handles it
             }
 
             handlePlayerDeath();
