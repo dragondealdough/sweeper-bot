@@ -86,8 +86,16 @@ const TutorialMessageDisplay: React.FC<{
 }> = ({ message, onAdvance }) => {
   const { displayedText, isComplete, skip } = useTypingEffect(message.text, 2);
 
+  // Anti-spam: enforce 1s delay before interaction is allowed
+  const [canInteract, setCanInteract] = useState(false);
+  useEffect(() => {
+    setCanInteract(false);
+    const timer = setTimeout(() => setCanInteract(true), 1000);
+    return () => clearTimeout(timer);
+  }, [message]);
+
   // Only show button when typing is complete AND we've displayed the full current message
-  const shouldShowButton = isComplete && displayedText === message.text;
+  const shouldShowButton = isComplete && displayedText === message.text && canInteract;
 
   // Handle E key: skip typing animation if in progress, otherwise advance
   useEffect(() => {
@@ -97,8 +105,8 @@ const TutorialMessageDisplay: React.FC<{
         if (!isComplete) {
           // Skip the typing animation
           skip();
-        } else {
-          // Already complete, advance to next message
+        } else if (shouldShowButton) {
+          // Only advance if interaction is allowed
           onAdvance();
         }
       }
@@ -106,12 +114,12 @@ const TutorialMessageDisplay: React.FC<{
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isComplete, skip, onAdvance]);
+  }, [isComplete, skip, onAdvance, shouldShowButton]);
 
   return (
     <div className="fixed inset-x-0 bottom-8 z-[160] flex justify-center pointer-events-none px-4">
       <div className="pointer-events-auto max-w-lg w-full">
-        <div className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
+        <div key={message.text} className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
           <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
             <span className="text-[10px] font-black text-black uppercase tracking-wider">📖 Guide</span>
           </div>
