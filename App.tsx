@@ -44,6 +44,8 @@ const App: React.FC = () => {
 
   // Camera State Ref for sticky mode (Mine vs Overworld)
   const isMineModeRef = useRef(false);
+  // Scale Ref for camera calculations (to avoid closure staleness)
+  const scaleRef = useRef(1);
 
   // Check for save game on mount
   useEffect(() => {
@@ -74,9 +76,11 @@ const App: React.FC = () => {
 
       // Dynamic Zoom: Zoom in ~45% more when inside the mine (y >= 0)
       // Base mobile zoom 1.6 * 1.2 = 1.92. New request: "Another 20%" -> 1.44 mine multiplier.
-      const mineMultiplier = (state.player.y >= 0) ? 1.44 : 1.0;
+      const mineMultiplier = isMineModeRef.current ? 1.44 : 1.0;
 
-      setScale(Math.max(0.4, Math.min(1.5, newScale * mobileMultiplier * mineMultiplier)));
+      const finalScale = Math.max(0.4, Math.min(1.5, newScale * mobileMultiplier * mineMultiplier));
+      setScale(finalScale);
+      scaleRef.current = finalScale;
     };
 
     calculateScale();
@@ -306,36 +310,38 @@ const App: React.FC = () => {
     // viewportRef is on the game area (after sidebar), so use directly
     const vw = viewportRef.current?.clientWidth || (VIRTUAL_WIDTH - 256);
     const vh = viewportRef.current?.clientHeight || VIRTUAL_HEIGHT;
+    const currentScale = scaleRef.current || 1;
 
     const p = state.playerRef.current;
 
-    // Mine center for camera targeting
+    // Mine dimensions
     const MINE_WIDTH = GRID_CONFIG.COLUMNS * GRID_CONFIG.TILE_SIZE;
-    const MINE_CENTER = MINE_WIDTH / 2;
 
-    // Horizontal Cam Logic:
-    // If in Overworld (y < 0), track player freely.
-    // If in Mine (y >= 0), track player but clamp to mine bounds (so we don't see black void sides).
-    // If viewport is wider than mine, center the mine.
+    // Player's target position in world coordinates
     let targetCamX = (p.x * GRID_CONFIG.TILE_SIZE) + (GRID_CONFIG.TILE_SIZE / 2);
 
+    // In the mine, we want to follow the player but clamp to prevent showing void
     if (p.y >= 0) {
-      if (vw >= MINE_WIDTH) {
-        targetCamX = MINE_CENTER;
+      // Calculate effective viewport width in game units (accounting for zoom)
+      const effectiveVW = vw / currentScale;
+
+      // Calculate clamping bounds
+      const minCenter = effectiveVW / 2;
+      const maxCenter = MINE_WIDTH - (effectiveVW / 2);
+
+      // If viewport is wider than mine (minCenter > maxCenter), 
+      // swap bounds to allow tracking while keeping mine visible
+      if (minCenter > maxCenter) {
+        // Viewport wider than mine - allow panning but clamp within swapped bounds
+        targetCamX = Math.max(maxCenter, Math.min(targetCamX, minCenter));
       } else {
-        const minX = vw / 2;
-        const maxX = MINE_WIDTH - (vw / 2);
-        // Ensure min <= max (if not, we shouldn't be here due to vw check, but safe guard)
-        if (minX <= maxX) {
-          targetCamX = Math.max(minX, Math.min(targetCamX, maxX));
-        } else {
-          targetCamX = MINE_CENTER;
-        }
+        // Normal case - clamp to mine bounds
+        targetCamX = Math.max(minCenter, Math.min(targetCamX, maxCenter));
       }
     }
 
-    // Convert world target to camera position (top-left of screen)
-    const idealX = targetCamX - (vw / 2);
+    // Convert world target to camera position (top-left of screen, in game units)
+    const idealX = targetCamX - (vw / currentScale / 2);
     // Ignore upward movement (jumps) in overworld by clamping Y to 0
     const trackingY = Math.max(0, p.y);
     const idealY = trackingY * GRID_CONFIG.TILE_SIZE - (vh / 2);
