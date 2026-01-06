@@ -47,6 +47,8 @@ export const useKeyboard = (params: KeyboardParams) => {
     paramsRef.current = params;
   }, [params]);
 
+  const { playerRef } = params;
+
   const getTargetTile = useCallback(() => {
     const p = playerRef.current;
     let tx = Math.floor(p.x + 0.5), ty = Math.floor(p.y + 0.5);
