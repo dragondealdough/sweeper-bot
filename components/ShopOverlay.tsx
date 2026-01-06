@@ -369,6 +369,16 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           <button
             ref={closeButtonRef}
             onClick={() => {
+              // During tutorial, only allow closing when the close button is highlighted (tutorial says to close)
+              const isTutorialActive = tutorialState?.isActive && !tutorialState?.isComplete;
+              const shopTutorialSteps = ['SHOP_INTRO_1', 'SHOP_INTRO_2', 'SHOP_INTRO_3', 'SHOP_PICKAXE_BOUGHT', 'SHOP_CLOSE_MENU_1', 'SHOP_CLOSE_MENU_2'];
+              const inShopTutorial = isTutorialActive && tutorialState?.currentStep && shopTutorialSteps.includes(tutorialState.currentStep);
+
+              if (inShopTutorial && !tutorialHighlightCloseButton) {
+                // Don't allow closing yet - tutorial hasn't instructed to close
+                return;
+              }
+
               if (tutorialHighlightCloseButton && onTutorialAdvance) {
                 onTutorialAdvance();
               }
