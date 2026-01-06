@@ -318,16 +318,11 @@ const App: React.FC = () => {
     });
 
     // --- CAMERA LOGIC ---
-    // Use actual window dimensions for visible viewport (in screen pixels)
-    // Subtract sidebar width (256px = left-64) from screen width for game viewport
-    const SIDEBAR_WIDTH = 256;
-    const screenWidth = window.innerWidth - SIDEBAR_WIDTH;
-    const screenHeight = window.innerHeight;
+    // The viewportRef is on the game content area (after sidebar, in game units)
+    // Its clientWidth/clientHeight gives us the visible viewport in game coordinates directly
+    const visibleWidth = viewportRef.current?.clientWidth || (VIRTUAL_WIDTH - 256);
+    const visibleHeight = viewportRef.current?.clientHeight || VIRTUAL_HEIGHT;
     const currentScale = scaleRef.current || 1;
-
-    // Effective visible viewport in game units
-    const visibleWidth = screenWidth / currentScale;
-    const visibleHeight = screenHeight / currentScale;
 
     const p = state.playerRef.current;
 
