@@ -86,7 +86,7 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'i') {
+      if (e.key.toLowerCase() === 'i' || e.key.toLowerCase() === 'e') {
         onClose();
         return;
       }
@@ -103,7 +103,6 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
   }, [isCloseSelected, onClose]);
 
   useEffect(() => {
-    // Small delay to ensure elements are rendered
     const timer = setTimeout(() => {
       if (isCloseSelected) {
         updateCursorPosition(closeButtonRef.current);
@@ -114,8 +113,7 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
 
   return (
     <div
-      className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in duration-200 font-mono select-none"
-      style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
+      className="fixed inset-0 z-[150] flex justify-center bg-black/80 backdrop-blur-sm pt-0 pb-0 sm:pt-10 sm:pb-10"
     >
       {/* Cursor Pointer */}
       <div
@@ -126,57 +124,81 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
           transform: 'translateY(-50%)'
         }}
       >
-        <span className="text-amber-400 drop-shadow-lg">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 5V19L19 12L8 5Z" />
-          </svg>
-        </span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="drop-shadow-lg text-slate-400">
+          <path d="M5 3L19 12L5 21V3Z" fill="currentColor" stroke="black" strokeWidth="1.5" strokeLinejoin="round" />
+        </svg>
       </div>
 
-      <div className="w-full max-w-4xl bg-slate-900 border-4 border-slate-600 shadow-2xl rounded-sm overflow-hidden flex flex-col h-[600px]">
-        {/* Header */}
-        <div className="bg-slate-800 p-4 border-b border-slate-600 flex items-center gap-4">
+      {/* Main Modal - Matches Commissary/Construction format */}
+      <div className="w-full max-w-2xl bg-slate-900 border-x-4 sm:border-4 border-slate-600 shadow-[0_0_50px_rgba(100,116,139,0.3)] sm:rounded-sm overflow-hidden flex flex-col h-full sm:h-auto sm:max-h-[90vh]">
+
+        {/* Header with Safe Area Padding */}
+        <div
+          className="bg-slate-700 px-3 pb-3 flex items-center gap-3 shrink-0"
+          style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+        >
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            className={`text-white font-black px-3 py-1 transition-all border-2 border-slate-500 ${isCloseSelected ? 'bg-slate-700/50 ring-2 ring-amber-400' : 'hover:text-amber-400'
+            className={`text-white font-black px-2 py-1 text-xs transition-all border-2 border-slate-500 ${isCloseSelected ? 'bg-slate-800/50 ring-2 ring-slate-400' : 'hover:bg-slate-600'
               }`}
           >
             ← CLOSE
           </button>
-          <h2 className="text-2xl font-black text-white uppercase tracking-widest flex items-center justify-end gap-3 flex-1 text-right">
-            <span className="text-amber-500">Inventory</span>
-            <span className="text-[10px] bg-slate-700 px-2 py-1 rounded text-slate-300">LOGISTICS MANIFEST</span>
-          </h2>
-        </div>
 
-        {/* Grid */}
-        <div className="p-8 flex-1 bg-[#0a0a0a] overflow-y-auto">
-          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {items.map(item => (
-              <div key={item.id} className="group relative bg-slate-800/50 border-2 border-slate-700 hover:border-amber-500 hover:bg-slate-800 hover:z-50 transition-all p-4 flex flex-col items-center justify-center gap-2 aspect-square">
-                <div className="text-4xl drop-shadow-md grayscale group-hover:grayscale-0 transition-all duration-300">{item.icon}</div>
-                <div className="text-[10px] font-bold text-center uppercase text-slate-300 group-hover:text-white leading-tight">{item.name}</div>
-                <div className="absolute top-2 right-2 bg-amber-600 text-black font-black text-[10px] px-1.5 py-0.5 rounded shadow-sm">
-                  x{item.count}
-                </div>
-                {/* Tooltip */}
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 p-2 bg-black border border-slate-500 text-[9px] text-slate-300 rounded shadow-xl hidden group-hover:block z-[100] pointer-events-none">
-                  {item.description}
-                </div>
-              </div>
-            ))}
-            {Array.from({ length: emptySlots }).map((_, i) => (
-              <div key={`empty-${i}`} className="bg-slate-900/30 border-2 border-dashed border-slate-800 aspect-square flex items-center justify-center opacity-50">
-                <div className="w-2 h-2 rounded-full bg-slate-800" />
-              </div>
-            ))}
+          <div className="flex-1 text-right flex flex-col items-end">
+            <h2 className="text-lg font-black text-white uppercase tracking-tighter leading-none">Inventory</h2>
+            <div className="flex items-center gap-1 bg-black/20 px-2 rounded-full mt-1">
+              <span className="text-[9px] text-slate-300 font-bold uppercase tracking-widest">LOGISTICS MANIFEST</span>
+            </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="bg-slate-800 p-2 border-t border-slate-600 text-center">
-          <p className="text-[9px] text-slate-500 uppercase tracking-widest">Storage Capacity: {Math.round((items.length / totalSlots) * 100)}%</p>
+        {/* Content Wrapper - Flex Row for Grid + Scroll Controls */}
+        <div className="flex-1 relative overflow-hidden flex bg-black/20 p-2 gap-2">
+
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-black/40 border border-slate-700/50 shadow-inner rounded-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {items.map(item => (
+                <div key={item.id} className="group relative bg-slate-800/50 border-2 border-slate-700 hover:border-slate-500 hover:bg-slate-800 hover:z-50 transition-all p-3 flex flex-col items-center justify-center gap-2 aspect-square">
+                  <div className="text-3xl drop-shadow-md grayscale group-hover:grayscale-0 transition-all duration-300">{item.icon}</div>
+                  <div className="text-[9px] font-bold text-center uppercase text-slate-300 group-hover:text-white leading-tight">{item.name}</div>
+                  <div className="absolute top-1 right-1 bg-slate-600 text-white font-black text-[9px] px-1.5 py-0.5 rounded shadow-sm">
+                    x{item.count}
+                  </div>
+                  {/* Tooltip */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-40 p-2 bg-black border border-slate-500 text-[8px] text-slate-300 rounded shadow-xl hidden group-hover:block z-[100] pointer-events-none">
+                    {item.description}
+                  </div>
+                </div>
+              ))}
+              {Array.from({ length: emptySlots }).map((_, i) => (
+                <div key={`empty-${i}`} className="bg-slate-900/30 border-2 border-dashed border-slate-800 aspect-square flex items-center justify-center opacity-50">
+                  <div className="w-2 h-2 rounded-full bg-slate-800" />
+                </div>
+              ))}
+            </div>
+
+            {/* Footer inside scroll area */}
+            <div className="mt-4 text-center">
+              <p className="text-[9px] text-slate-500 uppercase tracking-widest">Storage Capacity: {Math.round((items.length / totalSlots) * 100)}%</p>
+            </div>
+          </div>
+
+          {/* Visual Scroll Track (Static for consistency) */}
+          <div className="w-12 bg-slate-800 border-l border-slate-700 flex flex-col shrink-0 opacity-50 pointer-events-none">
+            <div className="flex-1 flex items-center justify-center border-b border-slate-700">
+              <span className="text-2xl font-black text-slate-600">▲</span>
+            </div>
+            <div className="h-4 bg-black/40 flex items-center justify-center">
+              <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+            </div>
+            <div className="flex-1 flex items-center justify-center border-t border-slate-700">
+              <span className="text-2xl font-black text-slate-600">▼</span>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
