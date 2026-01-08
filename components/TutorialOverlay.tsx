@@ -3,6 +3,17 @@ import { TutorialState } from '../hooks/useTutorial';
 import { GRID_CONFIG } from '../constants';
 import TutorialMessageDisplay from './TutorialMessageDisplay';
 
+// CSS for blink animation
+const blinkStyle = `
+@keyframes tutorial-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.tutorial-blink {
+  animation: tutorial-blink 0.2s ease-in-out 2;
+}
+`;
+
 
 
 // Helper to render text with bold phrases
@@ -209,34 +220,56 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 }) => {
   // Hide arrows when any menu is open
   const isAnyMenuOpen = isShopOpen || isConstructionOpen || isRecyclerOpen || isInventoryOpen;
-  const [selectedChoiceIndex, setSelectedChoiceIndex] = useState(0);
+  const [selectedChoiceIndex, setSelectedChoiceIndex] = useState(-1); // Start with no selection
+  const [isBlinking, setIsBlinking] = useState(false);
+  const [confirmedChoice, setConfirmedChoice] = useState<'ROADS' | 'ATTRACTIONS' | 'ROBOTS' | null>(null);
   const choiceOptions = useMemo<Array<'ROADS' | 'ATTRACTIONS' | 'ROBOTS'>>(() => ['ROADS', 'ATTRACTIONS', 'ROBOTS'], []);
+
+  // Handle choice selection with blink animation
+  const handleChoiceSelect = useCallback((choice: 'ROADS' | 'ATTRACTIONS' | 'ROBOTS', index: number) => {
+    if (isBlinking) return; // Prevent interaction during animation
+
+    // Set the selection and start blinking
+    setSelectedChoiceIndex(index);
+    setConfirmedChoice(choice);
+    setIsBlinking(true);
+
+    // After blink animation completes (2 blinks at 0.2s each = 0.4s), advance
+    setTimeout(() => {
+      setIsBlinking(false);
+      onSelectChoice?.(choice);
+    }, 500);
+  }, [isBlinking, onSelectChoice]);
 
   // Keyboard navigation for choices
   useEffect(() => {
-    if (!tutorialState.showingChoice) return;
+    if (!tutorialState.showingChoice || isBlinking) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedChoiceIndex(prev => (prev > 0 ? prev - 1 : choiceOptions.length - 1));
+        setSelectedChoiceIndex(prev => (prev <= 0 ? choiceOptions.length - 1 : prev - 1));
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
         setSelectedChoiceIndex(prev => (prev < choiceOptions.length - 1 ? prev + 1 : 0));
       } else if (e.key === 'Enter' || e.key === ' ' || e.key.toLowerCase() === 'e') {
         e.preventDefault();
-        onSelectChoice?.(choiceOptions[selectedChoiceIndex]);
+        if (selectedChoiceIndex >= 0) {
+          handleChoiceSelect(choiceOptions[selectedChoiceIndex], selectedChoiceIndex);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [tutorialState.showingChoice, selectedChoiceIndex, onSelectChoice, choiceOptions]);
+  }, [tutorialState.showingChoice, selectedChoiceIndex, handleChoiceSelect, choiceOptions, isBlinking]);
 
   // Reset choice selection when choice dialog appears
   useEffect(() => {
     if (tutorialState.showingChoice) {
-      setSelectedChoiceIndex(0);
+      setSelectedChoiceIndex(-1); // Start with no selection
+      setIsBlinking(false);
+      setConfirmedChoice(null);
     }
   }, [tutorialState.showingChoice]);
 
@@ -378,6 +411,9 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
   return (
     <>
+      {/* Inject blink animation styles */}
+      <style>{blinkStyle}</style>
+
       {/* Dimming Backdrop */}
       {shouldDim && (
         <div className="fixed inset-0 bg-black/40 z-[100] pointer-events-none animate-in fade-in duration-500" />
@@ -410,11 +446,12 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
 
                 <div className="space-y-2">
                   <button
-                    onClick={() => onSelectChoice?.('ROADS')}
+                    onClick={() => handleChoiceSelect('ROADS', 0)}
+                    disabled={isBlinking}
                     className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 0
-                      ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
+                      ? `bg-amber-600 border-amber-400 ring-2 ring-amber-400/50 ${isBlinking && confirmedChoice === 'ROADS' ? 'tutorial-blink' : ''}`
                       : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
-                      }`}
+                      } ${isBlinking ? 'cursor-not-allowed' : ''}`}
                   >
                     {selectedChoiceIndex === 0 && (
                       <span className="text-amber-400">
@@ -426,11 +463,12 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                     Roads!
                   </button>
                   <button
-                    onClick={() => onSelectChoice?.('ATTRACTIONS')}
+                    onClick={() => handleChoiceSelect('ATTRACTIONS', 1)}
+                    disabled={isBlinking}
                     className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 1
-                      ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
+                      ? `bg-amber-600 border-amber-400 ring-2 ring-amber-400/50 ${isBlinking && confirmedChoice === 'ATTRACTIONS' ? 'tutorial-blink' : ''}`
                       : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
-                      }`}
+                      } ${isBlinking ? 'cursor-not-allowed' : ''}`}
                   >
                     {selectedChoiceIndex === 1 && (
                       <span className="text-amber-400">
@@ -442,11 +480,12 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
                     Special attractions!
                   </button>
                   <button
-                    onClick={() => onSelectChoice?.('ROBOTS')}
+                    onClick={() => handleChoiceSelect('ROBOTS', 2)}
+                    disabled={isBlinking}
                     className={`w-full border-2 text-white font-bold px-4 py-3 rounded transition-all text-sm text-left flex items-center gap-2 ${selectedChoiceIndex === 2
-                      ? 'bg-amber-600 border-amber-400 ring-2 ring-amber-400/50'
+                      ? `bg-amber-600 border-amber-400 ring-2 ring-amber-400/50 ${isBlinking && confirmedChoice === 'ROBOTS' ? 'tutorial-blink' : ''}`
                       : 'bg-slate-800 hover:bg-slate-700 border-amber-500'
-                      }`}
+                      } ${isBlinking ? 'cursor-not-allowed' : ''}`}
                   >
                     {selectedChoiceIndex === 2 && (
                       <span className="text-amber-400">
