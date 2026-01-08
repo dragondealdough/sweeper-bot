@@ -107,7 +107,7 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7 })
                     {/* 3. Utility Action: FLAG / Z (Top) */}
                     <div className="pointer-events-auto">
                         <TouchButton
-                            keys={['z', 'Z']}
+                            keys={['z']}
                             size="w-14 h-14"
                             color="bg-red-600 border-2 border-red-400/30"
                             icon="🚩"
@@ -117,7 +117,7 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7 })
                     {/* 2. Secondary Action: INTERACT / HAND (Middle) */}
                     <div className="pointer-events-auto">
                         <TouchButton
-                            keys={['e', 'E', 'Enter']}
+                            keys={['e']}
                             size="w-16 h-16"
                             color="bg-green-600 border-2 border-green-400/30"
                             icon="✋"
