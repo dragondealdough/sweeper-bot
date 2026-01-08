@@ -50,6 +50,7 @@ export type TutorialStep =
   | 'MINE_COLLECTED'
   | 'MINE_CHARGES_1'
   | 'MINE_CHARGES_2'
+  | 'ARROW_TO_ROPE'
   | 'ARROW_TO_RECYCLER'
   | 'RECYCLER_INTRO'
   | 'RECYCLER_PROCESSING'
@@ -115,8 +116,9 @@ const TUTORIAL_MESSAGES: Record<TutorialStep, TutorialMessage | null> = {
   MINE_COLLECT_2: { text: "Here's the trick: First, mark the block with Z to plant a red flag. Then, break it open with the pickaxe to safely collect the explosive!", buttonText: "Got it!", character: 'narrator' },
   MINE_COLLECT_WAIT: null, // Hidden step while waiting for collection
   MINE_COLLECTED: { text: "You're a natural! Well, I mean you're programmed to do this but a little compliment never hurt anybody, right?", buttonText: "Thanks!", character: 'narrator' },
-  MINE_CHARGES_1: { text: "By the way, see that Disarm Kit display on the left? Each kit gives you 3 charges to safely collect explosives.", buttonText: "I see it!", character: 'narrator' },
-  MINE_CHARGES_2: { text: "If you try to collect an explosive without any charges left…well, I think you can guess what happens!", buttonText: "Kaboom!", character: 'narrator' },
+  MINE_CHARGES_1: { text: "By the way, see those little red flags in the top bar? These are your disarm kit's charges.", buttonText: "I see it!", character: 'narrator' },
+  MINE_CHARGES_2: { text: "If you have spare disarm kits when you run out of charges, they will automatically replenish the charges! Now, let's head back up to the recycler to process the mine we found!", buttonText: "Up I go!", character: 'narrator' },
+  ARROW_TO_ROPE: null, // No message, just arrow pointing to rope for ascent
   ARROW_TO_RECYCLER: null, // No message, just arrow
   RECYCLER_INTRO: { text: "I'm sure you can figure this part out without my help. Let's process the mine we found!", buttonText: "Let's do it!", character: 'narrator' },
   RECYCLER_PROCESSING: { text: "And there you have it! Soon we will have some valuable metal for trading.", buttonText: "Great!", character: 'narrator' },
@@ -159,6 +161,7 @@ export interface TutorialState {
   showArrowToConstruction: boolean;
   showArrowToMine: boolean;
   showArrowToTimer: boolean;
+  showArrowToRope: boolean;
   showArrowToRecycler: boolean;
   highlightPickaxe: boolean;
   highlightCloseButton: boolean;
@@ -189,6 +192,7 @@ export const useTutorial = () => {
     showArrowToConstruction: false,
     showArrowToMine: false,
     showArrowToTimer: false,
+    showArrowToRope: false,
     showArrowToRecycler: false,
     highlightPickaxe: false,
     highlightCloseButton: false,
@@ -622,13 +626,13 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_CHARGES_2') {
-          // Guide player to recycler
+          // Guide player to rope first (they need to ascend to surface)
           return {
             ...prev,
-            currentStep: 'ARROW_TO_RECYCLER',
+            currentStep: 'ARROW_TO_ROPE',
             showingMessage: false,
             currentMessage: null,
-            showArrowToRecycler: true,
+            showArrowToRope: true,
             highlightDisarmKit: false,
           };
         }
@@ -864,6 +868,7 @@ export const useTutorial = () => {
       showArrowToMine: false,
       showArrowToTimer: false,
       showArrowToRecycler: false,
+      showArrowToRope: false,
       highlightPickaxe: false,
       highlightCloseButton: false,
       postShopChoice: null,
@@ -882,6 +887,7 @@ export const useTutorial = () => {
       showArrowToMine: false,
       showArrowToTimer: false,
       showArrowToRecycler: false,
+      showArrowToRope: false,
       highlightPickaxe: false,
       highlightCloseButton: false,
       pickaxeTaken: true, // Mark as taken so free pickaxe doesn't show
@@ -1080,6 +1086,15 @@ export const useTutorial = () => {
           showArrowToMine: false,
         };
       }
+      // If player descends during ARROW_TO_RECYCLER, switch back to ARROW_TO_ROPE
+      if (prev.currentStep === 'ARROW_TO_RECYCLER' && prev.isActive) {
+        return {
+          ...prev,
+          currentStep: 'ARROW_TO_ROPE',
+          showArrowToRecycler: false,
+          showArrowToRope: true,
+        };
+      }
       return prev;
     });
   }, []);
@@ -1204,6 +1219,16 @@ export const useTutorial = () => {
   // Called when player returns to overworld during mine tutorial
   const onPlayerReturnedToOverworld = useCallback(() => {
     setTutorialState(prev => {
+      // If we're at ARROW_TO_ROPE, transition to ARROW_TO_RECYCLER
+      if (prev.currentStep === 'ARROW_TO_ROPE' && prev.isActive) {
+        return {
+          ...prev,
+          currentStep: 'ARROW_TO_RECYCLER',
+          showArrowToRope: false,
+          showArrowToRecycler: true,
+        };
+      }
+
       // If we're in mine tutorial steps, re-show arrow to mine
       const mineSteps: TutorialStep[] = [
         'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
@@ -1251,6 +1276,7 @@ export const useTutorial = () => {
         showArrowToMine: false,
         showArrowToTimer: false,
         showArrowToRecycler: false,
+        showArrowToRope: false,
         highlightPickaxe: false,
         highlightCloseButton: false,
         flashTimer: false,

@@ -649,6 +649,7 @@ const App: React.FC = () => {
           ROPE_X={ROPE_X}
           RECYCLER_X={RECYCLER_X}
           playerX={state.player.x}
+          playerY={state.player.y}
           camera={state.camera}
           scale={scale}
           isShopOpen={state.isShopOpen}

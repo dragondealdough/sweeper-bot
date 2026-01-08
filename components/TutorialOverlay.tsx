@@ -189,6 +189,7 @@ interface TutorialOverlayProps {
   ROPE_X: number;
   RECYCLER_X: number;
   playerX: number;
+  playerY: number;
   camera: { x: number; y: number };
   scale: number;
   isShopOpen?: boolean;
@@ -210,6 +211,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   ROPE_X,
   RECYCLER_X,
   playerX,
+  playerY,
   camera,
   scale,
   isShopOpen = false,
@@ -279,6 +281,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     tutorialState.showArrowToConstruction ||
     tutorialState.showArrowToMine ||
     tutorialState.showArrowToTimer ||
+    tutorialState.showArrowToRope ||
     tutorialState.showArrowToRecycler;
 
   if (!tutorialState.isActive) {
@@ -338,6 +341,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   const constructionBubbleVisible = tutorialState.showArrowToConstruction && Math.abs(playerX - CONSTRUCTION_X) >= 2 && !isConstructionOpen;
   const mineBubbleVisible = tutorialState.showArrowToMine && Math.abs(playerX - ROPE_X) >= 2;
   const recyclerBubbleVisible = tutorialState.showArrowToRecycler && Math.abs(playerX - RECYCLER_X) >= 2 && !isRecyclerOpen;
+  const ropeBubbleVisible = tutorialState.showArrowToRope && playerY >= 0; // Show rope arrow when player is in mine
 
   // Check if floating bubble positions are on-screen
   // Bubbles are centered with translateX(-50%), so check if center is within viewport
@@ -621,6 +625,23 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
             <div className="flex items-center gap-2 animate-pulse">
               <div className="bg-amber-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
                 {ropeIsRight ? 'Mine →' : '← Mine'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rope Ascend Arrow - shows in mine when player needs to go up */}
+        {ropeBubbleVisible && !isAnyMenuOpen && (
+          <div
+            className="absolute pointer-events-none"
+            style={{
+              ...getArrowStyle(ropeIsRight),
+              top: `${hudArrowY}px`,
+            }}
+          >
+            <div className="flex items-center gap-2 animate-pulse">
+              <div className="bg-cyan-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
+                {ropeIsRight ? 'Ascend ↑ →' : '← ↑ Ascend'}
               </div>
             </div>
           </div>
