@@ -19,6 +19,7 @@ export interface TileState {
   y: number;
   isMine: boolean;
   isRevealed: boolean;
+  isDisarmed?: boolean; // True if flagged with a disarm charge - mine cannot explode
   flag: FlagType;
   neighborMines: number;
   item?: ItemType;

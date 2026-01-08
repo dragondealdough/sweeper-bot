@@ -81,152 +81,113 @@ export const useMining = (
         if (tile.item === 'SILVER_BLOCK') {
             newGrid[y][x].item = undefined;
             setInventory(prev => ({ ...prev, silverBlocks: prev.silverBlocks + 1 }));
-        } else if (isInitial && tile.flag === FlagType.MINE) {
-            // Flagged tile - attempting disarm, uses a charge regardless of mine presence
-            const hasCharges = inventory.disarmCharges > 0 || inventory.disarmKits > 0;
+        } else if (tile.isDisarmed) {
+            // Tile was disarmed when flagged - safely reveal without any explosion risk
+            // Charges were already consumed when the flag was placed
+            const isMine = tile.isMine;
 
-            if (hasCharges) {
-                const isMine = tile.isMine;
+            if (isMine) {
+                // Was a mine - collect it safely
+                setMessage("+1 DEFUSED MINE 💣");
+                setTimeout(() => setMessage(null), 1500);
 
-                setInventory(prev => {
-                    let newCharges = prev.disarmCharges;
-                    let newKits = prev.disarmKits;
-                    let equippedNewKit = false;
+                setInventory(prev => ({
+                    ...prev,
+                    defusedMines: prev.defusedMines + 1
+                }));
 
-                    // If no charges but have kits, equip a new kit first
-                    if (newCharges === 0 && newKits > 0) {
-                        newKits -= 1;
-                        newCharges = CHARGES_PER_KIT;
-                        equippedNewKit = true;
-                    }
+                // Reveal tile and remove mine status
+                newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, isMine: false, flag: FlagType.NONE, isDisarmed: false };
 
-                    // Use a charge
-                    newCharges -= 1;
+                // Trigger tutorial callback if mine was collected
+                if (onMineCollected) {
+                    onMineCollected();
+                }
 
-                    // Show pickup-style message for defused mine
-                    if (isMine) {
-                        setMessage(equippedNewKit ? "+1 DEFUSED MINE 💣 (new kit equipped)" : "+1 DEFUSED MINE 💣");
-                    } else {
-                        setMessage(equippedNewKit ? "NO MINE - NEW KIT EQUIPPED" : "NO MINE - CHARGE USED");
-                    }
+                // Update neighbor counts since the mine is gone
+                const tilesBecomingZero: { x: number, y: number }[] = [];
 
-                    // Auto-equip new kit immediately if current one is now empty
-                    if (newCharges === 0 && newKits > 0) {
-                        newKits -= 1;
-                        newCharges = CHARGES_PER_KIT;
-                        setTimeout(() => {
-                            setMessage("KIT EMPTY - NEW KIT EQUIPPED (" + newKits + " remaining)");
-                            setTimeout(() => setMessage(null), 1500);
-                        }, 1500);
-                    } else if (newCharges === 0 && newKits === 0) {
-                        setTimeout(() => {
-                            setMessage("WARNING: NO DISARM KITS LEFT!");
-                            setTimeout(() => setMessage(null), 2000);
-                        }, 1500);
-                    } else {
-                        setTimeout(() => setMessage(null), 1500);
-                    }
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const ny = y + dy, nx = x + dx;
+                        if (ny >= 0 && ny < GRID_CONFIG.ROWS && nx >= 0 && nx < GRID_CONFIG.COLUMNS) {
+                            const oldCount = newGrid[ny][nx].neighborMines;
+                            const newCount = Math.max(0, oldCount - 1);
+                            newGrid[ny][nx] = { ...newGrid[ny][nx], neighborMines: newCount };
 
-                    return {
-                        ...prev,
-                        disarmCharges: newCharges,
-                        disarmKits: newKits,
-                        defusedMines: isMine ? prev.defusedMines + 1 : prev.defusedMines
-                    };
-                });
-
-                if (isMine) {
-                    // Was a mine - defuse it and update neighbor counts
-                    newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, isMine: false, flag: FlagType.NONE };
-
-                    // Trigger tutorial callback if mine was collected
-                    if (onMineCollected) {
-                        onMineCollected();
-                    }
-
-                    // Track tiles that become 0 after update
-                    const tilesBecomingZero: { x: number, y: number }[] = [];
-
-                    for (let dy = -1; dy <= 1; dy++) {
-                        for (let dx = -1; dx <= 1; dx++) {
-                            const ny = y + dy, nx = x + dx;
-                            if (ny >= 0 && ny < GRID_CONFIG.ROWS && nx >= 0 && nx < GRID_CONFIG.COLUMNS) {
-                                const oldCount = newGrid[ny][nx].neighborMines;
-                                const newCount = Math.max(0, oldCount - 1);
-                                newGrid[ny][nx] = { ...newGrid[ny][nx], neighborMines: newCount };
-
-                                // If this revealed tile just became 0, it should trigger flood fill
-                                if (newGrid[ny][nx].isRevealed && oldCount > 0 && newCount === 0) {
-                                    tilesBecomingZero.push({ x: nx, y: ny });
-                                }
+                            // If this revealed tile just became 0, it should trigger flood fill
+                            if (newGrid[ny][nx].isRevealed && oldCount > 0 && newCount === 0) {
+                                tilesBecomingZero.push({ x: nx, y: ny });
                             }
                         }
-                    }
-
-                    // Flood fill from any revealed tiles that just became 0
-                    const floodFill = (tx: number, ty: number) => {
-                        if (tx < 0 || tx >= GRID_CONFIG.COLUMNS || ty < 0 || ty >= GRID_CONFIG.ROWS) return;
-                        if (newGrid[ty][tx].isRevealed || newGrid[ty][tx].isMine) return;
-                        newGrid[ty][tx].isRevealed = true;
-                        if (newGrid[ty][tx].neighborMines === 0) {
-                            for (let dy = -1; dy <= 1; dy++) {
-                                for (let dx = -1; dx <= 1; dx++) {
-                                    if (dy !== 0 || dx !== 0) floodFill(tx + dx, ty + dy);
-                                }
-                            }
-                        }
-                    };
-
-                    tilesBecomingZero.forEach(tile => {
-                        for (let dy = -1; dy <= 1; dy++) {
-                            for (let dx = -1; dx <= 1; dx++) {
-                                if (dy !== 0 || dx !== 0) floodFill(tile.x + dx, tile.y + dy);
-                            }
-                        }
-                    });
-                } else {
-                    // No mine - just reveal normally
-                    newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, flag: FlagType.NONE };
-                    // Check for item drops - spawn as world items with gravity
-                    const depthFactor = Math.floor(y / 5);
-                    const stoneChance = 0.20 + (depthFactor * 0.01);
-                    const gemChance = 0.10 + (depthFactor * 0.02);
-                    const coalChance = 0.15 + (depthFactor * 0.025);
-                    const rand = Math.random();
-                    let dropType: ItemType | null = null;
-                    if (rand < stoneChance) dropType = 'STONE';
-                    else if (rand < stoneChance + gemChance) dropType = 'GEM';
-                    else if (rand < stoneChance + gemChance + coalChance) dropType = 'COAL';
-                    else if (Math.random() < 0.1) dropType = 'COIN';
-
-                    if (dropType) {
-                        setWorldItems(prev => [...prev, {
-                            id: `drop-${Date.now()}-${Math.random()}`,
-                            x: x + 0.25,
-                            y,
-                            vy: 0,
-                            type: dropType
-                        }]);
-                    }
-
-                    // Flood fill if no neighbors
-                    if (newGrid[y][x].neighborMines === 0) {
-                        const floodFill = (tx: number, ty: number) => {
-                            if (tx < 0 || tx >= GRID_CONFIG.COLUMNS || ty < 0 || ty >= GRID_CONFIG.ROWS || newGrid[ty][tx].isRevealed || newGrid[ty][tx].isMine) return;
-                            newGrid[ty][tx].isRevealed = true;
-                            if (newGrid[ty][tx].neighborMines === 0) {
-                                for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) floodFill(tx + dx, ty + dy);
-                            }
-                        };
-                        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dy !== 0 || dx !== 0) floodFill(x + dx, y + dy);
                     }
                 }
+
+                // Flood fill from any revealed tiles that just became 0
+                const floodFill = (tx: number, ty: number) => {
+                    if (tx < 0 || tx >= GRID_CONFIG.COLUMNS || ty < 0 || ty >= GRID_CONFIG.ROWS) return;
+                    if (newGrid[ty][tx].isRevealed || newGrid[ty][tx].isMine) return;
+                    newGrid[ty][tx].isRevealed = true;
+                    if (newGrid[ty][tx].neighborMines === 0) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (dy !== 0 || dx !== 0) floodFill(tx + dx, ty + dy);
+                            }
+                        }
+                    }
+                };
+
+                tilesBecomingZero.forEach(tile => {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (dy !== 0 || dx !== 0) floodFill(tile.x + dx, tile.y + dy);
+                        }
+                    }
+                });
             } else {
-                // No charges and tile is flagged - can't dig
-                setMessage("NO DISARM CHARGES - REMOVE FLAG OR BUY KIT");
-                setTimeout(() => setMessage(null), 2000);
-                return; // Don't reveal
+                // No mine - just reveal normally (disarm was a false positive but that's okay)
+                newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, flag: FlagType.NONE, isDisarmed: false };
+
+                // Check for item drops
+                const depthFactor = Math.floor(y / 5);
+                const stoneChance = 0.20 + (depthFactor * 0.01);
+                const gemChance = 0.10 + (depthFactor * 0.02);
+                const coalChance = 0.15 + (depthFactor * 0.025);
+                const rand = Math.random();
+                let dropType: ItemType | null = null;
+                if (rand < stoneChance) dropType = 'STONE';
+                else if (rand < stoneChance + gemChance) dropType = 'GEM';
+                else if (rand < stoneChance + gemChance + coalChance) dropType = 'COAL';
+                else if (Math.random() < 0.1) dropType = 'COIN';
+
+                if (dropType) {
+                    setWorldItems(prev => [...prev, {
+                        id: `drop-${Date.now()}-${Math.random()}`,
+                        x: x + 0.25,
+                        y,
+                        vy: 0,
+                        type: dropType
+                    }]);
+                }
+
+                // Flood fill if no neighbors
+                if (newGrid[y][x].neighborMines === 0) {
+                    const floodFill = (tx: number, ty: number) => {
+                        if (tx < 0 || tx >= GRID_CONFIG.COLUMNS || ty < 0 || ty >= GRID_CONFIG.ROWS || newGrid[ty][tx].isRevealed || newGrid[ty][tx].isMine) return;
+                        newGrid[ty][tx].isRevealed = true;
+                        if (newGrid[ty][tx].neighborMines === 0) {
+                            for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) floodFill(tx + dx, ty + dy);
+                        }
+                    };
+                    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dy !== 0 || dx !== 0) floodFill(x + dx, y + dy);
+                }
             }
+        } else if (tile.flag === FlagType.MINE && !tile.isDisarmed) {
+            // Has flag but NOT disarmed - this shouldn't happen in normal play since 
+            // flagging now always sets isDisarmed. But handle edge case: treat as unable to dig.
+            setMessage("FLAG NOT DISARMED - REFLAG TILE");
+            setTimeout(() => setMessage(null), 2000);
+            return; // Don't reveal
         } else if (tile.isMine) {
             // Check if we're in mine collection tutorial FIRST - before any explosion
             // During MINE_COLLECT_2: intercept the attempt without exploding, prompt to flag
@@ -336,21 +297,82 @@ export const useMining = (
 
     const handleFlagAction = useCallback((tx: number, ty: number, status: GameStatus, isMenuOpen: boolean) => {
         if (status !== GameStatus.PLAYING || isMenuOpen || ty < 0) return;
-        setGrid(prev => {
-            const newGrid = prev.map(row => row.map(t => ({ ...t })));
-            if (!newGrid[ty][tx].isRevealed) {
-                const wasNotFlagged = newGrid[ty][tx].flag !== FlagType.MINE;
-                newGrid[ty][tx].flag = newGrid[ty][tx].flag === FlagType.MINE ? FlagType.NONE : FlagType.MINE;
 
-                // Call tutorial callback if tile was just flagged (not unflagged)
-                if (wasNotFlagged && newGrid[ty][tx].flag === FlagType.MINE && onTileFlagged) {
+        const tile = gridRef.current[ty]?.[tx];
+        if (!tile || tile.isRevealed) return; // Can't flag revealed tiles
+
+        // If already flagged, allow unflagging (no refund)
+        if (tile.flag === FlagType.MINE) {
+            setGrid(prev => {
+                const newGrid = prev.map(row => row.map(t => ({ ...t })));
+                newGrid[ty][tx].flag = FlagType.NONE;
+                // Note: isDisarmed stays true - the mine is still safe even after removing flag
+                gridRef.current = newGrid;
+                return newGrid;
+            });
+            return;
+        }
+
+        // Placing a new flag - requires a disarm charge
+        setInventory(prev => {
+            let newCharges = prev.disarmCharges;
+            let newKits = prev.disarmKits;
+
+            // Check if we have charges or can equip a new kit
+            if (newCharges === 0 && newKits > 0) {
+                newKits -= 1;
+                newCharges = CHARGES_PER_KIT;
+                setMessage("NEW KIT EQUIPPED");
+                setTimeout(() => setMessage(null), 1500);
+            }
+
+            if (newCharges === 0) {
+                // No charges available
+                setMessage("NO DISARM CHARGES - BUY MORE KITS!");
+                setTimeout(() => setMessage(null), 2000);
+                return prev; // Don't modify inventory
+            }
+
+            // Consume a charge
+            newCharges -= 1;
+
+            // Place the flag and mark tile as disarmed
+            setGrid(prevGrid => {
+                const newGrid = prevGrid.map(row => row.map(t => ({ ...t })));
+                newGrid[ty][tx].flag = FlagType.MINE;
+                newGrid[ty][tx].isDisarmed = true; // Mark as safely disarmed
+                gridRef.current = newGrid;
+
+                // Call tutorial callback if tile was just flagged
+                if (onTileFlagged) {
                     onTileFlagged(tx, ty);
                 }
+
+                return newGrid;
+            });
+
+            // Auto-equip new kit if charges are now empty
+            if (newCharges === 0 && newKits > 0) {
+                newKits -= 1;
+                newCharges = CHARGES_PER_KIT;
+                setTimeout(() => {
+                    setMessage("KIT EMPTY - NEW KIT EQUIPPED (" + newKits + " remaining)");
+                    setTimeout(() => setMessage(null), 1500);
+                }, 500);
+            } else if (newCharges === 0 && newKits === 0) {
+                setTimeout(() => {
+                    setMessage("WARNING: NO DISARM KITS LEFT!");
+                    setTimeout(() => setMessage(null), 2000);
+                }, 500);
             }
-            gridRef.current = newGrid;
-            return newGrid;
+
+            return {
+                ...prev,
+                disarmCharges: newCharges,
+                disarmKits: newKits
+            };
         });
-    }, [onTileFlagged]);
+    }, [onTileFlagged, setInventory, setMessage]);
 
     return { grid, setGrid, gridRef, initGrid, revealTileAt, handleFlagAction, selectedTarget, setSelectedTarget };
 };
