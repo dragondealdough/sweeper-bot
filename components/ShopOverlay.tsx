@@ -377,9 +377,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
           {/* Explicit Scroll Control Bar */}
           <div className="w-12 bg-slate-800 border-l border-slate-700 flex flex-col shrink-0">
             <button
-              onMouseDown={() => scrollBy(-100)} // Repeat on hold could be added, simplified for now
-              onClick={() => scrollBy(-100)}
-              className={`flex-1 flex items-center justify-center text-amber-500 hover:bg-slate-700 transition-colors border-b border-slate-700 ${showScrollArrows.up ? 'opacity-100' : 'opacity-30'}`}
+              onMouseDown={() => !showTutorialMessage && showScrollArrows.up && scrollBy(-100)}
+              onClick={() => !showTutorialMessage && showScrollArrows.up && scrollBy(-100)}
+              disabled={!showScrollArrows.up || !!showTutorialMessage}
+              className={`flex-1 flex items-center justify-center text-amber-500 transition-colors border-b border-slate-700 ${showScrollArrows.up && !showTutorialMessage ? 'opacity-100 hover:bg-slate-700 cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5L5 15H19L12 5Z" fill="currentColor" />
@@ -392,9 +393,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
             </div>
 
             <button
-              onMouseDown={() => scrollBy(100)}
-              onClick={() => scrollBy(100)}
-              className={`flex-1 flex items-center justify-center text-amber-500 hover:bg-slate-700 transition-colors border-t border-slate-700 ${showScrollArrows.down ? 'opacity-100' : 'opacity-30'}`}
+              onMouseDown={() => !showTutorialMessage && showScrollArrows.down && scrollBy(100)}
+              onClick={() => !showTutorialMessage && showScrollArrows.down && scrollBy(100)}
+              disabled={!showScrollArrows.down || !!showTutorialMessage}
+              className={`flex-1 flex items-center justify-center text-amber-500 transition-colors border-t border-slate-700 ${showScrollArrows.down && !showTutorialMessage ? 'opacity-100 hover:bg-slate-700 cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M12 19L19 9H5L12 19Z" fill="currentColor" />

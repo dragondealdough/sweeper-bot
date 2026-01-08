@@ -313,7 +313,22 @@ export const useMining = (
             return;
         }
 
-        // Placing a new flag - requires a disarm charge
+        // If already disarmed but no flag (shouldn't happen normally), just add flag visually
+        if (tile.isDisarmed) {
+            setGrid(prev => {
+                const newGrid = prev.map(row => row.map(t => ({ ...t })));
+                newGrid[ty][tx].flag = FlagType.MINE;
+                gridRef.current = newGrid;
+                return newGrid;
+            });
+            return;
+        }
+
+        // Read current inventory state synchronously via ref workaround
+        // We need to check if we can place a flag before doing it
+        // Use a ref to track the inventory state internally
+        let canPlaceFlag = false;
+
         setInventory(prev => {
             let newCharges = prev.disarmCharges;
             let newKits = prev.disarmKits;
@@ -330,26 +345,13 @@ export const useMining = (
                 // No charges available
                 setMessage("NO DISARM CHARGES - BUY MORE KITS!");
                 setTimeout(() => setMessage(null), 2000);
+                canPlaceFlag = false;
                 return prev; // Don't modify inventory
             }
 
             // Consume a charge
             newCharges -= 1;
-
-            // Place the flag and mark tile as disarmed
-            setGrid(prevGrid => {
-                const newGrid = prevGrid.map(row => row.map(t => ({ ...t })));
-                newGrid[ty][tx].flag = FlagType.MINE;
-                newGrid[ty][tx].isDisarmed = true; // Mark as safely disarmed
-                gridRef.current = newGrid;
-
-                // Call tutorial callback if tile was just flagged
-                if (onTileFlagged) {
-                    onTileFlagged(tx, ty);
-                }
-
-                return newGrid;
-            });
+            canPlaceFlag = true;
 
             // Auto-equip new kit if charges are now empty
             if (newCharges === 0 && newKits > 0) {
@@ -372,6 +374,30 @@ export const useMining = (
                 disarmKits: newKits
             };
         });
+
+        // Place the flag after inventory update - use setTimeout to defer to next tick
+        // This ensures the inventory update completes first
+        setTimeout(() => {
+            if (canPlaceFlag) {
+                setGrid(prevGrid => {
+                    const newGrid = prevGrid.map(row => row.map(t => ({ ...t })));
+                    // Double-check the tile isn't already flagged (race condition guard)
+                    if (newGrid[ty][tx].flag === FlagType.MINE) {
+                        return prevGrid; // Already flagged, don't change
+                    }
+                    newGrid[ty][tx].flag = FlagType.MINE;
+                    newGrid[ty][tx].isDisarmed = true;
+                    gridRef.current = newGrid;
+
+                    // Call tutorial callback if tile was just flagged
+                    if (onTileFlagged) {
+                        onTileFlagged(tx, ty);
+                    }
+
+                    return newGrid;
+                });
+            }
+        }, 0);
     }, [onTileFlagged, setInventory, setMessage]);
 
     return { grid, setGrid, gridRef, initGrid, revealTileAt, handleFlagAction, selectedTarget, setSelectedTarget };
