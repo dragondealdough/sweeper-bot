@@ -20,7 +20,8 @@ import { useMining } from './hooks/useMining';
 import { useGameActions } from './hooks/useGameActions';
 import { useKeyboard } from './hooks/useKeyboard';
 import { useGameState } from './hooks/useGameState';
-import { useTutorial, INTERACTIVE_STEPS } from './hooks/useTutorial';
+import { useTutorial } from './hooks/useTutorial';
+import { useTutorialGuard } from './hooks/useTutorialGuard';
 import { useGameSettings } from './hooks/useGameSettings';
 import { useSaveGame } from './hooks/useSaveGame';
 import { useMusic } from './hooks/useMusic';
@@ -254,25 +255,7 @@ const App: React.FC = () => {
     mining.handleFlagAction(tx, ty, status, isMenuOpen);
   }, [mining.handleFlagAction, mining.gridRef, state.playerRef]);
 
-  const { getTargetTile } = useKeyboard({
-    status: state.status, isShopOpen: state.isShopOpen, isRecyclerOpen: state.isRecyclerOpen,
-    isInventoryOpen: state.isInventoryOpen, isConstructionOpen: state.isConstructionOpen,
-    playerRef: state.playerRef, ropeLength: state.ropeLength, inventory: state.inventory,
-    timeRef: state.timeRef, EVENING_THRESHOLD_MS, HOUSE_X, SHOP_X, RECYCLER_X,
-    CONSTRUCTION_X, ROPE_X, OVERWORLD_FLOOR_Y, keys: state.keys,
-    setIsInventoryOpen: state.setIsInventoryOpen, setIsShopOpen: state.setIsShopOpen,
-    setIsRecyclerOpen: state.setIsRecyclerOpen, setIsConstructionOpen: state.setIsConstructionOpen,
-    setMessage: state.setMessage, revealTileAt: mining.revealTileAt, startClimbing,
-    handleFlagAction: smartHandleFlagAction,
-    handleSleep: () => actionsWithGrid.handleSleep(false, state.dayCount),
-    onShopOpen: tutorial.onShopOpened,
-    onConstructionOpen: tutorial.onConstructionOpened,
-    onConstructionClosed: tutorial.onConstructionClosed,
-    onRecyclerOpen: tutorial.onRecyclerOpened,
-    tutorialState: tutorial.tutorialState,
-    depth: state.depth,
-    selectedTarget: mining.selectedTarget
-  });
+
 
   const initGame = useCallback(() => {
     // Start with fade-in effect
@@ -389,13 +372,28 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleDevToolsKey);
   }, [state.status]);
 
-  // Tap-to-Mine Logic
-  const handleTileInteraction = useCallback((x: number, y: number) => {
-    // Only valid for mine tiles
-    if (y < 0) return;
+  // Instantiate Tutorial Guard
+  const tutorialGuard = useTutorialGuard(tutorial.tutorialState, mining.grid);
 
-    // Check basic adjacency range (within ~1.5 tiles Chebyshev distance for diagonals or Manhattan for strict)
-    // Relaxed range for mobile gameplay feel
+  // Safe reveal with Tutorial Guard checks
+  const safeRevealTileAt = useCallback((x: number, y: number, inventory: Inventory, depth: number, isInitial: boolean = true) => {
+    const permission = tutorialGuard.canMine(x, y);
+    if (!permission.allowed) {
+      if (permission.reason === 'ANTI_CHEAT' && permission.minePos) {
+        tutorial.onObviousMineIgnored(permission.minePos);
+      }
+      // If reason is TUTORIAL_BLOCK, we just silently block (or maybe shake screen?)
+      return;
+    }
+    mining.revealTileAt(x, y, inventory, depth, isInitial);
+  }, [tutorialGuard, mining.revealTileAt, tutorial.onObviousMineIgnored]);
+
+  // Handle Tile Interaction (Tap/Click)
+  const handleTileInteraction = useCallback((x: number, y: number) => {
+    // 1. Check bounds and validity
+    if (x < 0 || y < 0 || x >= GRID_CONFIG.COLUMNS || y >= GRID_CONFIG.ROWS) return;
+
+    // 2. Check Range
     const dx = Math.abs(x - state.player.x);
     const dy = Math.abs(y - state.player.y);
     const inRange = dx < 1.8 && dy < 1.8;
@@ -415,7 +413,7 @@ const App: React.FC = () => {
       const adj2X = targetTileX;
       const adj2Y = playerTileY;
 
-      // Check if both adjacent tiles are unrevealed (blocking the diagonal)
+      // Check if both adjacent tiles exist and are unrevealed (blocking the diagonal)
       const adj1 = mining.grid[adj1Y]?.[adj1X];
       const adj2 = mining.grid[adj2Y]?.[adj2X];
 
@@ -429,7 +427,7 @@ const App: React.FC = () => {
     if (mining.selectedTarget?.x === x && mining.selectedTarget?.y === y) {
       if (inRange && !isDiagonalBlocked) {
         // Confirm Mine
-        mining.revealTileAt(x, y, state.inventory, state.depth);
+        safeRevealTileAt(x, y, state.inventory, state.depth);
         mining.setSelectedTarget(null);
         // Play dig sound? (implicitly handled by reveal logic or listener?)
         // Haptic feedback
@@ -455,7 +453,28 @@ const App: React.FC = () => {
         // Unless it's a revealed tile with an item?
       }
     }
-  }, [state.player.x, state.player.y, mining.selectedTarget, mining.revealTileAt, state.inventory, state.depth, mining.grid]);
+  }, [state.player, mining.grid, mining.selectedTarget, safeRevealTileAt, mining.setSelectedTarget, state.inventory, state.depth]);
+
+  const { getTargetTile } = useKeyboard({
+    status: state.status, isShopOpen: state.isShopOpen, isRecyclerOpen: state.isRecyclerOpen,
+    isInventoryOpen: state.isInventoryOpen, isConstructionOpen: state.isConstructionOpen,
+    playerRef: state.playerRef, ropeLength: state.ropeLength, inventory: state.inventory,
+    timeRef: state.timeRef, EVENING_THRESHOLD_MS, HOUSE_X, SHOP_X, RECYCLER_X,
+    CONSTRUCTION_X, ROPE_X, OVERWORLD_FLOOR_Y, keys: state.keys,
+    setIsInventoryOpen: state.setIsInventoryOpen, setIsShopOpen: state.setIsShopOpen,
+    setIsRecyclerOpen: state.setIsRecyclerOpen, setIsConstructionOpen: state.setIsConstructionOpen,
+    setMessage: state.setMessage, revealTileAt: safeRevealTileAt, startClimbing,
+    handleFlagAction: smartHandleFlagAction,
+    handleSleep: () => actionsWithGrid.handleSleep(false, state.dayCount),
+    onShopOpen: tutorial.onShopOpened,
+    onConstructionOpen: tutorial.onConstructionOpened,
+    onConstructionClosed: tutorial.onConstructionClosed,
+    onRecyclerOpen: tutorial.onRecyclerOpened,
+    tutorialState: tutorial.tutorialState,
+    depth: state.depth,
+    selectedTarget: mining.selectedTarget,
+    isInputBlocked: tutorialGuard.isInputBlocked()
+  });
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -831,7 +850,7 @@ const App: React.FC = () => {
         visible={isMobile && !state.isShopOpen && !state.isRecyclerOpen && !state.isInventoryOpen && !state.isConstructionOpen}
         opacity={settings.controlOpacity / 100}
         canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
-        disabled={tutorial.tutorialState.showingMessage && !INTERACTIVE_STEPS.has(tutorial.tutorialState.currentStep)}
+        disabled={tutorialGuard.isInputBlocked()}
       />
 
     </div>
