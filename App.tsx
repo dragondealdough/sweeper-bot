@@ -818,7 +818,7 @@ const App: React.FC = () => {
 
       {/* Mobile Touch Controls */}
       <TouchControls
-        visible={isMobile}
+        visible={isMobile && !state.isShopOpen && !state.isRecyclerOpen && !state.isInventoryOpen && !state.isConstructionOpen}
         opacity={settings.controlOpacity / 100}
         canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
       />
