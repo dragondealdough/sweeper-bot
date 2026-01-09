@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { getMusicEngine } from '../audio/MusicEngine';
 import { getMenuMusicEngine } from '../audio/MenuMusicEngine';
 
@@ -12,13 +12,18 @@ export const useMusic = (options: UseMusicOptions) => {
     const menuEngineRef = useRef(getMenuMusicEngine());
     const hasGameStartedRef = useRef(false);
     const hasMenuStartedRef = useRef(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const savedVolumeRef = useRef({ master: options.masterVolume, music: options.musicVolume });
 
     // Update volume when settings change
     useEffect(() => {
-        const effectiveVolume = (options.masterVolume / 100) * (options.musicVolume / 100) * 100;
-        gameEngineRef.current.setVolume(effectiveVolume);
-        menuEngineRef.current.setVolume(effectiveVolume);
-    }, [options.masterVolume, options.musicVolume]);
+        savedVolumeRef.current = { master: options.masterVolume, music: options.musicVolume };
+        if (!isMuted) {
+            const effectiveVolume = (options.masterVolume / 100) * (options.musicVolume / 100) * 100;
+            gameEngineRef.current.setVolume(effectiveVolume);
+            menuEngineRef.current.setVolume(effectiveVolume);
+        }
+    }, [options.masterVolume, options.musicVolume, isMuted]);
 
     const startMusic = useCallback(() => {
         // Stop menu music and start game music
@@ -50,6 +55,23 @@ export const useMusic = (options: UseMusicOptions) => {
         menuEngineRef.current.stop();
     }, []);
 
+    const toggleMute = useCallback(() => {
+        setIsMuted(prev => {
+            const newMuted = !prev;
+            if (newMuted) {
+                // Mute - set volume to 0
+                gameEngineRef.current.setVolume(0);
+                menuEngineRef.current.setVolume(0);
+            } else {
+                // Unmute - restore saved volume
+                const effectiveVolume = (savedVolumeRef.current.master / 100) * (savedVolumeRef.current.music / 100) * 100;
+                gameEngineRef.current.setVolume(effectiveVolume);
+                menuEngineRef.current.setVolume(effectiveVolume);
+            }
+            return newMuted;
+        });
+    }, []);
+
     // Cleanup on unmount
     useEffect(() => {
         return () => {
@@ -63,6 +85,8 @@ export const useMusic = (options: UseMusicOptions) => {
         stopMusic,
         startMenuMusic,
         stopMenuMusic,
+        toggleMute,
+        isMuted,
         isPlaying: hasGameStartedRef.current,
         isMenuPlaying: hasMenuStartedRef.current,
     };

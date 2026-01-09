@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { GameSettings } from '../hooks/useGameSettings';
 import { APP_VERSION } from '../constants';
 
@@ -7,7 +7,9 @@ interface MainMenuProps {
     onStartNewGame: () => void;
     onContinueGame: () => void;
     onOpenOptions: () => void;
-    onMenuClick: () => void;
+    startMenuMusic: () => void;
+    toggleMute: () => void;
+    isMuted: boolean;
     isOptionsOpen: boolean;
     settings: GameSettings;
     onUpdateSetting: <K extends keyof GameSettings>(key: K, value: GameSettings[K]) => void;
@@ -128,15 +130,44 @@ const MainMenu: React.FC<MainMenuProps> = ({
     onStartNewGame,
     onContinueGame,
     onOpenOptions,
-    onMenuClick,
+    startMenuMusic,
+    toggleMute,
+    isMuted,
 }) => {
     const [time, setTime] = useState(0);
+    const [fadingOut, setFadingOut] = useState(false);
+    const [pressedButton, setPressedButton] = useState<'new' | 'continue' | null>(null);
 
     // Animation timer
     useEffect(() => {
         const interval = setInterval(() => setTime(t => t + 1), 100);
         return () => clearInterval(interval);
     }, []);
+
+    // Auto-start music on mount
+    useEffect(() => {
+        // Small delay to ensure audio context is ready
+        const timer = setTimeout(() => {
+            startMenuMusic();
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [startMenuMusic]);
+
+    // Handle game start with fade transition
+    const handleGameStart = useCallback((action: () => void, buttonType: 'new' | 'continue') => {
+        if (fadingOut) return;
+        setPressedButton(buttonType);
+
+        // Button feedback delay, then start fade
+        setTimeout(() => {
+            setFadingOut(true);
+
+            // After fade completes, trigger the actual action
+            setTimeout(() => {
+                action();
+            }, 600); // Match fade duration
+        }, 150); // Button press feedback duration
+    }, [fadingOut]);
 
     // Generate random elements once
     const clouds = useMemo(() => [
@@ -163,10 +194,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
         })), []);
 
     return (
-        <div
-            className="relative h-screen w-screen overflow-hidden cursor-pointer"
-            onClick={onMenuClick}
-        >
+        <div className="relative h-screen w-screen overflow-hidden">
             {/* Gradient sky background - warm sunset/sunrise feel */}
             <div
                 className="absolute inset-0"
@@ -263,11 +291,14 @@ const MainMenu: React.FC<MainMenuProps> = ({
                 <div className="flex flex-col gap-3 items-center">
                     {hasSave && (
                         <button
-                            onClick={(e) => { e.stopPropagation(); onContinueGame(); }}
-                            className="group relative px-10 py-3 bg-gradient-to-b from-emerald-600 to-emerald-700 
+                            onClick={(e) => { e.stopPropagation(); handleGameStart(onContinueGame, 'continue'); }}
+                            disabled={fadingOut}
+                            className={`group relative px-10 py-3 bg-gradient-to-b from-emerald-600 to-emerald-700 
                          text-white font-bold rounded-lg border-2 border-emerald-500/50
                          shadow-lg hover:from-emerald-500 hover:to-emerald-600 
-                         active:translate-y-1 transition-all text-sm tracking-wider"
+                         transition-all text-sm tracking-wider
+                         ${pressedButton === 'continue' ? 'scale-95 brightness-125' : 'active:translate-y-1'}
+                         ${fadingOut ? 'pointer-events-none' : ''}`}
                         >
                             <span className="relative z-10">Continue Journey</span>
                             <div className="absolute inset-0 rounded-lg bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -275,11 +306,14 @@ const MainMenu: React.FC<MainMenuProps> = ({
                     )}
 
                     <button
-                        onClick={(e) => { e.stopPropagation(); onStartNewGame(); }}
-                        className="group relative px-12 py-4 bg-gradient-to-b from-amber-500 to-amber-600 
+                        onClick={(e) => { e.stopPropagation(); handleGameStart(onStartNewGame, 'new'); }}
+                        disabled={fadingOut}
+                        className={`group relative px-12 py-4 bg-gradient-to-b from-amber-500 to-amber-600 
                        text-amber-950 font-black rounded-lg border-2 border-amber-400/50
                        shadow-xl hover:from-amber-400 hover:to-amber-500 
-                       active:translate-y-1 transition-all text-lg tracking-wide"
+                       transition-all text-lg tracking-wide
+                       ${pressedButton === 'new' ? 'scale-95 brightness-125' : 'active:translate-y-1'}
+                       ${fadingOut ? 'pointer-events-none' : ''}`}
                     >
                         <span className="relative z-10">Begin Adventure</span>
                         <div className="absolute inset-0 rounded-lg bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -287,25 +321,40 @@ const MainMenu: React.FC<MainMenuProps> = ({
 
                     <button
                         onClick={(e) => { e.stopPropagation(); onOpenOptions(); }}
-                        className="group relative px-8 py-2.5 bg-gradient-to-b from-stone-600 to-stone-700 
+                        disabled={fadingOut}
+                        className={`group relative px-8 py-2.5 bg-gradient-to-b from-stone-600 to-stone-700 
                        text-stone-200 font-semibold rounded-lg border-2 border-stone-500/50
                        shadow-lg hover:from-stone-500 hover:to-stone-600 
-                       active:translate-y-1 transition-all text-sm tracking-wider"
+                       active:translate-y-1 transition-all text-sm tracking-wider
+                       ${fadingOut ? 'pointer-events-none opacity-50' : ''}`}
                     >
                         <span className="relative z-10">⚙ Options</span>
                         <div className="absolute inset-0 rounded-lg bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
                 </div>
 
-                {/* Hint text */}
-                <p className="absolute bottom-6 text-amber-200/40 text-xs tracking-wider animate-pulse">
-                    Click anywhere to start music ♪
-                </p>
-                {/* Version Number - Moved to Top Left for mobile safety */}
+                {/* Version Number */}
                 <div className="absolute top-4 left-4 text-white/20 text-[10px] font-mono pointer-events-none select-none z-50">
                     {APP_VERSION}
                 </div>
+
+                {/* Music Mute/Unmute Button */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); toggleMute(); }}
+                    className="absolute bottom-4 right-4 w-10 h-10 flex items-center justify-center 
+                             bg-black/30 hover:bg-black/50 rounded-full transition-all
+                             text-white/70 hover:text-white text-xl"
+                    title={isMuted ? 'Unmute Music' : 'Mute Music'}
+                >
+                    {isMuted ? '🔇' : '🔊'}
+                </button>
             </div>
+
+            {/* Fade to black overlay */}
+            <div
+                className={`absolute inset-0 bg-black pointer-events-none transition-opacity duration-[600ms] ease-in-out z-50
+                           ${fadingOut ? 'opacity-100' : 'opacity-0'}`}
+            />
 
             {/* CSS Animations */}
             <style>{`

@@ -35,7 +35,7 @@ const App: React.FC = () => {
   const { isMobile, isLandscape } = useDeviceDetection();
   const { settings, updateSetting, resetSettings } = useGameSettings();
   const saveSystem = useSaveGame();
-  const { startMusic, startMenuMusic } = useMusic({
+  const { startMusic, startMenuMusic, toggleMute, isMuted } = useMusic({
     masterVolume: settings.masterVolume,
     musicVolume: settings.musicVolume,
   });
@@ -44,6 +44,7 @@ const App: React.FC = () => {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   const [hasSave, setHasSave] = useState(false);
+  const [gameFadingIn, setGameFadingIn] = useState(false);
 
   // Camera State Ref for sticky mode (Mine vs Overworld)
   const isMineModeRef = useRef(false);
@@ -231,6 +232,9 @@ const App: React.FC = () => {
   });
 
   const initGame = useCallback(() => {
+    // Start with fade-in effect
+    setGameFadingIn(true);
+
     mining.initGrid();
     const startPos = { x: HOUSE_X, y: OVERWORLD_FLOOR_Y, vx: 0, vy: 0, facing: Direction.DOWN, isClimbing: false };
     state.playerRef.current = startPos;
@@ -262,6 +266,9 @@ const App: React.FC = () => {
     state.setDayCount(1);
     state.wellIncomeRef.current = 60000;
     startMusic(); // Start background music
+
+    // Clear fade-in after animation completes
+    setTimeout(() => setGameFadingIn(false), 600);
   }, [mining, state, OVERWORLD_FLOOR_Y, HOUSE_X, startMusic]);
 
   // Trigger tutorial when shop opens
@@ -437,6 +444,9 @@ const App: React.FC = () => {
     const saveData = saveSystem.loadGame();
     if (!saveData) return;
 
+    // Start with fade-in effect
+    setGameFadingIn(true);
+
     state.playerRef.current = saveData.player;
     state.setPlayer(saveData.player);
     state.setCoins(saveData.coins);
@@ -452,6 +462,9 @@ const App: React.FC = () => {
     if (saveData.tutorialCompleted) {
       tutorial.skipTutorial(() => { });
     }
+
+    // Clear fade-in after animation completes
+    setTimeout(() => setGameFadingIn(false), 600);
   }, [saveSystem, state, mining, tutorial, startMusic]);
 
   // Auto-save when day ends or entering buildings
@@ -506,7 +519,9 @@ const App: React.FC = () => {
         }}
         onContinueGame={loadSavedGame}
         onOpenOptions={() => setIsOptionsOpen(true)}
-        onMenuClick={startMenuMusic}
+        startMenuMusic={startMenuMusic}
+        toggleMute={toggleMute}
+        isMuted={isMuted}
         isOptionsOpen={isOptionsOpen}
         settings={settings}
         onUpdateSetting={updateSetting}
@@ -635,8 +650,8 @@ const App: React.FC = () => {
         className={`fixed inset-0 bg-white z-[300] pointer-events-none transition-opacity duration-1000 ease-out ${explosionFlash ? 'opacity-100' : 'opacity-0'}`}
       />
 
-      {/* Tutorial Overlay */}
-      {state.status === GameStatus.PLAYING && (
+      {/* Tutorial Overlay - hide during fade-in */}
+      {state.status === GameStatus.PLAYING && !gameFadingIn && (
         <TutorialOverlay
           tutorialState={tutorial.tutorialState}
           onDismiss={tutorial.dismissMessage}
@@ -659,6 +674,12 @@ const App: React.FC = () => {
           isMobile={isMobile}
         />
       )}
+
+      {/* Game Fade-in Overlay */}
+      <div
+        className={`fixed inset-0 bg-black pointer-events-none transition-opacity duration-[600ms] ease-out z-[400]
+                   ${gameFadingIn ? 'opacity-100' : 'opacity-0'}`}
+      />
 
       {(state.status === GameStatus.LOST || state.status === GameStatus.WON) && (
         <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-10 text-center animate-in fade-in zoom-in">
