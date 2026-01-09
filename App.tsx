@@ -299,6 +299,11 @@ const App: React.FC = () => {
       });
     }
 
+    // Player descends during recycler phase - trigger ascend arrow
+    if (wasInOverworld && isInMine && tutorial.tutorialState.currentStep === 'ARROW_TO_RECYCLER') {
+      tutorial.onMineEntered(() => { });
+    }
+
     // Leaving mine back to overworld during mine tutorial - re-show arrow
     if (wasInMine && isInOverworld && tutorial.tutorialState.isActive) {
       tutorial.onPlayerReturnedToOverworld();

@@ -633,12 +633,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         {/* Rope Ascend Arrow - shows at rope center in mine when player needs to go up */}
         {ropeBubbleVisible && !isAnyMenuOpen && (
           <div
-            className="absolute pointer-events-none"
+            className="absolute pointer-events-none z-[150]"
             style={{
-              // Position at rope center X in world coordinates, converted to screen
-              left: `${(getMineCenter() - camera.x) * scale}px`,
-              // Position at top of visible area (where rope leads up)
-              top: `${TOP_BAR_HEIGHT * scale + 20}px`,
+              // Rope position in mine: ROPE_X * TILE_SIZE + 20 + 4 (same as MiningSection)
+              // The mine grid starts at left: 0, so we can use pixel coordinates directly
+              left: `${(ROPE_X * GRID_CONFIG.TILE_SIZE + 20 + 4) * scale}px`,
+              // Position near top of visible mine area
+              top: `${TOP_BAR_HEIGHT * scale + 30}px`,
               transform: 'translateX(-50%)',
             }}
           >
