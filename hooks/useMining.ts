@@ -342,7 +342,28 @@ export const useMining = (
             }
 
             if (newCharges === 0) {
-                // No charges available
+                // Check if we're in tutorial mine phase - provide safety net
+                const tutorialMinePhases = [
+                    'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
+                    'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9',
+                    'MINE_HIT_MINE_1', 'MINE_HIT_MINE_2', 'MINE_EXPLAIN_NUMBERS',
+                    'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECT_WAIT'
+                ];
+                const isInTutorialMine = tutorialState?.isActive && tutorialMinePhases.includes(tutorialState.currentStep);
+
+                if (isInTutorialMine) {
+                    // Tutorial safety net - replenish charges with helpful message
+                    newCharges = CHARGES_PER_KIT;
+                    setMessage("Oops! Let me give you more charges. Try to flag the actual mine!");
+                    setTimeout(() => setMessage(null), 3000);
+                    // Don't consume a charge this time - give them a fresh start
+                    return {
+                        ...prev,
+                        disarmCharges: newCharges,
+                    };
+                }
+
+                // No charges available (non-tutorial)
                 setMessage("NO DISARM CHARGES - BUY MORE KITS!");
                 setTimeout(() => setMessage(null), 2000);
                 canPlaceFlag = false;
