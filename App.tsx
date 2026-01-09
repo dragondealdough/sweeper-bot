@@ -20,7 +20,7 @@ import { useMining } from './hooks/useMining';
 import { useGameActions } from './hooks/useGameActions';
 import { useKeyboard } from './hooks/useKeyboard';
 import { useGameState } from './hooks/useGameState';
-import { useTutorial } from './hooks/useTutorial';
+import { useTutorial, INTERACTIVE_STEPS } from './hooks/useTutorial';
 import { useGameSettings } from './hooks/useGameSettings';
 import { useSaveGame } from './hooks/useSaveGame';
 import { useMusic } from './hooks/useMusic';
@@ -822,6 +822,7 @@ const App: React.FC = () => {
         visible={isMobile && !state.isShopOpen && !state.isRecyclerOpen && !state.isInventoryOpen && !state.isConstructionOpen}
         opacity={settings.controlOpacity / 100}
         canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
+        disabled={tutorial.tutorialState.showingMessage && !INTERACTIVE_STEPS.has(tutorial.tutorialState.currentStep)}
       />
 
     </div>

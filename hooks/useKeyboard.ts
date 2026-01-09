@@ -1,7 +1,7 @@
 
 import React, { useEffect, useCallback } from 'react';
 import { GameStatus, Direction, PlayerPosition, Inventory } from '../types';
-import { TutorialState } from './useTutorial';
+import { TutorialState, INTERACTIVE_STEPS } from './useTutorial';
 
 interface KeyboardParams {
   status: GameStatus;
@@ -71,6 +71,14 @@ export const useKeyboard = (params: KeyboardParams) => {
         handleSleep, setIsRecyclerOpen, onRecyclerOpen, setIsConstructionOpen, onConstructionOpen, onConstructionClosed,
         onShopOpen
       } = currentParams;
+
+      // Check if input should be blocked by tutorial
+      // Block if message is showing AND the current step is NOT in the interactive allowed list
+      if (tutorialState &&
+        tutorialState.showingMessage &&
+        !INTERACTIVE_STEPS.has(tutorialState.currentStep)) {
+        return;
+      }
 
       keys.current[e.key] = true;
 

@@ -96,19 +96,20 @@ interface TouchControlsProps {
     visible: boolean;
     opacity?: number;
     canInteract?: boolean; // Whether the interact button should glow
+    disabled?: boolean; // Blocks all interaction
 }
 
-const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7, canInteract = false }) => {
+const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7, canInteract = false, disabled = false }) => {
     if (!visible) return null;
 
     return (
-        <div className="fixed inset-0 pointer-events-none z-[210] flex flex-col justify-end select-none touch-none overflow-hidden" style={{ opacity }}>
+        <div className={`fixed inset-0 pointer-events-none z-[210] flex flex-col justify-end select-none touch-none overflow-hidden ${disabled ? 'opacity-50' : ''}`} style={{ opacity: disabled ? opacity * 0.5 : opacity }}>
 
             {/* Controls Container - Pushed properly to edges for landscape ergonomics */}
             <div className="flex justify-between items-end w-full h-full pointer-events-none">
 
                 {/* LEFT: Virtual Joystick - Needs events */}
-                <div className="relative w-1/3 h-full flex items-end justify-start pb-2 pl-2 pointer-events-auto">
+                <div className={`relative w-1/3 h-full flex items-end justify-start pb-2 pl-2 ${disabled ? 'pointer-events-none' : 'pointer-events-auto'}`}>
                     <VirtualJoystick size={150} className="opacity-80 hover:opacity-100 transition-opacity" />
                 </div>
 
@@ -117,7 +118,7 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7, c
                 <div className="fixed bottom-0 right-0 w-32 h-screen pointer-events-none flex flex-col justify-end items-end pb-8 pr-6 gap-6 z-[101]">
 
                     {/* 3. Utility Action: FLAG / Z (Top) */}
-                    <div className="pointer-events-auto">
+                    <div className={disabled ? 'pointer-events-none' : 'pointer-events-auto'}>
                         <TouchButton
                             keys={['z']}
                             size="w-14 h-14"
@@ -127,7 +128,7 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7, c
                     </div>
 
                     {/* 2. Secondary Action: INTERACT / HAND (Middle) */}
-                    <div className="pointer-events-auto">
+                    <div className={disabled ? 'pointer-events-none' : 'pointer-events-auto'}>
                         <TouchButton
                             keys={['e']}
                             size="w-16 h-16"
@@ -139,7 +140,7 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7, c
                     </div>
 
                     {/* 1. Primary Action: MINE / SPACE (Bottom) */}
-                    <div className="pointer-events-auto">
+                    <div className={disabled ? 'pointer-events-none' : 'pointer-events-auto'}>
                         <TouchButton
                             keys={[' ']}
                             size="w-20 h-20"

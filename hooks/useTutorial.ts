@@ -156,6 +156,18 @@ const CONSTRUCTION_TUTORIAL_SEQUENCE: TutorialStep[] = [
   'CONSTRUCTION_INTRO_6',
 ];
 
+// Steps where the user is allowed to move/interact even if a message is showing
+export const INTERACTIVE_STEPS = new Set<TutorialStep>([
+  'ARROW_TO_SHOP',
+  'ARROW_TO_CONSTRUCTION',
+  'ARROW_TO_MINE',
+  'MINE_INTRO_9',    // "Highlight a block..."
+  'MINE_COLLECT_2',  // "Press spacebar to collect..."
+  'ARROW_TO_ROPE',
+  'ARROW_TO_RECYCLER',
+  'MINE_COLLECT_WAIT', // (Message hidden, but usually interactive)
+]);
+
 export interface TutorialState {
   currentStep: TutorialStep;
   isActive: boolean;
@@ -253,7 +265,7 @@ export const useTutorial = () => {
             currentMessage: message,
           }));
         }
-      }, 1000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [tutorialState.isActive]);
