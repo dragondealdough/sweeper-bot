@@ -3,6 +3,7 @@ import { TutorialState } from '../hooks/useTutorial';
 import { GRID_CONFIG } from '../constants';
 import TutorialMessageDisplay from './TutorialMessageDisplay';
 import TimerSpotlight from './TimerSpotlight';
+import RopeAscendArrow from './RopeAscendArrow';
 
 // CSS for blink animation
 const blinkStyle = `
@@ -442,7 +443,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       {/* Multiple Choice Dialog */}
       {
         tutorialState.currentStep === 'POST_SHOP_CHOICE' && tutorialState.showingChoice && !isShopOpen && (
-          <div className="fixed inset-x-0 bottom-8 z-[200] flex justify-center pointer-events-none px-4">
+          <div className="fixed inset-x-0 bottom-8 z-[230] flex justify-center pointer-events-none px-4">
             <div className="pointer-events-auto max-w-lg w-full">
               <div className="relative bg-stone-900/95 border-2 border-amber-500 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4">
                 <div className="absolute -top-2.5 left-4 bg-amber-500 px-2 py-0.5 rounded-full">
@@ -636,28 +637,13 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         )}
 
         {/* Rope Ascend Arrow - shows at rope center in mine when player needs to go up */}
-        {ropeBubbleVisible && !isAnyMenuOpen && (
-          <div
-            className="absolute pointer-events-none z-[150]"
-            style={{
-              // Rope position in mine: ROPE_X * TILE_SIZE + 20 + 4 (same as MiningSection)
-              // The mine grid starts at left: 0, so we can use pixel coordinates directly
-              left: `${(ROPE_X * GRID_CONFIG.TILE_SIZE + 20 + 4) * scale}px`,
-              // Position near top of visible mine area
-              top: `${TOP_BAR_HEIGHT * scale + 30}px`,
-              transform: 'translateX(-50%)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-1 animate-bounce">
-              <div className="bg-cyan-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap px-3 py-2 text-sm">
-                ↑ Ascend
-              </div>
-              <svg width="20" height="30" viewBox="0 0 20 30" className="text-cyan-500">
-                <path d="M10 30 L10 5 M10 5 L3 12 M10 5 L17 12" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-          </div>
-        )}
+        <RopeAscendArrow
+          visible={ropeBubbleVisible && !isAnyMenuOpen}
+          ropeX={ROPE_X}
+          cameraX={camera.x}
+          scale={scale}
+          topBarHeight={TOP_BAR_HEIGHT}
+        />
 
         {recyclerBubbleVisible && !isAnyMenuOpen && !recyclerBubbleOnScreen && (
           <div
