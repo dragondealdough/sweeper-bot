@@ -142,7 +142,11 @@ export const useMining = (
         if (x < 0 || x >= GRID_CONFIG.COLUMNS || y < 0 || y >= GRID_CONFIG.ROWS) return;
 
         // Guided Mine Discovery (Anti-Cheat for Tutorial)
-        if (tutorialState && tutorialState.isActive && onObviousMineIgnored) {
+        // Skip this check during MINE_COLLECT_2 as it effectively double-blocks the user (first via this, second via the tutorial interrupt)
+        // We only want to enforce this during free-roaming parts of the tutorial where they might try to skip ahead
+        const shouldCheckAntiCheat = tutorialState && tutorialState.isActive && onObviousMineIgnored && tutorialState.currentStep !== 'MINE_COLLECT_2';
+
+        if (shouldCheckAntiCheat) {
             const deducibleMines = checkForObviousMines(gridRef.current);
             if (deducibleMines.length > 0) {
                 // If there ARE deducible mines, the player MUST be interacting with one of them (via flagging, usually)
