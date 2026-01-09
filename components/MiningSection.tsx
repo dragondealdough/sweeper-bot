@@ -73,6 +73,7 @@ const MiningSection: React.FC<MiningSectionProps> = ({
 
         {/* Rope continuation in mine with dynamic length */}
         <div
+          id="mining-rope"
           className="absolute top-0 z-0 w-1 bg-amber-700 shadow-[1px_0_2px_rgba(0,0,0,0.5)] transition-all duration-500"
           style={{
             left: ROPE_X * GRID_CONFIG.TILE_SIZE + 20 + 4,

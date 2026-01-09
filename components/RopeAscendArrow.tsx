@@ -1,48 +1,69 @@
-import React from 'react';
-import { GRID_CONFIG } from '../constants';
+import React, { useEffect, useState } from 'react';
 
 interface RopeAscendArrowProps {
     visible: boolean;
-    ropeX: number;
-    cameraX: number;
-    scale: number;
-    topBarHeight: number;
+    // We don't need manual props anymore, we query the DOM element
+    ropeX?: number;
+    cameraX?: number;
+    scale?: number;
+    topBarHeight?: number;
 }
 
 /**
  * Arrow pointing up to the rope/elevator.
- * Positioned at the top of the screen, but horizontally aligned with the rope's world position.
- * Moves with the camera to stay aligned with the rope.
+ * Uses exact DOM positioning by tracking the 'mining-rope' element.
+ * This ensures it is always perfectly aligned regardless of camera math.
  */
-const RopeAscendArrow: React.FC<RopeAscendArrowProps> = ({
-    visible,
-    ropeX,
-    cameraX,
-    scale,
-    topBarHeight
-}) => {
-    if (!visible) return null;
+const RopeAscendArrow: React.FC<RopeAscendArrowProps> = ({ visible }) => {
+    const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
 
-    // Calculate world X position of the rope center
-    // ROPE_X is tile index. +20 is half tile? No, TILE_SIZE=40.
-    // +4 is board padding?
-    // Based on TutorialOverlay logic: ROPE_X * GRID_CONFIG.TILE_SIZE + 20 + 4
-    const worldRopeCenterX = ropeX * GRID_CONFIG.TILE_SIZE + (GRID_CONFIG.TILE_SIZE / 2) + 4;
+    useEffect(() => {
+        if (!visible) {
+            setPosition(null);
+            return;
+        }
 
-    // Convert to screen coordinates relative to the viewport
-    // We assume the container is positioned at the top-left of the gameplay area
-    const screenX = (worldRopeCenterX - cameraX) * scale;
+        const updatePosition = () => {
+            const ropeElement = document.getElementById('mining-rope');
+            if (ropeElement) {
+                const rect = ropeElement.getBoundingClientRect();
+                setPosition({
+                    left: rect.left + rect.width / 2,
+                    top: rect.top + 30 // 30px down from the top of the rope (which is usually top of screen)
+                });
+            }
+        };
 
-    // Fixed vertical position at the top of the gameplay area
-    const screenY = topBarHeight * scale + 30;
+        // Update immediately
+        updatePosition();
+
+        // Update on frame/resize/scroll
+        // We can use requestAnimationFrame for smooth tracking if camera moves
+        let animationFrameId: number;
+
+        const loop = () => {
+            updatePosition();
+            animationFrameId = requestAnimationFrame(loop);
+        };
+
+        loop();
+
+        window.addEventListener('resize', updatePosition);
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [visible]);
+
+    if (!visible || !position) return null;
 
     return (
         <div
-            className="absolute pointer-events-none z-[150]"
+            className="fixed pointer-events-none z-[150]"
             style={{
-                left: `${screenX}px`,
-                top: `${screenY}px`,
-                transform: 'translateX(-50%)',
+                left: `${position.left}px`,
+                top: `${position.top}px`,
+                transform: 'translate(-50%, 0)', // Center horizontally
             }}
         >
             <div className="flex flex-col items-center gap-1 animate-bounce">
