@@ -133,6 +133,11 @@ const App: React.FC = () => {
     // Apply item loss via actions
     actions.handlePlayerDeath(state.dayCount);
 
+    // If in tutorial, mark as died so we can show resurrection message
+    if (tutorial.tutorialState.isActive) {
+      tutorial.onTutorialDeath();
+    }
+
     // Start death sequence: IMPACT phase
     setDeathPhase('IMPACT');
     if (state.setScreenShake) state.setScreenShake(1);
@@ -305,7 +310,10 @@ const App: React.FC = () => {
 
     // Clear fade-in after animation completes
     setTimeout(() => setGameFadingIn(false), 600);
-  }, [mining, state, OVERWORLD_FLOOR_Y, HOUSE_X, startMusic]);
+
+    // Check for tutorial resurrection message on day start
+    tutorial.checkResurrection();
+  }, [mining, state, OVERWORLD_FLOOR_Y, HOUSE_X, startMusic, tutorial]);
 
   // Handle "Next Day" after death sequence
   const handleDeathNextDay = useCallback(() => {

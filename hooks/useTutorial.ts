@@ -58,6 +58,7 @@ export type TutorialStep =
   | 'RECYCLER_WAIT_2'
   | 'RECYCLER_WAIT_3'
   | 'MINE_COLLECT_WAIT'  // New waiting step
+  | 'RESURRECTION'  // Shown after dying in tutorial
   | 'COMPLETED';
 
 export interface TutorialMessage {
@@ -125,6 +126,7 @@ const TUTORIAL_MESSAGES: Record<TutorialStep, TutorialMessage | null> = {
   RECYCLER_WAIT_1: { text: "Whilst you wait for the recycler, I recommend exploring the mine and seeing what other treasures are down there!", buttonText: "Sounds fun!", character: 'narrator' },
   RECYCLER_WAIT_2: { text: "But a word of warning: Don't dig so far that you are unable to reach the exit rope. If you do leave yourself stranded then your best bet is to discover as much in the mine as you can.", buttonText: "I'll be careful!", character: 'narrator' },
   RECYCLER_WAIT_3: { text: "There are other ways to prevent yourself from becoming stranded, but I'll leave that for you to discover. See you soon!", buttonText: "See you!", character: 'narrator' },
+  RESURRECTION: { text: "You're finally awake! I patched you up so you're as good as new!", buttonText: "Thanks!", character: 'narrator' },
   COMPLETED: null,
 };
 
@@ -180,6 +182,7 @@ export interface TutorialState {
   waitingForFlag?: boolean;
   waitingForDisarm?: boolean;
   taskMinimized?: boolean; // Whether task popup is minimized to HUD
+  diedInTutorial?: boolean; // Track if player died during tutorial for resurrection message
 }
 
 export const useTutorial = () => {
@@ -1374,6 +1377,30 @@ export const useTutorial = () => {
     });
   }, []);
 
+  // Called when player dies during tutorial
+  const onTutorialDeath = useCallback(() => {
+    setTutorialState(prev => ({
+      ...prev,
+      diedInTutorial: true
+    }));
+  }, []);
+
+  // Called on day start to check if we should show resurrection message
+  const checkResurrection = useCallback(() => {
+    setTutorialState(prev => {
+      if (prev.diedInTutorial && prev.isActive) {
+        return {
+          ...prev,
+          currentStep: 'RESURRECTION',
+          showingMessage: true,
+          currentMessage: TUTORIAL_MESSAGES['RESURRECTION'],
+          diedInTutorial: false, // Clear flag after using it
+        };
+      }
+      return prev;
+    });
+  }, []);
+
   return {
     tutorialState,
     dismissMessage,
@@ -1400,6 +1427,8 @@ export const useTutorial = () => {
     skipToTutorialPhase,
     onMineAttemptInterrupt,
     onTileFlagged,
+    onTutorialDeath,
+    checkResurrection,
   };
 };
 
