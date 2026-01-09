@@ -21,6 +21,7 @@ interface ConstructionOverlayProps {
   onClose: () => void;
   tutorialState?: TutorialState;
   onTutorialAdvance?: () => void;
+  isMobile?: boolean;
 }
 
 interface BuildingRequirement {
@@ -39,6 +40,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
   onClose,
   tutorialState,
   onTutorialAdvance,
+  isMobile = false,
 }) => {
   const showTutorialMessage = tutorialState?.showingMessage && tutorialState?.currentMessage;
   const highlightCloseButton = tutorialState?.highlightCloseButton || false;
@@ -399,6 +401,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
           message={tutorialState.currentMessage}
           onAdvance={onTutorialAdvance || (() => { })}
           renderText={renderTextWithBold}
+          isMobile={isMobile}
         />
       )}
     </div>

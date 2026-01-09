@@ -730,6 +730,7 @@ const App: React.FC = () => {
         showFreePickaxe={!tutorial.tutorialState.pickaxeTaken}
         tutorialState={tutorial.tutorialState}
         onTutorialAdvance={tutorial.advanceShopTutorial}
+        isMobile={isMobile}
       />}
       {state.isRecyclerOpen && <RecyclingOverlay inventory={state.inventory} onRecycle={(q) => {
         state.setInventory(p => ({ ...p, defusedMines: p.defusedMines - q }));
@@ -737,7 +738,7 @@ const App: React.FC = () => {
         tutorial.onRecyclingStarted();
       }} onClose={() => state.setIsRecyclerOpen(false)} onOpen={() => tutorial.checkRecyclerMines(state.inventory.defusedMines)} />}
       {state.isInventoryOpen && <InventoryOverlay inventory={state.inventory} onClose={() => state.setIsInventoryOpen(false)} />}
-      {state.isConstructionOpen && <ConstructionOverlay inventory={state.inventory} onContribute={actionsWithGrid.handleContribute} onClose={() => { tutorial.onConstructionClosed(); state.setIsConstructionOpen(false); }} tutorialState={tutorial.tutorialState} onTutorialAdvance={tutorial.dismissMessage} />}
+      {state.isConstructionOpen && <ConstructionOverlay inventory={state.inventory} onContribute={actionsWithGrid.handleContribute} onClose={() => { tutorial.onConstructionClosed(); state.setIsConstructionOpen(false); }} tutorialState={tutorial.tutorialState} onTutorialAdvance={tutorial.dismissMessage} isMobile={isMobile} />}
 
       {/* Explosion White Flash Overlay */}
       <div

@@ -14,6 +14,7 @@ interface ShopOverlayProps {
   showFreePickaxe?: boolean;
   tutorialState?: TutorialState;
   onTutorialAdvance?: () => void;
+  isMobile?: boolean;
 }
 
 const ShopOverlay: React.FC<ShopOverlayProps> = ({
@@ -27,6 +28,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   showFreePickaxe = false,
   tutorialState,
   onTutorialAdvance,
+  isMobile = false,
 }) => {
   const [tab, setTab] = useState<'BUY' | 'SELL'>('BUY');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -418,6 +420,7 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
         <TutorialMessageDisplay
           message={tutorialState.currentMessage}
           onAdvance={onTutorialAdvance || (() => { })}
+          isMobile={isMobile}
         />
       )}
     </div>
