@@ -8,6 +8,7 @@ interface TutorialMessageDisplayProps {
     renderText?: (text: string) => React.ReactNode;
     isTaskStep?: boolean;
     onMinimize?: () => void;
+    isMobile?: boolean; // New prop for mobile detection
 }
 
 const TutorialMessageDisplay: React.FC<TutorialMessageDisplayProps> = ({
@@ -15,7 +16,8 @@ const TutorialMessageDisplay: React.FC<TutorialMessageDisplayProps> = ({
     onAdvance,
     renderText,
     isTaskStep = false,
-    onMinimize
+    onMinimize,
+    isMobile = false
 }) => {
     const { displayedText, isComplete, skip } = useTypingEffect(message.text, 2);
 
@@ -50,8 +52,10 @@ const TutorialMessageDisplay: React.FC<TutorialMessageDisplayProps> = ({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isComplete, skip, onAdvance, shouldShowButton]);
 
+    const positionClass = isMobile ? 'top-20 items-start' : 'bottom-8 items-end';
+
     return (
-        <div className="fixed inset-x-0 bottom-8 z-[160] flex justify-center pointer-events-none px-4">
+        <div className={`fixed inset-x-0 ${positionClass} z-[160] flex justify-center pointer-events-none px-4`}>
             <div className="pointer-events-auto max-w-lg w-full">
                 {/* key added to force re-mount on message change, preventing stale state */}
                 <div key={message.text} className={`relative bg-stone-900/95 border-2 rounded-lg shadow-[0_0_20px_rgba(245,158,11,0.2)] p-4 ${isTaskStep ? 'border-white' : 'border-amber-500'}`}>

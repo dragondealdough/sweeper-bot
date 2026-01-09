@@ -431,6 +431,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           renderText={(text) => renderTextWithBold(text, isMobile)}
           isTaskStep={isTaskStep}
           onMinimize={isTaskStep ? onToggleTaskMinimized : undefined}
+          isMobile={isMobile}
         />
       )}
 
