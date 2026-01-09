@@ -21,7 +21,8 @@ export const useMining = (
     setScreenShake?: React.Dispatch<React.SetStateAction<number>>,
     setPlayerHitFlash?: React.Dispatch<React.SetStateAction<boolean>>,
     onMineAttemptInterrupt?: (x: number, y: number) => void,
-    onTileFlagged?: (x: number, y: number) => void
+    onTileFlagged?: (x: number, y: number) => void,
+    onObviousMineIgnored?: (pos: { x: number, y: number }) => void
 ) => {
     const [grid, setGrid] = useState<TileState[][]>([]);
     const gridRef = useRef<TileState[][]>([]);
@@ -71,8 +72,105 @@ export const useMining = (
         return newGrid;
     }, [ROPE_X]);
 
+    // Helper to find "obvious" mines based on revealed neighbors
+    // An obvious mine is one where a neighbor has N mines around it, and exactly N unrevealed neighbors.
+    // In that case, ALL unrevealed neighbors MUST be mines.
+    const checkForObviousMines = useCallback((currentGrid: TileState[][]) => {
+        const deducibleMines: { x: number, y: number }[] = [];
+        const deducibleSet = new Set<string>();
+
+        for (let y = 0; y < GRID_CONFIG.ROWS; y++) {
+            for (let x = 0; x < GRID_CONFIG.COLUMNS; x++) {
+                const tile = currentGrid[y][x];
+                if (tile.isRevealed && !tile.isMine && tile.neighborMines > 0) {
+                    // Count unrevealed neighbors
+                    const unrevealedNeighbors: { x: number, y: number }[] = [];
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const ny = y + dy, nx = x + dx;
+                            if (ny >= 0 && ny < GRID_CONFIG.ROWS && nx >= 0 && nx < GRID_CONFIG.COLUMNS) {
+                                const neighbor = currentGrid[ny][nx];
+                                if (!neighbor.isRevealed && !neighbor.isDisarmed && neighbor.flag !== FlagType.MINE) {
+                                    // Note: if it's already flagged as mine or disarmed, we don't count it as a "hidden" mine we need to find
+                                    // Actually, for the purpose of "obviousness", we treat flagged/disarmed as "found" or "safe"
+                                    // Wait, the logic is: if unrevealed_neighbors == neighborMines, then all unrevealed are mines.
+                                    // If a neighbor is already flagged/disarmed, it contributes to the "neighborMines" count but is "solved".
+                                    // So we should count neighbors that are NOT revealed.
+                                    unrevealedNeighbors.push({ x: nx, y: ny });
+                                }
+                            }
+                        }
+                    }
+
+                    // But we need to account for ALREADY flagged/disarmed mines.
+                    // Effectively: unrevealed_count == remaining_mines_needed
+                    // remaining_mines_needed = tile.neighborMines - (confirmed_mines_around_it)
+                    // If we assume Flags are correct (which they are in this game logic mostly), we can subtract them.
+
+                    let adjacentFlags = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const ny = y + dy, nx = x + dx;
+                            if (ny >= 0 && ny < GRID_CONFIG.ROWS && nx >= 0 && nx < GRID_CONFIG.COLUMNS) {
+                                const neighbor = currentGrid[ny][nx];
+                                if (neighbor.isDisarmed || neighbor.flag === FlagType.MINE || (neighbor.isRevealed && neighbor.isMine)) {
+                                    adjacentFlags++;
+                                }
+                            }
+                        }
+                    }
+
+                    const remainingMinesNeeded = tile.neighborMines - adjacentFlags;
+
+                    // Simple check: if unrevealed neighbors count matches exactly the mines we still need to find
+                    if (unrevealedNeighbors.length > 0 && unrevealedNeighbors.length === remainingMinesNeeded) {
+                        unrevealedNeighbors.forEach(pos => {
+                            const key = `${pos.x},${pos.y}`;
+                            if (!deducibleSet.has(key)) {
+                                deducibleSet.add(key);
+                                deducibleMines.push(pos);
+                            }
+                        });
+                    }
+                }
+            }
+        }
+        return deducibleMines;
+    }, []);
+
     const revealTileAt = useCallback((x: number, y: number, inventory: Inventory, depth: number, isInitial: boolean = true) => {
         if (x < 0 || x >= GRID_CONFIG.COLUMNS || y < 0 || y >= GRID_CONFIG.ROWS) return;
+
+        // Guided Mine Discovery (Anti-Cheat for Tutorial)
+        if (tutorialState && tutorialState.isActive && onObviousMineIgnored) {
+            const deducibleMines = checkForObviousMines(gridRef.current);
+            if (deducibleMines.length > 0) {
+                // If there ARE deducible mines, the player MUST be interacting with one of them (via flagging, usually)
+                // But wait, revealTileAt is called for MINING (Spacebar).
+                // If there is an obvious mine, the player should be FLAGGING it, not digging somewhere else randomly.
+                // So if they try to dig ANYWHERE that is not a safe tile, we should warn them.
+                // Actually, if there is an obvious mine, digging it would kill them.
+                // If they try to dig a DIFFERENT unknown tile, they are guessing.
+                // So we block digging completely if there are obvious mines that haven't been dealt with?
+                // Or rather: If they try to dig a tile that is NOT deducible as safe...
+                // Simpler approach requested: "player tries mining a different block... tell them 'Look!'"
+
+                // Let's check if the tile they are trying to dig is one of the deducible mines.
+                const isTargetObviousMine = deducibleMines.some(m => m.x === x && m.y === y);
+
+                if (!isTargetObviousMine) {
+                    // They are digging something else. Is it safe to dig?
+                    // If they are just guessing, we block them and point to the obvious mine.
+                    // We pick the first obvious mine to show.
+                    onObviousMineIgnored(deducibleMines[0]);
+                    return;
+                } else {
+                    // They are trying to dig the obvious mine! This will explode (or be handled by tutorial explosion logic).
+                    // That's fine, let it proceed to the mine hit logic.
+                }
+            }
+        }
+
         const tile = gridRef.current[y][x];
         if (tile.isRevealed && !(isInitial && tile.item === 'SILVER_BLOCK')) return;
 

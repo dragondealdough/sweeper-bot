@@ -183,7 +183,8 @@ const App: React.FC = () => {
     state.setScreenShake,
     state.setPlayerHitFlash,
     tutorial.onMineAttemptInterrupt,
-    tutorial.onTileFlagged
+    tutorial.onTileFlagged,
+    tutorial.onObviousMineIgnored
   );
 
   // Injected real gridRef into actions

@@ -1433,6 +1433,19 @@ export const useTutorial = () => {
     });
   }, []);
 
+  const onObviousMineIgnored = useCallback((pos: { x: number; y: number }) => {
+    setTutorialState(prev => ({
+      ...prev,
+      showingMessage: true,
+      currentMessage: {
+        text: "Look! The numbers don't lie. There is definitely a mine here!",
+        buttonText: "My bad!",
+        character: 'narrator'
+      },
+      foundMinePosition: pos,
+    }));
+  }, []);
+
   return {
     tutorialState,
     dismissMessage,
