@@ -423,8 +423,8 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
         <div className="fixed inset-0 bg-black/40 z-[100] pointer-events-none animate-in fade-in duration-500" />
       )}
 
-      {/* Tutorial Message - hide if task is minimized */}
-      {tutorialState.showingMessage && tutorialState.currentMessage && !tutorialState.taskMinimized && (
+      {/* Tutorial Message - hide if task is minimized OR if any menu is open (menus have their own message handling) */}
+      {tutorialState.showingMessage && tutorialState.currentMessage && !tutorialState.taskMinimized && !isAnyMenuOpen && (
         <TutorialMessageDisplay
           message={tutorialState.currentMessage}
           onAdvance={onDismiss}
