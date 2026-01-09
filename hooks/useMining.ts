@@ -199,26 +199,32 @@ export const useMining = (
                 return; // Exit early - let tutorial handle it, mine stays intact
             }
 
-            // Check if we're in mine intro tutorial (extended list) - if so, don't kill player OR explode mine!
-            // Trigger tutorial dialogue instead and preserve the state so they can try again
+            // Check if we're in mine intro tutorial (extended list) - if so, don't kill player but DO explode the mine!
+            // The tile should be revealed/destroyed, just no death sequence
             const mineIntroSteps: string[] = [
                 'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
                 'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9',
-                'MINE_EXPLAIN_NUMBERS', 'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECT_WAIT'
+                'MINE_EXPLAIN_NUMBERS', 'MINE_COLLECT_1', 'MINE_COLLECT_WAIT'
             ];
 
             if (tutorialState && mineIntroSteps.includes(tutorialState.currentStep) && onMineHit) {
-                // Trigger screen shake and sound effect via callback
-                onMineHit();
-
-                // Also trigger visual feedback directly if needed
-                const cameraShake = document.getElementById('camera-shake-layer');
-                if (cameraShake) {
-                    cameraShake.classList.add('animate-shake');
-                    setTimeout(() => cameraShake.classList.remove('animate-shake'), 500);
+                // Tutorial mode: Reveal and destroy the mine tile, but don't trigger death
+                newGrid[y][x] = { ...newGrid[y][x], isRevealed: true, isMine: false };
+                // Update neighbor counts since the mine is gone
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const ny = y + dy, nx = x + dx;
+                        if (ny >= 0 && ny < GRID_CONFIG.ROWS && nx >= 0 && nx < GRID_CONFIG.COLUMNS) {
+                            newGrid[ny][nx] = { ...newGrid[ny][nx], neighborMines: Math.max(0, newGrid[ny][nx].neighborMines - 1) };
+                        }
+                    }
                 }
+                gridRef.current = newGrid;
+                setGrid(newGrid);
 
-                return;
+                // Trigger tutorial dialogue and visual effects
+                onMineHit();
+                return; // Exit early - tutorial handled it, no death
             }
 
             // Unflagged mine - explosion! Remove the mine (it exploded)
