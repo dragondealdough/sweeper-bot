@@ -412,7 +412,7 @@ export const useMining = (
         setGrid(newGrid);
         if (y > depth) setDepth(y);
         if (y === GRID_CONFIG.ROWS - 1) setStatus(GameStatus.WON);
-    }, [setDepth, setStatus, setInventory, setMessage, handlePlayerDeath, setWorldItems, tutorialState, onMineHit, onTileRevealed, onMineCollected, setScreenShake, setPlayerHitFlash, onMineAttemptInterrupt]);
+    }, [setDepth, setStatus, setInventory, setMessage, handlePlayerDeath, setWorldItems, tutorialState, onMineHit, onTileRevealed, onMineCollected, setScreenShake, setPlayerHitFlash, onMineAttemptInterrupt, onObviousMineIgnored]);
 
     const handleFlagAction = useCallback((tx: number, ty: number, status: GameStatus, isMenuOpen: boolean) => {
         if (status !== GameStatus.PLAYING || isMenuOpen || ty < 0) return;
