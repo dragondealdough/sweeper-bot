@@ -102,7 +102,7 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7, c
     if (!visible) return null;
 
     return (
-        <div className="fixed inset-0 pointer-events-none z-[100] flex flex-col justify-end select-none touch-none overflow-hidden" style={{ opacity }}>
+        <div className="fixed inset-0 pointer-events-none z-[210] flex flex-col justify-end select-none touch-none overflow-hidden" style={{ opacity }}>
 
             {/* Controls Container - Pushed properly to edges for landscape ergonomics */}
             <div className="flex justify-between items-end w-full h-full pointer-events-none">
