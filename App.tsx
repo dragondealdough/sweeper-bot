@@ -13,6 +13,7 @@ import MiningSection from './components/MiningSection';
 import GameHUD from './components/GameHUD';
 import TutorialOverlay from './components/TutorialOverlay';
 import DevToolsOverlay from './components/DevToolsOverlay';
+import DeathScreen, { DeathPhase } from './components/DeathScreen';
 import { useWorldUpdates } from './hooks/useWorldUpdates';
 import { usePhysics } from './hooks/usePhysics';
 import { useMining } from './hooks/useMining';
@@ -45,6 +46,11 @@ const App: React.FC = () => {
   const [isDevToolsOpen, setIsDevToolsOpen] = useState(false);
   const [hasSave, setHasSave] = useState(false);
   const [gameFadingIn, setGameFadingIn] = useState(false);
+
+  // Death sequence state
+  const [deathPhase, setDeathPhase] = useState<DeathPhase>('NONE');
+  const [deathDepth, setDeathDepth] = useState(0);
+  const [furthestDepth, setFurthestDepth] = useState(0);
 
   // Camera State Ref for sticky mode (Mine vs Overworld)
   const isMineModeRef = useRef(false);
@@ -115,6 +121,36 @@ const App: React.FC = () => {
   // Flash effect state for mine explosion
   const [explosionFlash, setExplosionFlash] = useState(false);
 
+  // Death sequence trigger - handles the full death animation flow
+  const triggerDeathSequence = useCallback(() => {
+    // Record depth at death
+    const currentDepth = state.depth;
+    setDeathDepth(currentDepth);
+
+    // Update furthest depth record
+    setFurthestDepth(prev => Math.max(prev, currentDepth));
+
+    // Apply item loss via actions
+    actions.handlePlayerDeath(state.dayCount);
+
+    // Start death sequence: IMPACT phase
+    setDeathPhase('IMPACT');
+    if (state.setScreenShake) state.setScreenShake(1);
+    setExplosionFlash(true);
+
+    // After 800ms, transition to FADE
+    setTimeout(() => {
+      if (state.setScreenShake) state.setScreenShake(0);
+      setExplosionFlash(false);
+      setDeathPhase('FADE');
+
+      // After fade (600ms), show REPAIRING screen
+      setTimeout(() => {
+        setDeathPhase('REPAIRING');
+      }, 600);
+    }, 800);
+  }, [state.depth, state.dayCount, state.setScreenShake, actions]);
+
   // Intercept the tutorial's mine hit handler to inject visual effects first
   const handleMineHitWithEffects = useCallback(() => {
     // 1. Trigger Screen Shake
@@ -133,7 +169,7 @@ const App: React.FC = () => {
 
   const mining = useMining(
     ROPE_X, state.setDepth, state.setStatus, state.setInventory,
-    state.setMessage, () => actions.handlePlayerDeath(state.dayCount),
+    state.setMessage, triggerDeathSequence,
     state.setWorldItems,
     tutorial.tutorialState,
     handleMineHitWithEffects, // Use our intercepted handler
@@ -270,6 +306,22 @@ const App: React.FC = () => {
     // Clear fade-in after animation completes
     setTimeout(() => setGameFadingIn(false), 600);
   }, [mining, state, OVERWORLD_FLOOR_Y, HOUSE_X, startMusic]);
+
+  // Handle "Next Day" after death sequence
+  const handleDeathNextDay = useCallback(() => {
+    // Reset death phase
+    setDeathPhase('NONE');
+
+    // Advance to next day using sleep (forced)
+    actionsWithGrid.handleSleep(true, state.dayCount);
+
+    // Regenerate mine grid for new day
+    mining.initGrid();
+
+    // Start fade-in
+    setGameFadingIn(true);
+    setTimeout(() => setGameFadingIn(false), 600);
+  }, [actionsWithGrid, state.dayCount, mining]);
 
   // Trigger tutorial when shop opens
   useEffect(() => {
@@ -636,6 +688,7 @@ const App: React.FC = () => {
                     ropeLength={state.ropeLength}
                     ROPE_X={ROPE_X}
                     playerHitFlash={state.playerHitFlash}
+                    isDead={deathPhase === 'IMPACT' || deathPhase === 'FADE'}
                     prompts={{
                       showRopePrompt, ropePromptText,
                       showShopPrompt, showHousePrompt, housePromptText,
@@ -713,6 +766,16 @@ const App: React.FC = () => {
         className={`fixed inset-0 bg-black pointer-events-none transition-opacity duration-[600ms] ease-out z-[400]
                    ${gameFadingIn ? 'opacity-100' : 'opacity-0'}`}
       />
+
+      {/* Death Screen */}
+      {deathPhase !== 'NONE' && (
+        <DeathScreen
+          phase={deathPhase}
+          deathDepth={deathDepth}
+          furthestDepth={furthestDepth}
+          onNextDay={handleDeathNextDay}
+        />
+      )}
 
       {(state.status === GameStatus.LOST || state.status === GameStatus.WON) && (
         <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-10 text-center animate-in fade-in zoom-in">

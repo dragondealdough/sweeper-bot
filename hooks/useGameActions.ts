@@ -25,47 +25,59 @@ export const useGameActions = (
     playerRef.current = startPos;
     setPlayer(startPos);
     if (!forced) {
-        setMessage("WELL RESTED - DAY " + (currentDayCount + 1));
-        setTimeout(() => setMessage(null), 2000);
+      setMessage("WELL RESTED - DAY " + (currentDayCount + 1));
+      setTimeout(() => setMessage(null), 2000);
     }
   }, [setDayTime, setDayCount, setPlayer, setMessage, timeRef, OVERWORLD_FLOOR_Y, playerRef]);
 
   const handlePassOut = useCallback((currentCoins: number, currentDayCount: number) => {
     setMessage("EXHAUSTION - SKIPPING TO NEXT DAY");
     setCoins(Math.max(0, currentCoins - 20));
-    setTimeout(() => { 
-      setMessage(null); 
-      handleSleep(true, currentDayCount); 
+    setTimeout(() => {
+      setMessage(null);
+      handleSleep(true, currentDayCount);
     }, 2000);
   }, [setCoins, setMessage, handleSleep]);
 
   const handlePlayerDeath = useCallback((currentDayCount: number) => {
-    setMessage("CRITICAL INJURY - EMERGENCY EVAC");
+    // Calculate item loss - lose half of each, rounded down
+    // Formula: Math.floor(count / 2) items are lost
+    setInventory(prev => ({
+      ...prev,
+      silverBlocks: Math.ceil(prev.silverBlocks / 2),
+      stone: Math.ceil(prev.stone / 2),
+      defusedMines: Math.ceil(prev.defusedMines / 2),
+      scrapMetal: Math.ceil(prev.scrapMetal / 2),
+      gems: Math.ceil(prev.gems / 2),
+      coal: Math.ceil(prev.coal / 2),
+      // Disarm kits and charges are kept (equipment)
+      // Pickaxe is kept (permanent upgrade)
+    }));
+
+    // Also lose some coins
     setCoins(c => Math.floor(c * 0.75));
-    setTimeout(() => { 
-      setMessage(null); 
-      handleSleep(true, currentDayCount); 
-    }, 3000);
-  }, [setCoins, setMessage, handleSleep]);
+
+    // Don't call handleSleep here - let the death sequence manage the transition
+  }, [setCoins, setInventory]);
 
   const handleShopBuy = useCallback((id: any, price: number, coins: number, ropeLength: number) => {
     if (coins < price) return;
     if (id === 'ROPE') {
-        const extensionAmount = 5; 
-        let obstructed = false;
-        for (let i = 0; i < extensionAmount; i++) {
-            const ty = ropeLength + i;
-            if (ty >= GRID_CONFIG.ROWS || !gridRef.current[ty]?.[ROPE_X]?.isRevealed || gridRef.current[ty]?.[ROPE_X]?.item === 'SILVER_BLOCK') { 
-              obstructed = true; 
-              break; 
-            }
+      const extensionAmount = 5;
+      let obstructed = false;
+      for (let i = 0; i < extensionAmount; i++) {
+        const ty = ropeLength + i;
+        if (ty >= GRID_CONFIG.ROWS || !gridRef.current[ty]?.[ROPE_X]?.isRevealed || gridRef.current[ty]?.[ROPE_X]?.item === 'SILVER_BLOCK') {
+          obstructed = true;
+          break;
         }
-        if (obstructed) { 
-          setMessage("PATH OBSTRUCTED - CLEAR ROCK FIRST"); 
-          setTimeout(() => setMessage(null), 2000); 
-          return; 
-        }
-        setRopeLength(prev => prev + extensionAmount);
+      }
+      if (obstructed) {
+        setMessage("PATH OBSTRUCTED - CLEAR ROCK FIRST");
+        setTimeout(() => setMessage(null), 2000);
+        return;
+      }
+      setRopeLength(prev => prev + extensionAmount);
     }
     if (price > 0) setCoins(c => c - price);
     if (id === 'CHARGE') setInventory(prev => ({ ...prev, disarmCharges: prev.disarmCharges + 1 }));
@@ -79,21 +91,21 @@ export const useGameActions = (
 
   const handleShopSell = useCallback((id: 'SCRAP' | 'GEM' | 'COAL', price: number) => {
     setInventory(prev => {
-        if (id === 'SCRAP' && prev.scrapMetal > 0) { setCoins(c => c + price); return { ...prev, scrapMetal: prev.scrapMetal - 1 }; }
-        if (id === 'GEM' && prev.gems > 0) { setCoins(c => c + price); return { ...prev, gems: prev.gems - 1 }; }
-        if (id === 'COAL' && prev.coal > 0) { setCoins(c => c + price); return { ...prev, coal: prev.coal - 1 }; }
-        return prev;
+      if (id === 'SCRAP' && prev.scrapMetal > 0) { setCoins(c => c + price); return { ...prev, scrapMetal: prev.scrapMetal - 1 }; }
+      if (id === 'GEM' && prev.gems > 0) { setCoins(c => c + price); return { ...prev, gems: prev.gems - 1 }; }
+      if (id === 'COAL' && prev.coal > 0) { setCoins(c => c + price); return { ...prev, coal: prev.coal - 1 }; }
+      return prev;
     });
   }, [setCoins, setInventory]);
 
   const handleContribute = useCallback((id: string, material: 'stone' | 'silver') => {
     setInventory(prev => {
       const newInv = { ...prev };
-      
+
       if (id === 'WISHING_WELL') {
         const requirements = { stone: 10, silver: 4 };
         const progress = { ...prev.wishingWellProgress };
-        
+
         if (material === 'stone' && prev.stone > 0 && progress.stone < requirements.stone) {
           newInv.stone = prev.stone - 1;
           progress.stone += 1;
@@ -105,9 +117,9 @@ export const useGameActions = (
         } else {
           return prev; // No change
         }
-        
+
         newInv.wishingWellProgress = progress;
-        
+
         // Check if complete
         if (progress.stone >= requirements.stone && progress.silver >= requirements.silver) {
           newInv.wishingWellBuilt = true;
@@ -119,7 +131,7 @@ export const useGameActions = (
           setTimeout(() => setMessage(null), 1500);
         }
       }
-      
+
       return newInv;
     });
   }, [setInventory, setMessage]);

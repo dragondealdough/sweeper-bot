@@ -25,6 +25,7 @@ interface MiningSectionProps {
   ROPE_X: number;
   prompts: PromptState;
   playerHitFlash?: boolean;
+  isDead?: boolean;
   foundMinePosition?: { x: number; y: number } | null;
   selectedTarget?: { x: number; y: number } | null;
   onTileClick?: (x: number, y: number) => void;
@@ -38,6 +39,7 @@ const MiningSection: React.FC<MiningSectionProps> = ({
   ropeLength,
   ROPE_X,
   playerHitFlash = false,
+  isDead = false,
   prompts,
   foundMinePosition,
   selectedTarget,
@@ -97,8 +99,17 @@ const MiningSection: React.FC<MiningSectionProps> = ({
       >
         <div className={`w-8 h-8 mx-auto mt-1 rounded-full border-2 border-white shadow-lg flex items-center justify-center ${playerHitFlash ? 'bg-red-500' : (player.vy < 0 ? 'bg-cyan-300' : 'bg-orange-500')} ${player.facing === Direction.LEFT ? 'scale-x-[-1]' : 'scale-x-1'} transition-colors duration-75`}>
           <div className="flex gap-1">
-            <div className="w-1.5 h-1.5 bg-black rounded-full" />
-            <div className="w-1.5 h-1.5 bg-black rounded-full" />
+            {isDead ? (
+              <>
+                <span className="text-[10px] font-black text-black">✕</span>
+                <span className="text-[10px] font-black text-black">✕</span>
+              </>
+            ) : (
+              <>
+                <div className="w-1.5 h-1.5 bg-black rounded-full" />
+                <div className="w-1.5 h-1.5 bg-black rounded-full" />
+              </>
+            )}
           </div>
         </div>
 
