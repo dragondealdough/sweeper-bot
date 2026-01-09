@@ -245,8 +245,23 @@ export const useMining = (
                 setTimeout(() => setPlayerHitFlash(false), 500); // Reset after 500ms
             }
 
-            handlePlayerDeath();
-            return; // Exit early - death handled
+            // Check if we're in tutorial mine phase - don't trigger death, just show tutorial
+            const tutorialMinePhases = [
+                'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4',
+                'MINE_INTRO_5', 'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9',
+                'MINE_HIT_MINE_1', 'MINE_HIT_MINE_2', 'MINE_EXPLAIN_NUMBERS',
+                'MINE_COLLECT_1', 'MINE_COLLECT_2', 'MINE_COLLECT_WAIT'
+            ];
+            const isInTutorialMine = tutorialState?.isActive && tutorialMinePhases.includes(tutorialState.currentStep);
+
+            if (isInTutorialMine && onMineHit) {
+                // Tutorial handles the mine hit - no death
+                onMineHit();
+            } else {
+                // Normal game - trigger death sequence
+                handlePlayerDeath();
+            }
+            return; // Exit early - mine hit handled
         } else {
             // Normal tile (not flagged, not mine)
             const floodFill = (tx: number, ty: number) => {
