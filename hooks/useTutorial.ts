@@ -265,7 +265,7 @@ export const useTutorial = () => {
             currentMessage: message,
           }));
         }
-      }, 1500);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [tutorialState.isActive]);
