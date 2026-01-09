@@ -7,6 +7,8 @@ interface TouchButtonProps {
     label?: string; // Optional text label
     icon?: React.ReactNode; // Optional icon
     color?: string;
+    glowColor?: string; // Optional glow effect color
+    isGlowing?: boolean; // Whether to show glow effect
     disabled?: boolean;
     size?: string; // Tailwind size classes (e.g. w-20 h-20)
     style?: React.CSSProperties; // Inline styles (for absolute positioning)
@@ -18,6 +20,8 @@ const TouchButton: React.FC<TouchButtonProps> = ({
     label,
     icon,
     color = 'bg-stone-700',
+    glowColor = 'rgba(34, 197, 94, 0.6)',
+    isGlowing = false,
     disabled,
     size = 'w-16 h-16',
     style
@@ -58,14 +62,21 @@ const TouchButton: React.FC<TouchButtonProps> = ({
     return (
         <div
             className={`
-                relative rounded-full flex items-center justify-center select-none touch-none transition-transform
+                relative rounded-full flex items-center justify-center select-none touch-none transition-all
                 ${className}
                 ${size}
                 ${color}
-                ${active ? 'scale-95 brightness-110 shadow-[inset_0_2px_8px_rgba(0,0,0,0.4)]' : 'shadow-[0_4px_10px_rgba(0,0,0,0.4)] border-b-4 border-black/20 active:border-b-0 active:translate-y-1'}
+                ${active ? 'scale-95 brightness-125 shadow-[inset_0_2px_8px_rgba(0,0,0,0.4)]' : 'shadow-[0_4px_10px_rgba(0,0,0,0.4)] border-b-4 border-black/20 active:border-b-0 active:translate-y-1'}
                 ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer'}
+                ${isGlowing && !disabled ? 'animate-pulse brightness-110' : ''}
             `}
-            style={{ ...style, WebkitTapHighlightColor: 'transparent' }}
+            style={{
+                ...style,
+                WebkitTapHighlightColor: 'transparent',
+                boxShadow: isGlowing && !disabled && !active
+                    ? `0 0 15px ${glowColor}, 0 0 30px ${glowColor}, 0 4px 10px rgba(0,0,0,0.4)`
+                    : undefined
+            }}
             onTouchStart={handleStart}
             onTouchEnd={handleEnd}
             onMouseDown={handleStart}
@@ -84,9 +95,10 @@ const TouchButton: React.FC<TouchButtonProps> = ({
 interface TouchControlsProps {
     visible: boolean;
     opacity?: number;
+    canInteract?: boolean; // Whether the interact button should glow
 }
 
-const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7 }) => {
+const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7, canInteract = false }) => {
     if (!visible) return null;
 
     return (
@@ -121,6 +133,8 @@ const TouchControls: React.FC<TouchControlsProps> = ({ visible, opacity = 0.7 })
                             size="w-16 h-16"
                             color="bg-green-600 border-2 border-green-400/30"
                             icon="✋"
+                            isGlowing={canInteract}
+                            glowColor="rgba(34, 197, 94, 0.7)"
                         />
                     </div>
 

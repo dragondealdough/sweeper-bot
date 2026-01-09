@@ -330,22 +330,50 @@ const App: React.FC = () => {
     const dy = Math.abs(y - state.player.y);
     const inRange = dx < 1.8 && dy < 1.8;
 
+    // Check for diagonal blocking - if both adjacent tiles are unrevealed, diagonal is blocked
+    const isDiagonal = Math.abs(Math.round(x - state.player.x)) === 1 && Math.abs(Math.round(y - state.player.y)) === 1;
+    let isDiagonalBlocked = false;
+    if (isDiagonal && y >= 0) {
+      const playerTileX = Math.round(state.player.x);
+      const playerTileY = Math.round(state.player.y);
+      const targetTileX = x;
+      const targetTileY = y;
+
+      // Get the two adjacent tiles that form the L-path
+      const adj1X = playerTileX;
+      const adj1Y = targetTileY;
+      const adj2X = targetTileX;
+      const adj2Y = playerTileY;
+
+      // Check if both adjacent tiles are unrevealed (blocking the diagonal)
+      const adj1 = mining.grid[adj1Y]?.[adj1X];
+      const adj2 = mining.grid[adj2Y]?.[adj2X];
+
+      // If both adjacent tiles exist and are unrevealed, diagonal is blocked
+      if (adj1 && !adj1.isRevealed && adj2 && !adj2.isRevealed) {
+        isDiagonalBlocked = true;
+      }
+    }
+
     // If tapping the already selected target...
     if (mining.selectedTarget?.x === x && mining.selectedTarget?.y === y) {
-      if (inRange) {
+      if (inRange && !isDiagonalBlocked) {
         // Confirm Mine
         mining.revealTileAt(x, y, state.inventory, state.depth);
         mining.setSelectedTarget(null);
         // Play dig sound? (implicitly handled by reveal logic or listener?)
         // Haptic feedback
         if (navigator.vibrate) navigator.vibrate(20);
+      } else if (isDiagonalBlocked) {
+        // Diagonal blocked feedback
+        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
       } else {
         // Out of range feedback - shake selection?
         // Just keep selected.
         if (navigator.vibrate) navigator.vibrate(50);
       }
     } else {
-      // Select new target
+      // Select new target (even if blocked, so player can see it's selected)
       mining.setSelectedTarget({ x, y });
 
       // Clear selection if tapping a revealed tile?
@@ -713,7 +741,11 @@ const App: React.FC = () => {
       />
 
       {/* Mobile Touch Controls */}
-      <TouchControls visible={isMobile} opacity={settings.controlOpacity / 100} />
+      <TouchControls
+        visible={isMobile}
+        opacity={settings.controlOpacity / 100}
+        canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
+      />
 
     </div>
   );
