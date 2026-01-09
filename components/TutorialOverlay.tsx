@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { TutorialState } from '../hooks/useTutorial';
 import { GRID_CONFIG } from '../constants';
 import TutorialMessageDisplay from './TutorialMessageDisplay';
+import TimerSpotlight from './TimerSpotlight';
 
 // CSS for blink animation
 const blinkStyle = `
@@ -422,6 +423,9 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       {shouldDim && (
         <div className="fixed inset-0 bg-black/40 z-[100] pointer-events-none animate-in fade-in duration-500" />
       )}
+
+      {/* Timer Spotlight Effect */}
+      <TimerSpotlight visible={tutorialState.showTimerSpotlight || false} />
 
       {/* Tutorial Message - hide if task is minimized OR if any menu is open (menus have their own message handling) */}
       {tutorialState.showingMessage && tutorialState.currentMessage && !tutorialState.taskMinimized && !isAnyMenuOpen && (

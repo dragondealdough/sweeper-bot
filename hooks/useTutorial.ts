@@ -35,6 +35,7 @@ export type TutorialStep =
   | 'ARROW_TO_MINE'
   | 'MINE_INTRO_1'
   | 'MINE_INTRO_2'
+  | 'MINE_TIMER_SPOTLIGHT'  // Spotlight on timer, no message
   | 'MINE_INTRO_3'
   | 'MINE_INTRO_4'
   | 'MINE_INTRO_5'
@@ -103,6 +104,7 @@ const TUTORIAL_MESSAGES: Record<TutorialStep, TutorialMessage | null> = {
   ARROW_TO_MINE: null, // No message, just arrow
   MINE_INTRO_1: { text: "Welcome to the mine! You'll be spending a lot of time here, but never forget: time is a valuable resource", buttonText: "Got it!", character: 'narrator' },
   MINE_INTRO_2: { text: "Let me show you how much time we have...", buttonText: "Show me!", character: 'narrator' },
+  MINE_TIMER_SPOTLIGHT: null, // No message, just spotlight on timer for 2 seconds
   MINE_INTRO_3: { text: "There, you see the clock is ticking? When you run out of time here, I'll have to come and rescue you", buttonText: "I see it!", character: 'narrator' },
   MINE_INTRO_4: { text: "Unfortunately, as you are the main priority, I won't be able to rescue all of the resources you find here", buttonText: "Oh no...", character: 'narrator' },
   MINE_INTRO_5: { text: "To put this simply: when you are on the brink of exhaustion, you will lose half of all your resources and gold!", buttonText: "That's harsh!", character: 'narrator' },
@@ -183,6 +185,7 @@ export interface TutorialState {
   waitingForDisarm?: boolean;
   taskMinimized?: boolean; // Whether task popup is minimized to HUD
   diedInTutorial?: boolean; // Track if player died during tutorial for resurrection message
+  showTimerSpotlight?: boolean; // Show spotlight on timer during MINE_TIMER_SPOTLIGHT
 }
 
 export const useTutorial = () => {
@@ -474,15 +477,32 @@ export const useTutorial = () => {
         }
 
         if (prev.currentStep === 'MINE_INTRO_2') {
-          // Show arrow to timer and flash the timer
-          const mineIntro3 = TUTORIAL_MESSAGES['MINE_INTRO_3'];
+          // Transition to spotlight step - hide message, show spotlight
+          // After 2 seconds, auto-advance to MINE_INTRO_3
+          setTimeout(() => {
+            setTutorialState(prevState => {
+              if (prevState.currentStep === 'MINE_TIMER_SPOTLIGHT') {
+                const mineIntro3 = TUTORIAL_MESSAGES['MINE_INTRO_3'];
+                return {
+                  ...prevState,
+                  currentStep: 'MINE_INTRO_3',
+                  showingMessage: true,
+                  currentMessage: mineIntro3,
+                  showTimerSpotlight: false,
+                  showArrowToTimer: true,
+                };
+              }
+              return prevState;
+            });
+          }, 2000);
+
           return {
             ...prev,
-            currentStep: 'MINE_INTRO_3',
-            showingMessage: true,
-            currentMessage: mineIntro3,
-            showArrowToTimer: true,
-            flashTimer: true,
+            currentStep: 'MINE_TIMER_SPOTLIGHT',
+            showingMessage: false,
+            currentMessage: null,
+            showTimerSpotlight: true,
+            flashTimer: true, // Keep timer flashing
           };
         }
 
