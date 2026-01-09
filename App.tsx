@@ -25,6 +25,7 @@ import { useGameSettings } from './hooks/useGameSettings';
 import { useSaveGame } from './hooks/useSaveGame';
 import { useMusic } from './hooks/useMusic';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
+import TutorialController from './components/TutorialController';
 import TouchControls from './components/TouchControls';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -314,6 +315,9 @@ const App: React.FC = () => {
 
     // Check for tutorial resurrection message on day start
     tutorial.checkResurrection();
+
+    // Reset tutorial state for fresh run (important for New Game from menu)
+    tutorial.resetTutorial();
   }, [mining, state, OVERWORLD_FLOOR_Y, HOUSE_X, startMusic, tutorial]);
 
   // Handle "Next Day" after death sequence
@@ -793,6 +797,10 @@ const App: React.FC = () => {
           <p className="text-lg mb-12 text-stone-400">Final Log Depth: <span className="text-white">{state.depth * 10}m</span></p>
           <button onClick={initGame} className="bg-white text-black px-16 py-4 font-black uppercase tracking-widest border-b-4 border-stone-400 hover:scale-105 transition-all">Re-Deploy</button>
         </div>
+      )}
+
+      {state.status === GameStatus.PLAYING && !tutorial.tutorialState.tutorialCompleted && (
+        <TutorialController tutorial={tutorial} />
       )}
 
       {/* Dev Tools Overlay */}

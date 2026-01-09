@@ -251,24 +251,53 @@ export const useTutorial = () => {
     };
   }, []);
 
-  // Start tutorial on first render
-  useEffect(() => {
-    if (!hasStarted.current && tutorialState.isActive) {
+  const startTutorial = useCallback(() => {
+    if (tutorialState.tutorialCompleted) return;
+
+    // Show first message
+    const message = TUTORIAL_MESSAGES['WELCOME_1'];
+    if (message) {
+      setTutorialState(prev => ({
+        ...prev,
+        isActive: true, // Ensure active
+        showingMessage: true,
+        currentMessage: message,
+        currentStep: 'WELCOME_1',
+      }));
       hasStarted.current = true;
-      const timer = setTimeout(() => {
-        // Show first message
-        const message = TUTORIAL_MESSAGES['WELCOME_1'];
-        if (message) {
-          setTutorialState(prev => ({
-            ...prev,
-            showingMessage: true,
-            currentMessage: message,
-          }));
-        }
-      }, 3000);
-      return () => clearTimeout(timer);
     }
-  }, [tutorialState.isActive]);
+  }, [tutorialState.tutorialCompleted]);
+
+  const resetTutorial = useCallback(() => {
+    setTutorialState({
+      currentStep: 'WELCOME_1',
+      isActive: true,
+      showingMessage: false,
+      currentMessage: null,
+      showArrowToShop: false,
+      showArrowToConstruction: false,
+      showArrowToMine: false,
+      showArrowToTimer: false,
+      showArrowToRope: false,
+      showArrowToRecycler: false,
+      highlightPickaxe: false,
+      highlightCloseButton: false,
+      pickaxeTaken: false,
+      postShopChoice: null,
+      showingChoice: false,
+      hintMessage: null,
+      tutorialCompleted: false,
+      noMinesToRecycle: false,
+      flashTimer: false,
+      tutorialMinePosition: null,
+      requireFlagBeforeMine: false,
+      highlightDisarmKit: false,
+      foundMinePosition: null,
+      waitingForFlag: false,
+      waitingForDisarm: false,
+    });
+    hasStarted.current = false;
+  }, []);
 
   const advanceTutorial = useCallback(() => {
     setTutorialState(prev => {
@@ -1474,6 +1503,8 @@ export const useTutorial = () => {
     onTileFlagged,
     onTutorialDeath,
     checkResurrection,
+    onObviousMineIgnored,
+    startTutorial,
+    resetTutorial,
   };
 };
-
