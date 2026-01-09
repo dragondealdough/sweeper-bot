@@ -198,7 +198,8 @@ interface TutorialOverlayProps {
   isConstructionOpen?: boolean;
   isRecyclerOpen?: boolean;
   isInventoryOpen?: boolean;
-  isMobile?: boolean; // New prop for mobile text substitution
+  isMobile?: boolean; // Prop to detect mobile device
+  foundMinePosition?: { x: number; y: number } | null;
 }
 
 const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
@@ -221,6 +222,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
   isRecyclerOpen = false,
   isInventoryOpen = false,
   isMobile = false,
+  foundMinePosition,
 }) => {
   // Hide arrows when any menu is open
   const isAnyMenuOpen = isShopOpen || isConstructionOpen || isRecyclerOpen || isInventoryOpen;
@@ -644,6 +646,25 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           scale={scale}
           topBarHeight={TOP_BAR_HEIGHT}
         />
+
+        {/* Guided Mine Discovery Arrow - Points to the obvious mine */}
+        {foundMinePosition && !isAnyMenuOpen && (
+          <div
+            className="fixed pointer-events-none z-[200] flex flex-col items-center animate-bounce"
+            style={{
+              left: `${(foundMinePosition.x * GRID_CONFIG.TILE_SIZE + GRID_CONFIG.TILE_SIZE / 2 - camera.x) * scale + window.innerWidth / 2}px`,
+              top: `${(foundMinePosition.y * GRID_CONFIG.TILE_SIZE - camera.y) * scale + window.innerHeight / 2 - 40}px`,
+              transform: 'translate(-50%, -100%)', // Anchor bottom-center to the point
+            }}
+          >
+            <div className="bg-red-500 text-white font-bold rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.8)] uppercase tracking-wider whitespace-nowrap px-3 py-1 mb-1 text-sm border-2 border-white">
+              Mine Here!
+            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24" className="text-red-500 drop-shadow-lg filter">
+              <path d="M12 24 L24 0 L12 8 L0 0 Z" fill="currentColor" stroke="white" strokeWidth="2" strokeLinejoin="round" />
+            </svg>
+          </div>
+        )}
 
         {recyclerBubbleVisible && !isAnyMenuOpen && !recyclerBubbleOnScreen && (
           <div
