@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTypingEffect } from '../hooks/useTypingEffect';
 import { TutorialMessage } from '../hooks/useTutorial';
+import MinimizeButton from './MinimizeButton';
 
 interface TutorialMessageDisplayProps {
     message: TutorialMessage;
@@ -66,15 +67,9 @@ const TutorialMessageDisplay: React.FC<TutorialMessageDisplayProps> = ({
                                 {isTaskStep ? '❗ Task' : (message.character === 'narrator' ? '📖 Guide' : '🤖 Unit 734')}
                             </span>
                         </div>
-                        {/* Minimize button for task steps */}
+                        {/* Minimize button for task steps - isolated component */}
                         {isTaskStep && onMinimize && (
-                            <button
-                                onClick={onMinimize}
-                                className="bg-white hover:bg-gray-200 text-black font-bold w-5 h-5 rounded-full text-[10px] flex items-center justify-center transition-colors"
-                                title="Minimize task"
-                            >
-                                −
-                            </button>
+                            <MinimizeButton onClick={onMinimize} />
                         )}
                     </div>
 
