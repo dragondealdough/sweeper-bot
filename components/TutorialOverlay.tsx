@@ -630,19 +630,25 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
           </div>
         )}
 
-        {/* Rope Ascend Arrow - shows in mine when player needs to go up */}
+        {/* Rope Ascend Arrow - shows at rope center in mine when player needs to go up */}
         {ropeBubbleVisible && !isAnyMenuOpen && (
           <div
             className="absolute pointer-events-none"
             style={{
-              ...getArrowStyle(ropeIsRight),
-              top: `${hudArrowY}px`,
+              // Position at rope center X in world coordinates, converted to screen
+              left: `${(getMineCenter() - camera.x) * scale}px`,
+              // Position at top of visible area (where rope leads up)
+              top: `${TOP_BAR_HEIGHT * scale + 20}px`,
+              transform: 'translateX(-50%)',
             }}
           >
-            <div className="flex items-center gap-2 animate-pulse">
-              <div className="bg-cyan-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap" style={{ padding: '6.4px 12.8px', fontSize: '11.2px' }}>
-                {ropeIsRight ? 'Ascend ↑ →' : '← ↑ Ascend'}
+            <div className="flex flex-col items-center gap-1 animate-bounce">
+              <div className="bg-cyan-500 text-black font-bold rounded-lg shadow-lg uppercase tracking-wider whitespace-nowrap px-3 py-2 text-sm">
+                ↑ Ascend
               </div>
+              <svg width="20" height="30" viewBox="0 0 20 30" className="text-cyan-500">
+                <path d="M10 30 L10 5 M10 5 L3 12 M10 5 L17 12" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
           </div>
         )}
