@@ -14,11 +14,18 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
 
   const items = [
     {
-      id: 'disarm_kit',
-      name: 'Disarming Kit',
+      id: 'disarm_charges',
+      name: 'Disarm Charges',
       count: inventory.disarmCharges,
       icon: '🧨',
-      description: 'Standard issue explosive ordinance disposal tools. Essential for neutralizing mines.'
+      description: 'Current flagging capacity. Use to mark suspected mines.'
+    },
+    {
+      id: 'disarm_kits',
+      name: 'Disarm Kits',
+      count: inventory.disarmKits,
+      icon: '🧰',
+      description: 'Spare kits in reserve. Auto-equips when charges run out.'
     },
     {
       id: 'defused_mine',
@@ -33,13 +40,6 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
       count: inventory.scrapMetal,
       icon: '⚙️',
       description: 'Refined materials reclaimed from ordnance. Used for fabrication.'
-    },
-    {
-      id: 'repair_kit',
-      name: 'Repair Kit',
-      count: inventory.disarmKits,
-      icon: '🩹',
-      description: 'Automated repair nanobots.'
     },
     {
       id: 'silver_block',
