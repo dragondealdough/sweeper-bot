@@ -4,7 +4,7 @@ import { TileState, FlagType, GameStatus, Inventory, WorldItem, ItemType } from 
 import { GRID_CONFIG, INITIAL_ROPE_LENGTH, SAFE_ROWS, CARD_DEFINITIONS } from '../constants';
 import { TutorialState } from './useTutorial';
 
-const CHARGES_PER_KIT = 3;
+import { DIRECTIONS, TUTORIAL_MESSAGES, CHARGES_PER_KIT } from '../constants';
 
 export const useMining = (
     ROPE_X: number,

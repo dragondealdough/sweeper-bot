@@ -884,7 +884,7 @@ const App: React.FC = () => {
           if (id === 'PICKAXE' && !tutorial.tutorialState.pickaxeTaken) {
             tutorial.onPickaxeTaken();
           }
-          actionsWithGrid.handleShopBuy(id, p, state.coins, state.ropeLength);
+          actionsWithGrid.handleShopBuy(id, p, state.coins, state.ropeLength, state.inventory);
         }}
         onSell={actionsWithGrid.handleShopSell}
         onClose={() => state.setIsShopOpen(false)}

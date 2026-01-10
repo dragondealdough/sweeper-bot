@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { GameStatus, Inventory, Direction, PlayerPosition } from '../types';
-import { DAY_DURATION_MS, GRID_CONFIG } from '../constants';
+import { DAY_DURATION_MS, GRID_CONFIG, CHARGES_PER_KIT } from '../constants';
 
 export const useGameActions = (
   setCoins: React.Dispatch<React.SetStateAction<number>>,
@@ -60,8 +60,16 @@ export const useGameActions = (
     // Don't call handleSleep here - let the death sequence manage the transition
   }, [setCoins, setInventory]);
 
-  const handleShopBuy = useCallback((id: any, price: number, coins: number, ropeLength: number) => {
+  const handleShopBuy = useCallback((id: any, price: number, coins: number, ropeLength: number, inventory: Inventory) => {
     if (coins < price) return;
+
+    // Validate Charge Cap
+    if (id === 'CHARGE' && inventory.disarmCharges >= CHARGES_PER_KIT) {
+      setMessage("KIT ALREADY FULL (MAX " + CHARGES_PER_KIT + ")");
+      setTimeout(() => setMessage(null), 2000);
+      return;
+    }
+
     if (id === 'ROPE') {
       const extensionAmount = 5;
       let obstructed = false;
@@ -79,7 +87,11 @@ export const useGameActions = (
       }
       setRopeLength(prev => prev + extensionAmount);
     }
+
+    // Deduct coins
     if (price > 0) setCoins(c => c - price);
+
+    // Grant Item
     if (id === 'CHARGE') setInventory(prev => ({ ...prev, disarmCharges: prev.disarmCharges + 1 }));
     if (id === 'KIT') setInventory(prev => ({ ...prev, disarmKits: prev.disarmKits + 1 }));
     if (id === 'PICKAXE') {

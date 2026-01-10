@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Inventory } from '../types';
 import { TutorialState } from '../hooks/useTutorial';
 import TutorialMessageDisplay from './TutorialMessageDisplay';
+import { CHARGES_PER_KIT } from '../constants';
 
 interface ShopOverlayProps {
   coins: number;
@@ -46,8 +47,9 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
   const buyItems = [
     // Free pickaxe for tutorial
     ...(showFreePickaxe ? [{ id: 'PICKAXE', name: 'Mining Pickaxe', price: 0, icon: '⛏️', desc: 'FREE! Essential mining tool.', isFree: true }] : []),
+
     { id: 'CHARGE', name: 'Disarm Charge', price: 5, icon: '🧨', desc: '+1 charge to current kit.' },
-    { id: 'KIT', name: 'Disarm Kit', price: 25, icon: '🧰', desc: 'Spare kit with 3 charges. Auto-equips when empty.' },
+    { id: 'KIT', name: 'Disarm Kit', price: 12, icon: '🧰', desc: 'Spare kit with 3 charges. Auto-equips when empty.' },
     { id: 'ROPE', name: 'Elevator Cable', price: 10, icon: '🪢', desc: 'Extends elevator depth by 5m (5 tiles).' },
   ];
 
@@ -352,7 +354,14 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
                     </div>
 
                     <button
-                      disabled={tab === 'BUY' ? coins < item.price : (item as any).count <= 0}
+                      disabled={
+                        tab === 'BUY'
+                          ? (
+                            coins < item.price ||
+                            (item.id === 'CHARGE' && inventory.disarmCharges >= CHARGES_PER_KIT)
+                          )
+                          : (item as any).count <= 0
+                      }
                       onClick={() => tab === 'BUY' ? onBuy(item.id as any, item.price) : onSell(item.id as any, item.price)}
                       className={`w-full py-1.5 font-black text-[10px] uppercase transition-all flex items-center justify-center gap-1 mt-auto ${isPickaxe
                         ? 'bg-green-500 text-black hover:bg-green-400 shadow-lg'
