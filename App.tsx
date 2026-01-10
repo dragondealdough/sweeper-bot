@@ -649,14 +649,12 @@ const App: React.FC = () => {
 
 
   // Enforce Zoom Level (Prevent accidental browser/pinch zoom cutting off UI)
-  // visualViewport.scale detects pinch zoom (mobile) - goes above 1.0 when zooming in
-  // For desktop browser zoom, we check if devicePixelRatio differs from expected (or use screen ratio)
+  // visualViewport.scale detects pinch zoom (mobile) - goes above 1.0 when zooming in, below 1.0 when zooming out
+  // Note: Desktop browser zoom (Ctrl+/Ctrl-) typically doesn't affect visualViewport.scale
+  // We only block on mobile pinch-zoom which reliably updates visualViewport.scale
   const visualViewportScale = window.visualViewport?.scale ?? 1;
   const isZoomedIn = visualViewportScale > 1.05;
-  // For zoom-out detection, check if the viewport is significantly larger than expected
-  // (This happens when browser zoom < 100%)
-  const isZoomedOut = window.innerWidth > window.screen.availWidth * 1.02 ||
-    (visualViewportScale < 0.95 && visualViewportScale > 0);
+  const isZoomedOut = visualViewportScale < 0.95 && visualViewportScale > 0;
 
   const isZoomed = isZoomedIn || isZoomedOut;
   const zoomDirection = isZoomedIn ? 'in' : 'out';
