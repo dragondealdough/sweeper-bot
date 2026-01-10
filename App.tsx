@@ -439,6 +439,10 @@ const App: React.FC = () => {
         // Show depth limit popup
         state.setMessage("⚠️ Don't go too deep yet! Use the rope to return to the surface first.");
         setTimeout(() => state.setMessage(null), 2500);
+      } else if (permission.reason === 'RECYCLER_REDIRECT') {
+        // Show recycler redirect message
+        state.setMessage("🔄 Head to the recycler first! Use the rope to return to the surface.");
+        setTimeout(() => state.setMessage(null), 2500);
       }
       // If reason is TUTORIAL_BLOCK, we just silently block
       return;
