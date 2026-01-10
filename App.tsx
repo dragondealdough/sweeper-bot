@@ -3,7 +3,7 @@ import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { GameStatus, Direction, ItemType, FlagType } from './types';
 import {
   APP_VERSION, RECYCLE_TIME_MS, OVERWORLD_MIN_X, OVERWORLD_MAX_X,
-  GRID_CONFIG, PHYSICS, COLORS, INITIAL_ROPE_LENGTH, SAFE_ROWS, DAY_DURATION_MS,
+  GRID_CONFIG, PHYSICS, COLORS, INITIAL_ROPE_LENGTH, SAFE_ROWS, DAY_DURATION_MS, EVENING_THRESHOLD_MS,
   ROPE_X, HOUSE_X, RECYCLER_X, SHOP_X, CONSTRUCTION_X, OVERWORLD_FLOOR_Y
 } from './constants';
 import ShopOverlay from './components/ShopOverlay';
