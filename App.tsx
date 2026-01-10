@@ -27,6 +27,7 @@ import { useSaveGame } from './hooks/useSaveGame';
 import { useMusic } from './hooks/useMusic';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import TutorialController from './components/TutorialController';
+import { WorldOverlay } from './components/WorldOverlay';
 import TouchControls from './components/TouchControls';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -730,6 +731,15 @@ const App: React.FC = () => {
                     foundMinePosition={tutorial.tutorialState.foundMinePosition}
                     selectedTarget={mining.selectedTarget}
                     onTileClick={handleTileInteraction}
+                  />
+
+                  {/* Unified Scaling Overlay - Anchored to World Coordinates */}
+                  <WorldOverlay
+                    foundMinePosition={tutorial.tutorialState.foundMinePosition}
+                    ropeX={ROPE_X}
+                    ropeBubbleVisible={showRopePrompt}
+                    scale={scale} // Pass global scale for counter-scaling icons
+                    isMenuOpen={state.isShopOpen || state.isRecyclerOpen || state.isInventoryOpen || state.isConstructionOpen}
                   />
                 </div>
               </div>
