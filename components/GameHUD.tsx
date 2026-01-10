@@ -38,13 +38,14 @@ const GameHUD: React.FC<GameHUDProps> = ({
     onOpenDevTools,
     tutorialStep
 }) => {
-    // Hide flag UI during early tutorial (before MINE_COLLECT_2)
+    // Hide flag UI during early tutorial (before flagging tutorial starts at MINE_COLLECT_1)
     const preFlaggingSteps = new Set([
         'WELCOME_1', 'WELCOME_2', 'CONTROLS_INTRO', 'OVERWORLD_1', 'OVERWORLD_2',
         'SHOP_INTRO', 'SHOP_PICKAXE', 'SHOP_EXPLANATION', 'SHOP_EXIT', 'POST_SHOP_CHOICE',
         'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4', 'MINE_INTRO_5',
         'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9', 'MINE_INTRO_WAIT',
-        'MINE_NUMBER_EXPLAIN', 'MINE_COLLECT_1',
+        'MINE_NUMBER_EXPLAIN',
+        // MINE_COLLECT_1 onwards = show flag UI
     ]);
     const showFlagUI = !tutorialStep || !preFlaggingSteps.has(tutorialStep);
 

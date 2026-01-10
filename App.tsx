@@ -246,14 +246,15 @@ const App: React.FC = () => {
     const tutStep = tutorial.tutorialState.currentStep;
     const isTutorialActive = tutorial.tutorialState.isActive && !tutorial.tutorialState.tutorialCompleted;
 
-    // A. Block flagging before MINE_COLLECT_2 (Task 2 - when player is asked to flag)
+    // A. Block flagging before the flagging tutorial (MINE_COLLECT_1 is when flags are explained)
     // Define early tutorial steps where flagging should be blocked
     const preFlaggingSteps = new Set([
       'WELCOME_1', 'WELCOME_2', 'CONTROLS_INTRO', 'OVERWORLD_1', 'OVERWORLD_2',
       'SHOP_INTRO', 'SHOP_PICKAXE', 'SHOP_EXPLANATION', 'SHOP_EXIT', 'POST_SHOP_CHOICE',
       'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4', 'MINE_INTRO_5',
       'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9', 'MINE_INTRO_WAIT',
-      'MINE_NUMBER_EXPLAIN', 'MINE_COLLECT_1',
+      'MINE_NUMBER_EXPLAIN',
+      // MINE_COLLECT_1 and onwards = flagging tutorial, so allow flagging
     ]);
     if (isTutorialActive && preFlaggingSteps.has(tutStep)) {
       state.setMessage("🚫 You'll learn to flag mines soon!");
