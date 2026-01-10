@@ -217,6 +217,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
         >
           <button
             ref={closeButtonRef}
+            disabled={showTutorialMessage && !highlightCloseButton}
             onClick={() => {
               if (highlightCloseButton && onTutorialAdvance) {
                 onTutorialAdvance();
@@ -224,7 +225,7 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
               onClose();
             }}
             className={`text-white font-black px-2 py-1 text-xs transition-all border-2 border-orange-900/50 ${selectedElement === 'CLOSE' ? 'bg-orange-900/50 ring-2 ring-white' : 'hover:bg-orange-800'
-              }`}
+              } ${showTutorialMessage && !highlightCloseButton ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             ← CLOSE
           </button>
