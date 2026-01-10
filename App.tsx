@@ -101,8 +101,17 @@ const App: React.FC = () => {
     };
 
     calculateScale();
+    calculateScale();
     window.addEventListener('resize', calculateScale);
-    return () => window.removeEventListener('resize', calculateScale);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', calculateScale);
+    }
+    return () => {
+      window.removeEventListener('resize', calculateScale);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', calculateScale);
+      }
+    };
   }, [isMobile, state.player.y]); // Added dependency on player.y to trigger zoom change
 
   const ROPE_X = 8;
@@ -619,6 +628,23 @@ const App: React.FC = () => {
           Sweeper Bot requires a wider view to detect deep mines safely.
           <br /><br />
           Please rotate to <span className="text-white font-bold">Landscape Mode</span>.
+        </p>
+      </div>
+    );
+
+  }
+
+  // Enforce Zoom Level (Prevent accidental browser/pinch zoom cutting off UI)
+  const isZoomedIn = typeof window !== 'undefined' && window.visualViewport && window.visualViewport.scale > 1.1;
+  if (isZoomedIn) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-stone-950 flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
+        <div className="text-6xl mb-6 animate-pulse">🔍</div>
+        <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">View Obstructed</h2>
+        <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed">
+          The game view is currently zoomed in, which may hide important elements.
+          <br /><br />
+          Please <span className="text-white font-bold">Zoom Out</span> to 100% to continue.
         </p>
       </div>
     );
