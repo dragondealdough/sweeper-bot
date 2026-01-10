@@ -8,10 +8,11 @@ export const useGameState = () => {
   const [status, setStatus] = useState<GameStatus>(GameStatus.START);
   const [depth, setDepth] = useState(0);
   const [coins, setCoins] = useState(0);
-  const [inventory, setInventory] = useState<Inventory>({ 
+  const [inventory, setInventory] = useState<Inventory>({
     silverBlocks: 0, stone: 0, disarmKits: 1, disarmCharges: 3, defusedMines: 0, scrapMetal: 0, gems: 0, coal: 0,
     deck: [], collection: [], wishingWellBuilt: false, wishingWellProgress: { stone: 0, silver: 0 },
-    hasPickaxe: false
+    hasPickaxe: false,
+    foundBlueprints: [], ownedTokens: [], equippedTokens: [], minesDisarmedTotal: 0
   });
   const [ropeLength, setRopeLength] = useState(5);
   const [isShopOpen, setIsShopOpen] = useState(false);

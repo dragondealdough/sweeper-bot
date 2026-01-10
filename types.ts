@@ -87,6 +87,8 @@ export interface CardInstance {
   isDefused?: boolean;
 }
 
+export type TokenId = 'STONE_TOKEN';
+
 export interface Inventory {
   silverBlocks: number;
   stone: number;
@@ -103,6 +105,11 @@ export interface Inventory {
   wishingWellProgress: { stone: number; silver: number };
   // Tutorial items
   hasPickaxe: boolean;
+  // Blueprint/Token system
+  foundBlueprints: TokenId[];
+  ownedTokens: TokenId[];
+  equippedTokens: TokenId[];
+  minesDisarmedTotal: number;
 }
 
 export interface BattleState {

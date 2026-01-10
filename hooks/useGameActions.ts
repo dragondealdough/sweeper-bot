@@ -108,6 +108,12 @@ export const useGameActions = (
       setMessage("+1 PICKAXE ⛏️ - YOU CAN NOW MINE!");
       setTimeout(() => setMessage(null), 2000);
     }
+    // Token purchases
+    if (id === 'TOKEN_STONE') {
+      setInventory(prev => ({ ...prev, ownedTokens: [...prev.ownedTokens, 'STONE_TOKEN'] }));
+      setMessage("+1 STONE TOKEN 🪨 - EQUIP IN INVENTORY!");
+      setTimeout(() => setMessage(null), 2000);
+    }
   }, [setCoins, setInventory, setMessage, setRopeLength, gridRef]);
 
   const handleShopSell = useCallback((id: 'SCRAP' | 'GEM' | 'COAL', price: number) => {

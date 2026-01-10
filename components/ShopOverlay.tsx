@@ -3,6 +3,7 @@ import { Inventory } from '../types';
 import { TutorialState } from '../hooks/useTutorial';
 import TutorialMessageDisplay from './TutorialMessageDisplay';
 import { CHARGES_PER_KIT } from '../constants';
+import { TOKEN_DEFINITIONS } from '../constants';
 
 interface ShopOverlayProps {
   coins: number;
@@ -51,6 +52,10 @@ const ShopOverlay: React.FC<ShopOverlayProps> = ({
     { id: 'CHARGE', name: 'Disarm Charge', price: 5, icon: '🧨', desc: '+1 charge to current kit.' },
     { id: 'KIT', name: 'Disarm Kit', price: 12, icon: '🧰', desc: 'Spare kit with 3 charges. Auto-equips when empty.' },
     { id: 'ROPE', name: 'Elevator Cable', price: 10, icon: '🪢', desc: 'Extends elevator depth by 5m (5 tiles).' },
+    // Token items - only show if blueprint found and not already owned
+    ...(inventory.foundBlueprints.includes('STONE_TOKEN') && !inventory.ownedTokens.includes('STONE_TOKEN')
+      ? [{ id: 'TOKEN_STONE', name: TOKEN_DEFINITIONS.STONE_TOKEN.name, price: TOKEN_DEFINITIONS.STONE_TOKEN.shopPrice, icon: TOKEN_DEFINITIONS.STONE_TOKEN.icon, desc: TOKEN_DEFINITIONS.STONE_TOKEN.description }]
+      : []),
   ];
 
   const sellItems = [

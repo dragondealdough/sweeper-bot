@@ -42,7 +42,7 @@ export const EVENING_THRESHOLD_MS = 3 * 60 * 1000;
 export const RECYCLE_TIME_MS = 20000;
 export const OVERWORLD_MIN_X = -12;
 export const OVERWORLD_MAX_X = 28;
-export const APP_VERSION = 'v1.3.50';
+export const APP_VERSION = 'v1.3.51';
 
 export const CARD_DEFINITIONS: Record<CardType, CardDefinition> = {
   [CardType.BOMBER]: { type: CardType.BOMBER, name: 'Bomber', description: 'Explodes dealing damage.', baseValue: 3 },
@@ -73,3 +73,25 @@ export const RECYCLER_X = -8;
 export const SHOP_X = 13.5;
 export const CONSTRUCTION_X = 22;
 export const OVERWORLD_FLOOR_Y = -2;
+
+export const MAX_EQUIPPED_TOKENS = 3;
+
+export interface TokenDefinition {
+  name: string;
+  icon: string;
+  description: string;
+  baseDropChance: number;
+  dropChancePerDisarm: number;
+  shopPrice: number;
+}
+
+export const TOKEN_DEFINITIONS: Record<string, TokenDefinition> = {
+  STONE_TOKEN: {
+    name: 'Stone Token',
+    icon: '🪨',
+    description: '+20% stone from all tiles',
+    baseDropChance: 0.10,
+    dropChancePerDisarm: 0.01,
+    shopPrice: 50
+  }
+};

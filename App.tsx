@@ -366,7 +366,8 @@ const App: React.FC = () => {
     state.setInventory({
       silverBlocks: 0, stone: 0, disarmKits: 1, disarmCharges: 3, defusedMines: 0, scrapMetal: 0, gems: 0, coal: 0,
       deck: [], collection: [], wishingWellBuilt: false, wishingWellProgress: { stone: 0, silver: 0 },
-      hasPickaxe: false
+      hasPickaxe: false,
+      foundBlueprints: [], ownedTokens: [], equippedTokens: [], minesDisarmedTotal: 0
     });
     state.setWorldItems([]);
     state.recyclingRef.current = { queue: 0, timer: RECYCLE_TIME_MS };
@@ -899,7 +900,7 @@ const App: React.FC = () => {
         state.recyclingRef.current.queue += q;
         tutorial.onRecyclingStarted();
       }} onClose={() => state.setIsRecyclerOpen(false)} onOpen={() => tutorial.checkRecyclerMines(state.inventory.defusedMines)} />}
-      {state.isInventoryOpen && <InventoryOverlay inventory={state.inventory} onClose={() => state.setIsInventoryOpen(false)} />}
+      {state.isInventoryOpen && <InventoryOverlay inventory={state.inventory} setInventory={state.setInventory} onClose={() => state.setIsInventoryOpen(false)} />}
       {state.isConstructionOpen && <ConstructionOverlay inventory={state.inventory} onContribute={actionsWithGrid.handleContribute} onClose={() => { tutorial.onConstructionClosed(); state.setIsConstructionOpen(false); }} tutorialState={tutorial.tutorialState} onTutorialAdvance={tutorial.dismissMessage} isMobile={isMobile} />}
 
       {/* Explosion White Flash Overlay */}

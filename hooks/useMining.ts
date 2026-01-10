@@ -4,7 +4,8 @@ import { TileState, FlagType, GameStatus, Inventory, WorldItem, ItemType } from 
 import { GRID_CONFIG, INITIAL_ROPE_LENGTH, SAFE_ROWS, CARD_DEFINITIONS } from '../constants';
 import { TutorialState } from './useTutorial';
 
-import { DIRECTIONS, TUTORIAL_MESSAGES, CHARGES_PER_KIT } from '../constants';
+import { DIRECTIONS, TUTORIAL_MESSAGES, CHARGES_PER_KIT, TOKEN_DEFINITIONS } from '../constants';
+import { TokenId } from '../types';
 
 export const useMining = (
     ROPE_X: number,
@@ -26,6 +27,29 @@ export const useMining = (
     const [grid, setGrid] = useState<TileState[][]>([]);
     const gridRef = useRef<TileState[][]>([]);
     const [selectedTarget, setSelectedTarget] = useState<{ x: number, y: number } | null>(null);
+
+    // Blueprint drop helper - rolls for each unfound blueprint
+    const tryDropBlueprint = useCallback((inventory: Inventory) => {
+        const tokenIds = Object.keys(TOKEN_DEFINITIONS) as TokenId[];
+        for (const tokenId of tokenIds) {
+            // Skip if already found
+            if (inventory.foundBlueprints.includes(tokenId)) continue;
+
+            const def = TOKEN_DEFINITIONS[tokenId];
+            const dropChance = def.baseDropChance + (inventory.minesDisarmedTotal * def.dropChancePerDisarm);
+
+            if (Math.random() < dropChance) {
+                // Blueprint found!
+                setMessage(`📜 BLUEPRINT FOUND: ${def.name}!`);
+                setTimeout(() => setMessage(null), 3000);
+                setInventory(prev => ({
+                    ...prev,
+                    foundBlueprints: [...prev.foundBlueprints, tokenId]
+                }));
+                return; // Only one blueprint per tile
+            }
+        }
+    }, [setMessage, setInventory]);
 
     const initGrid = useCallback(() => {
         const newGrid: TileState[][] = [];
@@ -96,7 +120,8 @@ export const useMining = (
 
                 setInventory(prev => ({
                     ...prev,
-                    defusedMines: prev.defusedMines + 1
+                    defusedMines: prev.defusedMines + 1,
+                    minesDisarmedTotal: prev.minesDisarmedTotal + 1
                 }));
 
                 // Reveal tile and remove mine status
@@ -153,7 +178,8 @@ export const useMining = (
 
                 // Check for item drops
                 const depthFactor = Math.floor(y / 5);
-                const stoneChance = 0.20 + (depthFactor * 0.01);
+                const hasStoneToken = inventory.equippedTokens.includes('STONE_TOKEN');
+                const stoneChance = (0.20 + (depthFactor * 0.01)) * (hasStoneToken ? 1.2 : 1.0);
                 const gemChance = 0.10 + (depthFactor * 0.02);
                 const coalChance = 0.15 + (depthFactor * 0.025);
                 const rand = Math.random();
@@ -284,7 +310,8 @@ export const useMining = (
             if (isInitial) {
                 // Drop rates - spawn as world items with gravity
                 const depthFactor = Math.floor(y / 5);
-                const stoneChance = 0.20 + (depthFactor * 0.01);  // 20% base, +1% per 50m
+                const hasStoneToken = inventory.equippedTokens.includes('STONE_TOKEN');
+                const stoneChance = (0.20 + (depthFactor * 0.01)) * (hasStoneToken ? 1.2 : 1.0);  // 20% base, +1% per 50m, +20% if token
                 const gemChance = 0.10 + (depthFactor * 0.02);    // 10% base, +2% per 50m
                 const coalChance = 0.15 + (depthFactor * 0.025);  // 15% base, +2.5% per 50m
                 const rand = Math.random();
@@ -317,7 +344,10 @@ export const useMining = (
         setGrid(newGrid);
         if (y > depth) setDepth(y);
         if (y === GRID_CONFIG.ROWS - 1) setStatus(GameStatus.WON);
-    }, [setDepth, setStatus, setInventory, setMessage, handlePlayerDeath, setWorldItems, tutorialState, onMineHit, onTileRevealed, onMineCollected, setScreenShake, setPlayerHitFlash, onMineAttemptInterrupt]);
+
+        // Roll for blueprint drop on successful tile reveal
+        tryDropBlueprint(inventory);
+    }, [setDepth, setStatus, setInventory, setMessage, handlePlayerDeath, setWorldItems, tutorialState, onMineHit, onTileRevealed, onMineCollected, setScreenShake, setPlayerHitFlash, onMineAttemptInterrupt, tryDropBlueprint]);
 
     const handleFlagAction = useCallback((tx: number, ty: number, status: GameStatus, isMenuOpen: boolean) => {
         if (status !== GameStatus.PLAYING || isMenuOpen || ty < 0) return;

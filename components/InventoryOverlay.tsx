@@ -1,13 +1,14 @@
-
 import React, { useEffect, useState, useRef } from 'react';
-import { Inventory } from '../types';
+import { Inventory, TokenId } from '../types';
+import { TOKEN_DEFINITIONS, MAX_EQUIPPED_TOKENS } from '../constants';
 
 interface InventoryOverlayProps {
   inventory: Inventory;
+  setInventory: React.Dispatch<React.SetStateAction<Inventory>>;
   onClose: () => void;
 }
 
-const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose }) => {
+const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, setInventory, onClose }) => {
   const [cursorPosition, setCursorPosition] = useState({ top: 0, left: 0 });
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [isCloseSelected, setIsCloseSelected] = useState(true);
@@ -179,6 +180,81 @@ const InventoryOverlay: React.FC<InventoryOverlayProps> = ({ inventory, onClose 
                 </div>
               ))}
             </div>
+
+            {/* Token Slots Section */}
+            {(inventory.ownedTokens.length > 0 || inventory.equippedTokens.length > 0) && (
+              <div className="mt-4 border-t border-slate-700 pt-4">
+                <h3 className="text-[10px] text-slate-400 uppercase tracking-widest mb-2 font-bold">Equipped Tokens ({inventory.equippedTokens.length}/{MAX_EQUIPPED_TOKENS})</h3>
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {Array.from({ length: MAX_EQUIPPED_TOKENS }).map((_, slotIndex) => {
+                    const tokenId = inventory.equippedTokens[slotIndex] as TokenId | undefined;
+                    const def = tokenId ? TOKEN_DEFINITIONS[tokenId] : null;
+                    return (
+                      <div
+                        key={`slot-${slotIndex}`}
+                        className={`aspect-square border-2 flex flex-col items-center justify-center p-2 cursor-pointer transition-all ${tokenId
+                            ? 'bg-amber-900/30 border-amber-600 hover:bg-amber-900/50'
+                            : 'bg-slate-900/30 border-dashed border-slate-700'
+                          }`}
+                        onClick={() => {
+                          if (tokenId) {
+                            // Unequip token
+                            setInventory(prev => ({
+                              ...prev,
+                              equippedTokens: prev.equippedTokens.filter(t => t !== tokenId),
+                              ownedTokens: [...prev.ownedTokens, tokenId]
+                            }));
+                          }
+                        }}
+                      >
+                        {def ? (
+                          <>
+                            <div className="text-2xl">{def.icon}</div>
+                            <div className="text-[7px] text-center text-amber-300 mt-1">{def.name}</div>
+                          </>
+                        ) : (
+                          <div className="text-[8px] text-slate-600">Empty</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Owned (unequipped) tokens */}
+                {inventory.ownedTokens.length > 0 && (
+                  <>
+                    <h3 className="text-[10px] text-slate-400 uppercase tracking-widest mb-2 font-bold">Available Tokens</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {inventory.ownedTokens.map((tokenId, i) => {
+                        const def = TOKEN_DEFINITIONS[tokenId];
+                        const canEquip = inventory.equippedTokens.length < MAX_EQUIPPED_TOKENS;
+                        return (
+                          <div
+                            key={`owned-${tokenId}-${i}`}
+                            className={`p-2 border-2 flex items-center gap-2 transition-all ${canEquip
+                                ? 'bg-slate-800/50 border-slate-600 hover:border-amber-500 cursor-pointer'
+                                : 'bg-slate-900/30 border-slate-800 opacity-50 cursor-not-allowed'
+                              }`}
+                            onClick={() => {
+                              if (canEquip) {
+                                setInventory(prev => ({
+                                  ...prev,
+                                  ownedTokens: prev.ownedTokens.filter((t, idx) => idx !== i),
+                                  equippedTokens: [...prev.equippedTokens, tokenId]
+                                }));
+                              }
+                            }}
+                          >
+                            <div className="text-xl">{def.icon}</div>
+                            <div className="text-[8px] text-slate-300">{def.name}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Footer inside scroll area */}
             <div className="mt-4 text-center">
