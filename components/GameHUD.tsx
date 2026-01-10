@@ -17,6 +17,7 @@ interface GameHUDProps {
     taskMinimized?: boolean;
     onToggleTaskMinimized?: () => void;
     onOpenDevTools?: () => void;
+    tutorialStep?: string; // For hiding flag UI during early tutorial
 }
 
 const GameHUD: React.FC<GameHUDProps> = ({
@@ -34,8 +35,19 @@ const GameHUD: React.FC<GameHUDProps> = ({
     isMobile = false,
     taskMinimized = false,
     onToggleTaskMinimized,
-    onOpenDevTools
+    onOpenDevTools,
+    tutorialStep
 }) => {
+    // Hide flag UI during early tutorial (before MINE_COLLECT_2)
+    const preFlaggingSteps = new Set([
+        'WELCOME_1', 'WELCOME_2', 'CONTROLS_INTRO', 'OVERWORLD_1', 'OVERWORLD_2',
+        'SHOP_INTRO', 'SHOP_PICKAXE', 'SHOP_EXPLANATION', 'SHOP_EXIT', 'POST_SHOP_CHOICE',
+        'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4', 'MINE_INTRO_5',
+        'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9', 'MINE_INTRO_WAIT',
+        'MINE_NUMBER_EXPLAIN', 'MINE_COLLECT_1',
+    ]);
+    const showFlagUI = !tutorialStep || !preFlaggingSteps.has(tutorialStep);
+
     return (
         <>
             {/* Top bar - uses absolute positioning relative to game container */}
@@ -56,17 +68,20 @@ const GameHUD: React.FC<GameHUDProps> = ({
                     </div>
                     {isMobile && (
                         <>
-                            <div className="h-4 w-px bg-stone-700" />
-                            <div className="flex items-center gap-1.5 px-1">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" fill="#ef4444" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                    <line x1="4" y1="22" x2="4" y2="15" stroke="#78350f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                <span className={`text-sm font-bold font-mono ${inventory.disarmCharges === 0 ? 'text-red-500 animate-pulse' : 'text-stone-300'}`}>
-                                    {inventory.disarmCharges}/3
-                                </span>
-                            </div>
-                            <div className="h-4 w-px bg-stone-700" />
+                            {showFlagUI && (
+                                <>
+                                    <div className="h-4 w-px bg-stone-700" />
+                                    <div className="flex items-center gap-1.5 px-1">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" fill="#ef4444" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            <line x1="4" y1="22" x2="4" y2="15" stroke="#78350f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                        <span className={`text-sm font-bold font-mono ${inventory.disarmCharges === 0 ? 'text-red-500 animate-pulse' : 'text-stone-300'}`}>
+                                            {inventory.disarmCharges}/3
+                                        </span>
+                                    </div>
+                                </>
+                            )}
                             <button
                                 onClick={() => setIsInventoryOpen(true)}
                                 className="bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold px-3 py-1 rounded text-xs uppercase border border-stone-700"

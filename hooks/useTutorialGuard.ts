@@ -160,7 +160,12 @@ export const useTutorialGuard = (
         // D. Guided Mine Discovery Lock
         // If foundMinePosition is set (tutorial is showing "Mine Here!"),
         // ONLY allow mining that specific tile. Block ALL other mining.
-        if (tutorialState.foundMinePosition) {
+        // This ONLY applies during MINE_COLLECT_2 and MINE_COLLECT_WAIT steps
+        const mineDiscoverySteps = new Set<TutorialStep>([
+            'MINE_COLLECT_2',
+            'MINE_COLLECT_WAIT',
+        ]);
+        if (tutorialState.foundMinePosition && mineDiscoverySteps.has(tutorialState.currentStep)) {
             const fmp = tutorialState.foundMinePosition;
             // Block if target is NOT the highlighted tile
             if (x !== fmp.x || y !== fmp.y) {
