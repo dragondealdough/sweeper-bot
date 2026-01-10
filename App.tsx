@@ -643,17 +643,18 @@ const App: React.FC = () => {
 
   }
 
+
   // Enforce Zoom Level (Prevent accidental browser/pinch zoom cutting off UI)
-  const isZoomedIn = typeof window !== 'undefined' && window.visualViewport && window.visualViewport.scale > 1.1;
-  if (isZoomedIn) {
+  const isZoomed = typeof window !== 'undefined' && window.visualViewport && (window.visualViewport.scale > 1.1 || window.visualViewport.scale < 0.9);
+  if (isZoomed) {
     return (
       <div className="fixed inset-0 z-[9999] bg-stone-950 flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
         <div className="text-6xl mb-6 animate-pulse">🔍</div>
-        <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">View Obstructed</h2>
+        <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">Zoom Level Incorrect</h2>
         <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed">
-          The game view is currently zoomed in, which may hide important elements.
+          The game view is currently zoomed {window.visualViewport?.scale > 1 ? 'in' : 'out'}, which may break the layout.
           <br /><br />
-          Please <span className="text-white font-bold">Zoom Out</span> to 100% to continue.
+          Please <span className="text-white font-bold">Reset Zoom</span> to 100% to continue.
         </p>
       </div>
     );
