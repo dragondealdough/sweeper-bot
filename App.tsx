@@ -649,14 +649,26 @@ const App: React.FC = () => {
 
 
   // Enforce Zoom Level (Prevent accidental browser/pinch zoom cutting off UI)
-  const isZoomed = typeof window !== 'undefined' && window.visualViewport && (window.visualViewport.scale > 1.1 || window.visualViewport.scale < 0.9);
+  // visualViewport.scale detects pinch zoom (mobile) - goes above 1.0 when zooming in
+  // For desktop browser zoom, we check if devicePixelRatio differs from expected (or use screen ratio)
+  const visualViewportScale = window.visualViewport?.scale ?? 1;
+  const isZoomedIn = visualViewportScale > 1.1;
+  // For zoom-out detection, check if the viewport is significantly larger than expected
+  // (This happens when browser zoom < 100%)
+  const expectedMinWidth = 320; // Minimum expected viewport width at 100% zoom
+  const isZoomedOut = window.innerWidth > window.screen.availWidth * 1.1 ||
+    (visualViewportScale < 0.9 && visualViewportScale > 0);
+
+  const isZoomed = isZoomedIn || isZoomedOut;
+  const zoomDirection = isZoomedIn ? 'in' : 'out';
+
   if (isZoomed) {
     return (
       <div className="fixed inset-0 z-[9999] bg-stone-950 flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
         <div className="text-6xl mb-6 animate-pulse">🔍</div>
         <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">Zoom Level Incorrect</h2>
         <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed">
-          The game view is currently zoomed {window.visualViewport?.scale > 1 ? 'in' : 'out'}, which may break the layout.
+          The game view is currently zoomed {zoomDirection}, which may break the layout.
           <br /><br />
           Please <span className="text-white font-bold">Reset Zoom</span> to 100% to continue.
         </p>
