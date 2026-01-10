@@ -128,19 +128,7 @@ export const useTutorialGuard = (
             'TUTORIAL_COMPLETE',
         ]);
 
-        if (tutorialState.isActive && !antiCheatExcludedSteps.has(tutorialState.currentStep)) {
-            const deducibleMines = checkForObviousMines(grid);
-            if (deducibleMines.length > 0) {
-                // Is target one of them?
-                const isTargetObvious = deducibleMines.some(m => m.x === x && m.y === y);
-                if (!isTargetObvious) {
-                    // BLOCK!
-                    return { allowed: false, reason: 'ANTI_CHEAT', minePos: deducibleMines[0] };
-                }
-            }
-        }
-
-        // C. Recycler Redirect Block (CHECK FIRST before foundMinePosition)
+        // C. Recycler Redirect Block (moved before Anti-Cheat)
         // After collecting the mine and before recycling is complete, block mining
         // and direct player to the recycler
         const recyclerRedirectSteps = new Set<TutorialStep>([
@@ -156,6 +144,20 @@ export const useTutorialGuard = (
         if (tutorialState.isActive && recyclerRedirectSteps.has(tutorialState.currentStep)) {
             return { allowed: false, reason: 'RECYCLER_REDIRECT' };
         }
+
+        if (tutorialState.isActive && !antiCheatExcludedSteps.has(tutorialState.currentStep)) {
+            const deducibleMines = checkForObviousMines(grid);
+            if (deducibleMines.length > 0) {
+                // Is target one of them?
+                const isTargetObvious = deducibleMines.some(m => m.x === x && m.y === y);
+                if (!isTargetObvious) {
+                    // BLOCK!
+                    return { allowed: false, reason: 'ANTI_CHEAT', minePos: deducibleMines[0] };
+                }
+            }
+        }
+
+
 
         // D. Guided Mine Discovery Lock
         // If foundMinePosition is set (tutorial is showing "Mine Here!"),
