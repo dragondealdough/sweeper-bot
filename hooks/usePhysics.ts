@@ -1,7 +1,7 @@
 
 import React, { useCallback } from 'react';
 import { PlayerPosition, Direction, Inventory, WorldItem, TileState } from '../types';
-import { PHYSICS, OVERWORLD_MIN_X, OVERWORLD_MAX_X, GRID_CONFIG } from '../constants';
+import { PHYSICS, OVERWORLD_MIN_X, OVERWORLD_MAX_X, GRID_CONFIG, OVERWORLD_FLOOR_Y } from '../constants';
 
 interface PhysicsParams {
   playerRef: React.MutableRefObject<PlayerPosition>;
@@ -107,11 +107,15 @@ export const usePhysics = () => {
           const tyBelow = Math.floor(newY + 0.5);
           const tileBelow = gridRef.current[tyBelow]?.[tx];
 
-          // Item lands if tile below is not revealed OR if it's at the bottom
-          if (tyBelow >= GRID_CONFIG.ROWS || (tileBelow && !tileBelow.isRevealed) || (tileBelow && tileBelow.item === 'SILVER_BLOCK')) {
-            // Settle item near bottom of the tile above (e.g. 5.8) to prevent "falling -> collision -> reset" bounce loop
-            // which happens if we reset to exactly floor (x.0) which is too high from collision point (x.5)
-            newY = Math.floor(item.y) + 0.8;
+          // Item lands if tile below is not revealed OR if it's at the bottom OR if in overworld
+          const isOverworldFloor = newY >= OVERWORLD_FLOOR_Y && item.y < 0;
+          if (isOverworldFloor || tyBelow >= GRID_CONFIG.ROWS || (tileBelow && !tileBelow.isRevealed) || (tileBelow && tileBelow.item === 'SILVER_BLOCK')) {
+            // Settle item at floor level
+            if (isOverworldFloor) {
+              newY = OVERWORLD_FLOOR_Y;
+            } else {
+              newY = Math.floor(item.y) + 0.8;
+            }
             newVy = 0;
           }
 
