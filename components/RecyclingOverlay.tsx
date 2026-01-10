@@ -111,8 +111,7 @@ const RecyclingOverlay: React.FC<RecyclingOverlayProps> = ({ inventory, onRecycl
 
   return (
     <div
-      className="fixed inset-0 z-[150] flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in font-mono"
-      style={{ paddingTop: 'max(6rem, env(safe-area-inset-top))' }}
+      className="fixed inset-0 z-[150] flex justify-center bg-black/80 backdrop-blur-sm pt-0 pb-0 sm:pt-10 sm:pb-10"
     >
       {/* Cursor Pointer */}
       <div
