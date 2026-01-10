@@ -119,6 +119,21 @@ export const useTutorialGuard = (
             }
         }
 
+        // C. Guided Mine Discovery Lock
+        // If foundMinePosition is set (tutorial is showing "Mine Here!") AND
+        // the highlighted tile has been flagged, ONLY allow mining that specific tile.
+        if (tutorialState.foundMinePosition) {
+            const fmp = tutorialState.foundMinePosition;
+            const fmpTile = grid[fmp.y]?.[fmp.x];
+            // Check if the foundMinePosition tile is flagged
+            if (fmpTile && fmpTile.flag === FlagType.MINE) {
+                // Locked state: ONLY the flagged mine tile can be mined
+                if (x !== fmp.x || y !== fmp.y) {
+                    return { allowed: false, reason: 'TUTORIAL_BLOCK' };
+                }
+            }
+        }
+
         return { allowed: true };
     };
 

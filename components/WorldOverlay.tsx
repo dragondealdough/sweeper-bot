@@ -27,7 +27,7 @@ export const WorldOverlay: React.FC<WorldOverlayProps> = ({
     return (
         <div className="absolute inset-0 pointer-events-none z-[50]" style={{ overflow: 'visible' }}>
 
-            {/* Guided Mine Discovery Arrow - Points to the obvious mine */}
+            {/* Guided Mine Discovery - Points to the obvious mine */}
             {foundMinePosition && (
                 <div
                     className="absolute flex flex-col items-center animate-bounce"
@@ -39,12 +39,9 @@ export const WorldOverlay: React.FC<WorldOverlayProps> = ({
                         transformOrigin: 'bottom center'
                     }}
                 >
-                    <div className="bg-red-500 text-white font-bold rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.8)] uppercase tracking-wider whitespace-nowrap px-3 py-1 mb-1 text-sm border-2 border-white">
+                    <div className="bg-red-500 text-white font-bold rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.8)] uppercase tracking-wider whitespace-nowrap px-3 py-1 text-sm border-2 border-white">
                         Mine Here!
                     </div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" className="text-red-500 drop-shadow-lg filter">
-                        <path d="M12 24 L24 0 L12 8 L0 0 Z" fill="currentColor" stroke="white" strokeWidth="2" strokeLinejoin="round" />
-                    </svg>
                 </div>
             )}
 
