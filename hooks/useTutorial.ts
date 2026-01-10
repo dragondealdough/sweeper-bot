@@ -1276,8 +1276,8 @@ export const useTutorial = () => {
 
   const onRecyclerOpened = useCallback(() => {
     setTutorialState(prev => {
-      // If we're at ARROW_TO_RECYCLER and recycler is opened, show intro message
-      if (prev.currentStep === 'ARROW_TO_RECYCLER') {
+      // If we're at ARROW_TO_RECYCLER or RECYCLER_INTRO (debug skip), show intro message
+      if (prev.currentStep === 'ARROW_TO_RECYCLER' || prev.currentStep === 'RECYCLER_INTRO') {
         const recyclerIntro = TUTORIAL_MESSAGES['RECYCLER_INTRO'];
         return {
           ...prev,
