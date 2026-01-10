@@ -91,7 +91,18 @@ export const useGameActions = (
 
     // Grant Item
     if (id === 'CHARGE') setInventory(prev => ({ ...prev, disarmCharges: prev.disarmCharges + 1 }));
-    if (id === 'KIT') setInventory(prev => ({ ...prev, disarmKits: prev.disarmKits + 1 }));
+    if (id === 'KIT') {
+      setInventory(prev => {
+        // If charges are empty, auto-equip the kit
+        if (prev.disarmCharges === 0) {
+          setMessage("KIT EQUIPPED - 3 CHARGES READY");
+          setTimeout(() => setMessage(null), 2000);
+          return { ...prev, disarmCharges: CHARGES_PER_KIT };
+        }
+        // Otherwise add to reserves
+        return { ...prev, disarmKits: prev.disarmKits + 1 };
+      });
+    }
     if (id === 'PICKAXE') {
       setInventory(prev => ({ ...prev, hasPickaxe: true }));
       setMessage("+1 PICKAXE ⛏️ - YOU CAN NOW MINE!");
