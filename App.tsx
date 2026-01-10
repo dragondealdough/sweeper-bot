@@ -1,6 +1,6 @@
 
 import React, { useEffect, useCallback, useRef, useState } from 'react';
-import { GameStatus, Direction, ItemType } from './types';
+import { GameStatus, Direction, ItemType, FlagType } from './types';
 import { GRID_CONFIG, COLORS, CARD_DEFINITIONS, INITIAL_ROPE_LENGTH, DAY_DURATION_MS, EVENING_THRESHOLD_MS, RECYCLE_TIME_MS } from './constants';
 import ShopOverlay from './components/ShopOverlay';
 import InventoryOverlay from './components/InventoryOverlay';
@@ -243,8 +243,38 @@ const App: React.FC = () => {
 
     const p = state.playerRef.current;
     const fmp = tutorial.tutorialState.foundMinePosition;
+    const tutStep = tutorial.tutorialState.currentStep;
+    const isTutorialActive = tutorial.tutorialState.isActive && !tutorial.tutorialState.tutorialCompleted;
 
-    // During tutorial: If foundMinePosition is set, ONLY allow flagging that specific tile
+    // A. Block flagging before MINE_COLLECT_2 (Task 2 - when player is asked to flag)
+    // Define early tutorial steps where flagging should be blocked
+    const preFlaggingSteps = new Set([
+      'WELCOME_1', 'WELCOME_2', 'CONTROLS_INTRO', 'OVERWORLD_1', 'OVERWORLD_2',
+      'SHOP_INTRO', 'SHOP_PICKAXE', 'SHOP_EXPLANATION', 'SHOP_EXIT', 'POST_SHOP_CHOICE',
+      'MINE_INTRO_1', 'MINE_INTRO_2', 'MINE_INTRO_3', 'MINE_INTRO_4', 'MINE_INTRO_5',
+      'MINE_INTRO_6', 'MINE_INTRO_7', 'MINE_INTRO_8', 'MINE_INTRO_9', 'MINE_INTRO_WAIT',
+      'MINE_NUMBER_EXPLAIN', 'MINE_COLLECT_1',
+    ]);
+    if (isTutorialActive && preFlaggingSteps.has(tutStep)) {
+      state.setMessage("🚫 You'll learn to flag mines soon!");
+      setTimeout(() => state.setMessage(null), 2000);
+      return;
+    }
+
+    // B. Check for last disarm charge warning during tutorial (not on the foundMinePosition tile)
+    const targetTile = grid[ty]?.[tx];
+    if (isTutorialActive && targetTile && !targetTile.isRevealed && targetTile.flag !== FlagType.MINE) {
+      // Only check if we would be placing a flag (not removing one)
+      const isLastCharge = state.inventory.disarmCharges <= 1;
+      const isFMPTile = fmp && tx === fmp.x && ty === fmp.y;
+      if (isLastCharge && !isFMPTile) {
+        state.setMessage("⚠️ I don't think there's a mine there, and you only have one disarm charge left!");
+        setTimeout(() => state.setMessage(null), 3000);
+        return;
+      }
+    }
+
+    // C. During tutorial: If foundMinePosition is set, ONLY allow flagging that specific tile
     if (fmp) {
       // Check if attempting to flag the foundMinePosition tile
       // Allow flagging via selectedTarget, currentTarget, or player position
@@ -278,7 +308,7 @@ const App: React.FC = () => {
     }
 
     // Normal flagging logic (no foundMinePosition restriction)
-    const targetTile = grid[ty]?.[tx];
+    // targetTile already declared above
 
     // If target is valid and HIDDEN, flag it normally
     if (targetTile && !targetTile.isRevealed) {
