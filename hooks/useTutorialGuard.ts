@@ -145,6 +145,9 @@ export const useTutorialGuard = (
         // and direct player to the recycler
         const recyclerRedirectSteps = new Set<TutorialStep>([
             'MINE_COLLECTED',
+            'MINE_CHARGES_1',
+            'MINE_CHARGES_2',
+            'ARROW_TO_ROPE',
             'ARROW_TO_RECYCLER',
             'RECYCLER_INTRO',
             'RECYCLER_GUIDE',
