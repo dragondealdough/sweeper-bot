@@ -338,7 +338,7 @@ const App: React.FC = () => {
     if (dist < 1.8) {
       mining.handleFlagAction(tx, ty, status, isMenuOpen);
     }
-  }, [mining.handleFlagAction, mining.gridRef, state.playerRef, tutorial.tutorialState.foundMinePosition]);
+  }, [mining.handleFlagAction, mining.gridRef, state.playerRef, tutorial.tutorialState]);
 
 
 
