@@ -398,10 +398,10 @@ const App: React.FC = () => {
   const safeRevealTileAt = useCallback((x: number, y: number, inventory: Inventory, depth: number, isInitial: boolean = true) => {
     const permission = tutorialGuard.canMine(x, y);
     if (!permission.allowed) {
-      if (permission.reason === 'ANTI_CHEAT' && permission.minePos) {
+      if ((permission.reason === 'ANTI_CHEAT' || permission.reason === 'OBVIOUS_MINE_IGNORED') && permission.minePos) {
         tutorial.onObviousMineIgnored(permission.minePos);
       }
-      // If reason is TUTORIAL_BLOCK, we just silently block (or maybe shake screen?)
+      // If reason is TUTORIAL_BLOCK, we just silently block
       return;
     }
     mining.revealTileAt(x, y, inventory, depth, isInitial);
