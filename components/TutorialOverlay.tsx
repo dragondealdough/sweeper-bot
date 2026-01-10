@@ -431,7 +431,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       <TimerSpotlight visible={tutorialState.showTimerSpotlight || false} />
 
       {/* Tutorial Message - hide if task is minimized OR if any menu is open (menus have their own message handling) */}
-      {tutorialState.showingMessage && tutorialState.currentMessage && !tutorialState.taskMinimized && !isAnyMenuOpen && (
+      {tutorialState.showingMessage && tutorialState.currentMessage && !tutorialState.taskMinimized && (!isAnyMenuOpen || isRecyclerOpen) && (
         <TutorialMessageDisplay
           message={tutorialState.currentMessage}
           onAdvance={onDismiss}

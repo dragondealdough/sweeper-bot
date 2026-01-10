@@ -42,7 +42,7 @@ export const EVENING_THRESHOLD_MS = 3 * 60 * 1000;
 export const RECYCLE_TIME_MS = 20000;
 export const OVERWORLD_MIN_X = -12;
 export const OVERWORLD_MAX_X = 28;
-export const APP_VERSION = 'v1.3.40';
+export const APP_VERSION = 'v1.3.41';
 
 export const CARD_DEFINITIONS: Record<CardType, CardDefinition> = {
   [CardType.BOMBER]: { type: CardType.BOMBER, name: 'Bomber', description: 'Explodes dealing damage.', baseValue: 3 },
