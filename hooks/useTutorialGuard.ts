@@ -140,21 +140,7 @@ export const useTutorialGuard = (
             }
         }
 
-        // C. Guided Mine Discovery Lock
-        // If foundMinePosition is set (tutorial is showing "Mine Here!"),
-        // ONLY allow mining that specific tile. Block ALL other mining.
-        // BUT skip this check if we're past the mine collection step (foundMinePosition should be cleared)
-        if (tutorialState.foundMinePosition &&
-            tutorialState.currentStep !== 'MINE_COLLECTED' &&
-            tutorialState.currentStep !== 'ARROW_TO_RECYCLER') {
-            const fmp = tutorialState.foundMinePosition;
-            // Block if target is NOT the highlighted tile
-            if (x !== fmp.x || y !== fmp.y) {
-                return { allowed: false, reason: 'OBVIOUS_MINE_IGNORED', minePos: fmp };
-            }
-        }
-
-        // D. Recycler Redirect Block
+        // C. Recycler Redirect Block (CHECK FIRST before foundMinePosition)
         // After collecting the mine and before recycling is complete, block mining
         // and direct player to the recycler
         const recyclerRedirectSteps = new Set<TutorialStep>([
@@ -166,6 +152,17 @@ export const useTutorialGuard = (
         ]);
         if (tutorialState.isActive && recyclerRedirectSteps.has(tutorialState.currentStep)) {
             return { allowed: false, reason: 'RECYCLER_REDIRECT' };
+        }
+
+        // D. Guided Mine Discovery Lock
+        // If foundMinePosition is set (tutorial is showing "Mine Here!"),
+        // ONLY allow mining that specific tile. Block ALL other mining.
+        if (tutorialState.foundMinePosition) {
+            const fmp = tutorialState.foundMinePosition;
+            // Block if target is NOT the highlighted tile
+            if (x !== fmp.x || y !== fmp.y) {
+                return { allowed: false, reason: 'OBVIOUS_MINE_IGNORED', minePos: fmp };
+            }
         }
 
         return { allowed: true };
