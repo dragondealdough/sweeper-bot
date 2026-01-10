@@ -115,11 +115,7 @@ const MiningSection: React.FC<MiningSectionProps> = ({
         </div>
 
         {/* Floating Action Prompts */}
-        {prompts.showRopePrompt && (
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-black text-[8px] px-2 py-1 rounded font-black uppercase animate-bounce border-2 border-black shadow-xl z-[60]">
-            {prompts.ropePromptText}
-          </div>
-        )}
+
         {prompts.showShopPrompt && (
           <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-amber-500 text-black text-[8px] px-2 py-1 rounded font-black uppercase animate-bounce border-2 border-black shadow-xl z-[60]">
             ENTER COMMISSARY [E]

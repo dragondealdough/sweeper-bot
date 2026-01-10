@@ -245,7 +245,13 @@ const App: React.FC = () => {
 
     // If target is valid and HIDDEN, flag it normally
     if (targetTile && !targetTile.isRevealed) {
-      mining.handleFlagAction(tx, ty, status, isMenuOpen);
+      // Check range for manual target (prevent infinite range flagging)
+      const p = state.playerRef.current;
+      const dx = Math.abs(tx - p.x);
+      const dy = Math.abs(ty - p.y);
+      if (dx < 1.8 && dy < 1.8) {
+        mining.handleFlagAction(tx, ty, status, isMenuOpen);
+      }
       return;
     }
 
@@ -261,8 +267,11 @@ const App: React.FC = () => {
       return;
     }
 
-    // Otherwise try target anyway (standard behavior)
-    mining.handleFlagAction(tx, ty, status, isMenuOpen);
+    // Otherwise try target anyway (standard behavior) but strict range
+    const dist = Math.sqrt(Math.pow(tx - p.x, 2) + Math.pow(ty - p.y, 2));
+    if (dist < 1.8) {
+      mining.handleFlagAction(tx, ty, status, isMenuOpen);
+    }
   }, [mining.handleFlagAction, mining.gridRef, state.playerRef]);
 
 
