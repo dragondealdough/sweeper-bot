@@ -697,7 +697,7 @@ const App: React.FC = () => {
       >
         <div className="flex w-full h-full">
           <div className="flex-1 relative">
-            <GameHUD coins={state.coins} dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} formatTime={formatTime} depth={state.depth} inventory={state.inventory} setIsInventoryOpen={state.setIsInventoryOpen} message={state.message} flashTimer={tutorial.tutorialState.flashTimer} highlightDisarmKit={tutorial.tutorialState.highlightDisarmKit} isMobile={isCompact} taskMinimized={tutorial.tutorialState.taskMinimized} onToggleTaskMinimized={tutorial.toggleTaskMinimized} />
+            <GameHUD coins={state.coins} dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} formatTime={formatTime} depth={state.depth} inventory={state.inventory} setIsInventoryOpen={state.setIsInventoryOpen} message={state.message} flashTimer={tutorial.tutorialState.flashTimer} highlightDisarmKit={tutorial.tutorialState.highlightDisarmKit} isMobile={isCompact} taskMinimized={tutorial.tutorialState.taskMinimized} onToggleTaskMinimized={tutorial.toggleTaskMinimized} onOpenDevTools={() => setIsDevToolsOpen(true)} />
 
             {/* Game content area - positioned after sidebar, extends to screen edge to eliminate right border */}
             <div ref={viewportRef} className={`absolute ${isCompact ? 'left-0' : 'left-64'} top-0 bottom-0 pt-20 overflow-hidden bg-black`} style={{ right: 0 }}>

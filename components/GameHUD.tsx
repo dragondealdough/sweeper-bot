@@ -16,6 +16,7 @@ interface GameHUDProps {
     isMobile?: boolean; // New prop
     taskMinimized?: boolean;
     onToggleTaskMinimized?: () => void;
+    onOpenDevTools?: () => void;
 }
 
 const GameHUD: React.FC<GameHUDProps> = ({
@@ -32,7 +33,8 @@ const GameHUD: React.FC<GameHUDProps> = ({
     highlightDisarmKit = false,
     isMobile = false,
     taskMinimized = false,
-    onToggleTaskMinimized
+    onToggleTaskMinimized,
+    onOpenDevTools
 }) => {
     return (
         <>
@@ -71,6 +73,18 @@ const GameHUD: React.FC<GameHUDProps> = ({
                             >
                                 INV
                             </button>
+                            {/* Dev Tools Button (Mobile) */}
+                            {onOpenDevTools && (
+                                <>
+                                    <div className="h-4 w-px bg-stone-700" />
+                                    <button
+                                        onClick={onOpenDevTools}
+                                        className="bg-red-900/50 hover:bg-red-800/50 text-red-200 font-bold px-2 py-1 rounded text-xs uppercase border border-red-900/50 flex items-center justify-center w-8"
+                                    >
+                                        🐞
+                                    </button>
+                                </>
+                            )}
                         </>
                     )}
                     <div className="h-4 w-px bg-stone-700" />
