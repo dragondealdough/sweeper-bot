@@ -1467,11 +1467,12 @@ export const useTutorial = () => {
       ...prev,
       showingMessage: true,
       currentMessage: {
-        text: "Look! The numbers don't lie. There is definitely a mine here!",
-        buttonText: "My bad!",
+        text: "Wait! I have a sneaking suspicion there's an explosive inside that highlighted block! Why don't you go ahead and flag it with Z, then break it open?",
+        buttonText: "On it!",
         character: 'narrator'
       },
       foundMinePosition: pos,
+      taskMinimized: false, // Ensure popup is always visible
     }));
   }, []);
 
