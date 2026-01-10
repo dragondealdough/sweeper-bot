@@ -234,6 +234,52 @@ export const useTutorial = () => {
   const startTimerCallbackRef = useRef<(() => void) | null>(null);
   const hintTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Session persistence key
+  const TUTORIAL_SESSION_KEY = 'sweeper_tutorial_session';
+
+  // Restore tutorial state from sessionStorage on mount (survives orientation change)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(TUTORIAL_SESSION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Only restore if there's meaningful progress (not just initial state)
+        if (parsed.currentStep && parsed.currentStep !== 'WELCOME_1') {
+          setTutorialState(prev => ({
+            ...prev,
+            ...parsed,
+            // Don't restore transient UI states
+            showingMessage: false,
+            currentMessage: null,
+          }));
+          hasStarted.current = true;
+        }
+      }
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }, []);
+
+  // Save tutorial state to sessionStorage on change
+  useEffect(() => {
+    if (tutorialState.currentStep !== 'WELCOME_1' || tutorialState.tutorialCompleted) {
+      try {
+        // Save only the essential state (exclude transient values)
+        const toSave = {
+          currentStep: tutorialState.currentStep,
+          isActive: tutorialState.isActive,
+          tutorialCompleted: tutorialState.tutorialCompleted,
+          pickaxeTaken: tutorialState.pickaxeTaken,
+          postShopChoice: tutorialState.postShopChoice,
+          noMinesToRecycle: tutorialState.noMinesToRecycle,
+        };
+        sessionStorage.setItem(TUTORIAL_SESSION_KEY, JSON.stringify(toSave));
+      } catch (e) {
+        // Ignore storage errors
+      }
+    }
+  }, [tutorialState.currentStep, tutorialState.tutorialCompleted, tutorialState.pickaxeTaken, tutorialState.postShopChoice, tutorialState.noMinesToRecycle]);
+
   // Hint messages for waiting states
   const HINT_MESSAGES: Record<string, string> = {
     'MINE_INTRO_9': '💡 Hint: Select a tile with arrow keys, then press SPACEBAR to mine it!',
@@ -297,6 +343,12 @@ export const useTutorial = () => {
       waitingForDisarm: false,
     });
     hasStarted.current = false;
+    // Clear session storage so orientation change doesn't restore old state
+    try {
+      sessionStorage.removeItem(TUTORIAL_SESSION_KEY);
+    } catch (e) {
+      // Ignore storage errors
+    }
   }, []);
 
   const advanceTutorial = useCallback(() => {
