@@ -662,14 +662,23 @@ const App: React.FC = () => {
   const zoomDirection = isZoomedIn ? 'in' : 'out';
 
   if (isZoomed) {
+    const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+    const resetShortcut = isMac ? '⌘ + 0' : 'Ctrl + 0';
+
     return (
       <div className="fixed inset-0 z-[9999] bg-stone-950 flex flex-col items-center justify-center text-center p-8 animate-in fade-in duration-300">
         <div className="text-6xl mb-6 animate-pulse">🔍</div>
         <h2 className="text-2xl font-black text-amber-500 uppercase tracking-widest mb-4">Zoom Level Incorrect</h2>
-        <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed">
+        <p className="text-stone-400 font-mono text-sm max-w-xs leading-relaxed mb-4">
           The game view is currently zoomed {zoomDirection}, which may break the layout.
-          <br /><br />
-          Please <span className="text-white font-bold">Reset Zoom</span> to 100% to continue.
+        </p>
+        <div className="bg-stone-800 rounded-lg px-4 py-3 mb-4">
+          <p className="text-stone-300 text-sm font-bold mb-2">To Reset Zoom:</p>
+          <p className="text-white font-mono text-lg">{resetShortcut}</p>
+          <p className="text-stone-500 text-xs mt-2">or View → Actual Size in your browser menu</p>
+        </div>
+        <p className="text-stone-500 text-xs max-w-xs">
+          On mobile: Double-tap with two fingers or check your browser settings
         </p>
       </div>
     );
