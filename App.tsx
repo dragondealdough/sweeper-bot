@@ -241,12 +241,48 @@ const App: React.FC = () => {
     const grid = mining.gridRef.current;
     if (!grid) return;
 
+    const p = state.playerRef.current;
+    const fmp = tutorial.tutorialState.foundMinePosition;
+
+    // During tutorial: If foundMinePosition is set, ONLY allow flagging that specific tile
+    if (fmp) {
+      // Check if attempting to flag the foundMinePosition tile
+      // Allow flagging via selectedTarget, currentTarget, or player position
+      const targetTile = grid[ty]?.[tx];
+      const isTargetFMP = tx === fmp.x && ty === fmp.y;
+
+      // Check currentTarget (cursor)
+      const pTx = Math.floor(p.x + 0.5);
+      const pTy = Math.floor(p.y + 0.5);
+      const isPlayerOnFMP = pTx === fmp.x && pTy === fmp.y;
+
+      // If trying to flag the FMP tile (either directly or cursor is on it)
+      if (isTargetFMP) {
+        // Range check for direct target
+        const dx = Math.abs(tx - p.x);
+        const dy = Math.abs(ty - p.y);
+        if (dx < 1.8 && dy < 1.8 && targetTile && !targetTile.isRevealed) {
+          mining.handleFlagAction(tx, ty, status, isMenuOpen);
+        }
+        return;
+      } else if (isPlayerOnFMP) {
+        // Player cursor is on FMP
+        const fmpTile = grid[fmp.y]?.[fmp.x];
+        if (fmpTile && !fmpTile.isRevealed) {
+          mining.handleFlagAction(fmp.x, fmp.y, status, isMenuOpen);
+        }
+        return;
+      }
+      // Block flagging any other tile during foundMinePosition phase
+      return;
+    }
+
+    // Normal flagging logic (no foundMinePosition restriction)
     const targetTile = grid[ty]?.[tx];
 
     // If target is valid and HIDDEN, flag it normally
     if (targetTile && !targetTile.isRevealed) {
       // Check range for manual target (prevent infinite range flagging)
-      const p = state.playerRef.current;
       const dx = Math.abs(tx - p.x);
       const dy = Math.abs(ty - p.y);
       if (dx < 1.8 && dy < 1.8) {
@@ -256,7 +292,6 @@ const App: React.FC = () => {
     }
 
     // Fallback: Check player tile
-    const p = state.playerRef.current;
     const pTx = Math.floor(p.x + 0.5);
     const pTy = Math.floor(p.y + 0.5);
     const playerTile = grid[pTy]?.[pTx];
@@ -272,7 +307,7 @@ const App: React.FC = () => {
     if (dist < 1.8) {
       mining.handleFlagAction(tx, ty, status, isMenuOpen);
     }
-  }, [mining.handleFlagAction, mining.gridRef, state.playerRef]);
+  }, [mining.handleFlagAction, mining.gridRef, state.playerRef, tutorial.tutorialState.foundMinePosition]);
 
 
 
