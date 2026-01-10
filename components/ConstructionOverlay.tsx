@@ -394,6 +394,12 @@ const ConstructionOverlay: React.FC<ConstructionOverlayProps> = ({
           </div>
 
         </div>
+
+        {/* Tutorial Dimming Overlay - darkens the construction interface when a tutorial message is active */}
+        {showTutorialMessage && (
+          <div className="absolute inset-0 bg-black/70 z-[40] pointer-events-none animate-in fade-in duration-500 backdrop-blur-[1px]" />
+        )}
+
       </div>
 
       {/* Tutorial Message Display */}
