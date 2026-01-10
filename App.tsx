@@ -1,7 +1,11 @@
 
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { GameStatus, Direction, ItemType, FlagType } from './types';
-import { GRID_CONFIG, COLORS, CARD_DEFINITIONS, INITIAL_ROPE_LENGTH, DAY_DURATION_MS, EVENING_THRESHOLD_MS, RECYCLE_TIME_MS } from './constants';
+import {
+  APP_VERSION, RECYCLE_TIME_MS, OVERWORLD_MIN_X, OVERWORLD_MAX_X,
+  GRID_CONFIG, PHYSICS, COLORS, INITIAL_ROPE_LENGTH, SAFE_ROWS, DAY_DURATION_MS,
+  ROPE_X, HOUSE_X, RECYCLER_X, SHOP_X, CONSTRUCTION_X, OVERWORLD_FLOOR_Y
+} from './constants';
 import ShopOverlay from './components/ShopOverlay';
 import InventoryOverlay from './components/InventoryOverlay';
 import RecyclingOverlay from './components/RecyclingOverlay';
@@ -114,12 +118,7 @@ const App: React.FC = () => {
     };
   }, [isMobile, state.player.y]); // Added dependency on player.y to trigger zoom change
 
-  const ROPE_X = 8;
-  const HOUSE_X = -2;  // Moved left to make room for rope mechanism
-  const RECYCLER_X = -8;
-  const SHOP_X = 13.5;
-  const CONSTRUCTION_X = 22;
-  const OVERWORLD_FLOOR_Y = -2;
+
 
   const { updateTimers } = useWorldUpdates();
   const { updatePhysics } = usePhysics();
@@ -127,7 +126,7 @@ const App: React.FC = () => {
   const actions = useGameActions(
     state.setCoins, state.setInventory, state.setMessage, state.setDayTime,
     state.setDayCount, state.setRopeLength, state.playerRef, state.setPlayer,
-    state.timeRef, { current: [] } as any, ROPE_X, OVERWORLD_FLOOR_Y
+    state.timeRef, { current: [] } as any
   );
 
   // Flash effect state for mine explosion

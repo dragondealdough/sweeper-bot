@@ -42,7 +42,7 @@ export const EVENING_THRESHOLD_MS = 3 * 60 * 1000;
 export const RECYCLE_TIME_MS = 20000;
 export const OVERWORLD_MIN_X = -12;
 export const OVERWORLD_MAX_X = 28;
-export const APP_VERSION = 'v1.3.45';
+export const APP_VERSION = 'v1.3.46';
 
 export const CARD_DEFINITIONS: Record<CardType, CardDefinition> = {
   [CardType.BOMBER]: { type: CardType.BOMBER, name: 'Bomber', description: 'Explodes dealing damage.', baseValue: 3 },
@@ -64,4 +64,12 @@ export const CARD_DEFINITIONS: Record<CardType, CardDefinition> = {
   [CardType.SPY]: { type: CardType.SPY, name: 'Spy', description: 'Reveals enemy cards.', baseValue: 1 },
 };
 
+
 export const CHARGES_PER_KIT = 3;
+
+export const ROPE_X = 8;
+export const HOUSE_X = -2;
+export const RECYCLER_X = -8;
+export const SHOP_X = 13.5;
+export const CONSTRUCTION_X = 22;
+export const OVERWORLD_FLOOR_Y = -2;

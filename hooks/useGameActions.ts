@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { GameStatus, Inventory, Direction, PlayerPosition } from '../types';
-import { DAY_DURATION_MS, GRID_CONFIG, CHARGES_PER_KIT } from '../constants';
+import { DAY_DURATION_MS, GRID_CONFIG, CHARGES_PER_KIT, HOUSE_X, ROPE_X, OVERWORLD_FLOOR_Y } from '../constants';
 
 export const useGameActions = (
   setCoins: React.Dispatch<React.SetStateAction<number>>,
@@ -13,15 +13,13 @@ export const useGameActions = (
   playerRef: React.MutableRefObject<PlayerPosition>,
   setPlayer: React.Dispatch<React.SetStateAction<PlayerPosition>>,
   timeRef: React.MutableRefObject<number>,
-  gridRef: React.MutableRefObject<any[][]>,
-  ROPE_X: number,
-  OVERWORLD_FLOOR_Y: number
+  gridRef: React.MutableRefObject<any[][]>
 ) => {
   const handleSleep = useCallback((forced = false, currentDayCount: number) => {
     timeRef.current = DAY_DURATION_MS;
     setDayTime(DAY_DURATION_MS);
     setDayCount(prev => prev + 1);
-    const startPos = { x: 8, y: OVERWORLD_FLOOR_Y, vx: 0, vy: 0, facing: Direction.DOWN, isClimbing: false };
+    const startPos = { x: HOUSE_X, y: OVERWORLD_FLOOR_Y, vx: 0, vy: 0, facing: Direction.DOWN, isClimbing: false };
     playerRef.current = startPos;
     setPlayer(startPos);
     if (!forced) {
@@ -99,7 +97,7 @@ export const useGameActions = (
       setMessage("+1 PICKAXE ⛏️ - YOU CAN NOW MINE!");
       setTimeout(() => setMessage(null), 2000);
     }
-  }, [setCoins, setInventory, setMessage, setRopeLength, gridRef, ROPE_X]);
+  }, [setCoins, setInventory, setMessage, setRopeLength, gridRef]);
 
   const handleShopSell = useCallback((id: 'SCRAP' | 'GEM' | 'COAL', price: number) => {
     setInventory(prev => {
