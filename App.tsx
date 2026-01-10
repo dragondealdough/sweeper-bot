@@ -701,7 +701,8 @@ const App: React.FC = () => {
   // Interaction Prompts
   const canClimb = !state.player.isClimbing && Math.abs(state.player.x - ROPE_X) < 0.5 &&
     (Math.abs(state.player.y - OVERWORLD_FLOOR_Y) < 0.5 || (state.player.y <= state.ropeLength && state.player.y > OVERWORLD_FLOOR_Y && state.player.y >= 0));
-  const showRopePrompt = canClimb;
+  // Ascend prompt ONLY during tutorial (when showArrowToRope is true) AND player is in mine (y >= 0)
+  const showRopePrompt = canClimb && tutorial.tutorialState.showArrowToRope && state.player.y >= 0;
   const ropePromptText = Math.abs(state.player.y - OVERWORLD_FLOOR_Y) < 0.5 ? "DESCEND [E]" : "ASCEND [E]";
 
   const showShopPrompt = state.player.y < 0 && Math.abs(state.player.x - SHOP_X) < 1.5 && !state.isShopOpen;
