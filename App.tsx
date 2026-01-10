@@ -652,12 +652,11 @@ const App: React.FC = () => {
   // visualViewport.scale detects pinch zoom (mobile) - goes above 1.0 when zooming in
   // For desktop browser zoom, we check if devicePixelRatio differs from expected (or use screen ratio)
   const visualViewportScale = window.visualViewport?.scale ?? 1;
-  const isZoomedIn = visualViewportScale > 1.1;
+  const isZoomedIn = visualViewportScale > 1.05;
   // For zoom-out detection, check if the viewport is significantly larger than expected
   // (This happens when browser zoom < 100%)
-  const expectedMinWidth = 320; // Minimum expected viewport width at 100% zoom
-  const isZoomedOut = window.innerWidth > window.screen.availWidth * 1.1 ||
-    (visualViewportScale < 0.9 && visualViewportScale > 0);
+  const isZoomedOut = window.innerWidth > window.screen.availWidth * 1.02 ||
+    (visualViewportScale < 0.95 && visualViewportScale > 0);
 
   const isZoomed = isZoomedIn || isZoomedOut;
   const zoomDirection = isZoomedIn ? 'in' : 'out';
