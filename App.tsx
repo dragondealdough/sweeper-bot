@@ -392,7 +392,7 @@ const App: React.FC = () => {
   }, [state.status]);
 
   // Instantiate Tutorial Guard
-  const tutorialGuard = useTutorialGuard(tutorial.tutorialState, mining.grid);
+  const tutorialGuard = useTutorialGuard(tutorial.tutorialState, mining.grid, state.ropeLength);
 
   // Safe reveal with Tutorial Guard checks
   const safeRevealTileAt = useCallback((x: number, y: number, inventory: Inventory, depth: number, isInitial: boolean = true) => {
@@ -400,12 +400,16 @@ const App: React.FC = () => {
     if (!permission.allowed) {
       if ((permission.reason === 'ANTI_CHEAT' || permission.reason === 'OBVIOUS_MINE_IGNORED') && permission.minePos) {
         tutorial.onObviousMineIgnored(permission.minePos);
+      } else if (permission.reason === 'DEPTH_LIMIT') {
+        // Show depth limit popup
+        state.setMessage("⚠️ Don't go too deep yet! Use the rope to return to the surface first.");
+        setTimeout(() => state.setMessage(null), 2500);
       }
       // If reason is TUTORIAL_BLOCK, we just silently block
       return;
     }
     mining.revealTileAt(x, y, inventory, depth, isInitial);
-  }, [tutorialGuard, mining.revealTileAt, tutorial.onObviousMineIgnored]);
+  }, [tutorialGuard, mining.revealTileAt, tutorial.onObviousMineIgnored, state.setMessage]);
 
   // Handle Tile Interaction (Tap/Click)
   const handleTileInteraction = useCallback((x: number, y: number) => {

@@ -2,9 +2,13 @@ import { useCallback } from 'react';
 import { TutorialState, TutorialStep, INTERACTIVE_STEPS } from './useTutorial';
 import { TileState, FlagType, GRID_CONFIG } from '../types';
 
+// Max depth player can mine during early tutorial (relative to rope length)
+const TUTORIAL_DEPTH_BUFFER = 3; // Allow mining TUTORIAL_DEPTH_BUFFER tiles below rope
+
 export const useTutorialGuard = (
     tutorialState: TutorialState,
-    grid: TileState[][]
+    grid: TileState[][],
+    ropeLength: number = 999 // Default to no limit if not provided
 ) => {
     // Helper to find "obvious" mines (Anti-Cheat Logic)
     const checkForObviousMines = useCallback((currentGrid: TileState[][]) => {
@@ -81,12 +85,18 @@ export const useTutorialGuard = (
     };
 
     // 2. MINING GUARD
-    // Returns { allowed: boolean, reason?: 'ANTI_CHEAT' | 'TUTORIAL_BLOCK', minePos?: {x,y} }
+    // Returns { allowed: boolean, reason?: 'ANTI_CHEAT' | 'TUTORIAL_BLOCK' | 'DEPTH_LIMIT', minePos?: {x,y} }
     const canMine = (x: number, y: number) => {
         // A. General Tutorial Blocking (e.g. don't mine during conversations)
         // If input is generally blocked, mining is definitely blocked
         if (isInputBlocked()) {
             return { allowed: false, reason: 'TUTORIAL_BLOCK' };
+        }
+
+        // A2. Depth Limit during Tutorial
+        // Prevent player from mining too deep during tutorial so they can always reach the rope
+        if (tutorialState.isActive && y >= ropeLength + TUTORIAL_DEPTH_BUFFER) {
+            return { allowed: false, reason: 'DEPTH_LIMIT' };
         }
 
         // B. Anti-Cheat (Guided Discovery)
@@ -101,10 +111,21 @@ export const useTutorialGuard = (
 
         // Explicitly DISABLE anti-cheat for the very first whack (MINE_INTRO_9) to be safe?
         // Also disable for MINE_COLLECT_2 (Flagging tutorial).
+        // Also disable for all post-flagging steps to prevent softlock when player needs to mine back up.
 
         const antiCheatExcludedSteps = new Set<TutorialStep>([
             'MINE_INTRO_9',
-            'MINE_COLLECT_2'
+            'MINE_COLLECT_2',
+            'MINE_COLLECT_WAIT',
+            'MINE_COLLECTED',
+            'ARROW_TO_RECYCLER',
+            'RECYCLER_INTRO',
+            'RECYCLER_GUIDE',
+            'RECYCLER_WAIT',
+            'RECYCLER_SUCCESS',
+            'CONSTRUCTION_INTRO',
+            'CONSTRUCTION_GUIDE',
+            'TUTORIAL_COMPLETE',
         ]);
 
         if (tutorialState.isActive && !antiCheatExcludedSteps.has(tutorialState.currentStep)) {
