@@ -393,6 +393,19 @@ const App: React.FC = () => {
     // Reset death phase
     setDeathPhase('NONE');
 
+    // Complete any pending recycler items (overnight they would have finished)
+    const pendingItems = state.recyclingRef.current.queue;
+    if (pendingItems > 0) {
+      // Spawn scrap for each completed item
+      for (let i = 0; i < pendingItems; i++) {
+        const scrapId = `scrap-overnight-${Date.now()}-${i}`;
+        state.setWorldItems(prev => [...prev, { id: scrapId, x: RECYCLER_X, y: OVERWORLD_FLOOR_Y, vy: 0, type: 'SCRAP' }]);
+      }
+      // Clear the recycler queue
+      state.recyclingRef.current = { queue: 0, timer: RECYCLE_TIME_MS };
+      state.setRecyclingDisplay({ queue: 0, progress: 0 });
+    }
+
     // Advance to next day using sleep (forced)
     actionsWithGrid.handleSleep(true, state.dayCount);
 
@@ -405,7 +418,7 @@ const App: React.FC = () => {
     // Start fade-in
     setGameFadingIn(true);
     setTimeout(() => setGameFadingIn(false), 600);
-  }, [actionsWithGrid, state.dayCount, mining]);
+  }, [actionsWithGrid, state, mining, RECYCLER_X, OVERWORLD_FLOOR_Y, RECYCLE_TIME_MS]);
 
   // Trigger tutorial when shop opens
   useEffect(() => {
