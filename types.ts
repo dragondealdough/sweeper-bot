@@ -110,6 +110,11 @@ export interface Inventory {
   ownedTokens: TokenId[];
   equippedTokens: TokenId[];
   minesDisarmedTotal: number;
+  // Armor system
+  armorLevel: number;
+  armorHitsRemaining: number;
+  // Armadillo NPC
+  armadilloIntroSeen: boolean;
 }
 
 export interface BattleState {

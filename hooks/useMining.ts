@@ -295,8 +295,20 @@ export const useMining = (
                 // Tutorial handles the mine hit - no death
                 onMineHit();
             } else {
-                // Normal game - trigger death sequence
-                handlePlayerDeath();
+                // Check if armor can absorb the hit
+                if (inventory.armorHitsRemaining > 0) {
+                    // Armor absorbs the hit!
+                    setInventory(prev => ({ ...prev, armorHitsRemaining: prev.armorHitsRemaining - 1 }));
+                    setMessage("🛡️ ARMOR ABSORBED THE HIT!");
+                    setScreenShake(8);
+                    setPlayerHitFlash(true);
+                    setTimeout(() => setPlayerHitFlash(false), 300);
+                    setTimeout(() => setMessage(null), 2000);
+                    // Don't die - armor saved us
+                } else {
+                    // Normal game - trigger death sequence
+                    handlePlayerDeath();
+                }
             }
             return; // Exit early - mine hit handled
         } else {

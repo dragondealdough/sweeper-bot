@@ -42,7 +42,7 @@ export const EVENING_THRESHOLD_MS = 3 * 60 * 1000;
 export const RECYCLE_TIME_MS = 20000;
 export const OVERWORLD_MIN_X = -12;
 export const OVERWORLD_MAX_X = 28;
-export const APP_VERSION = 'v1.3.55';
+export const APP_VERSION = 'v1.3.56';
 
 export const CARD_DEFINITIONS: Record<CardType, CardDefinition> = {
   [CardType.BOMBER]: { type: CardType.BOMBER, name: 'Bomber', description: 'Explodes dealing damage.', baseValue: 3 },
@@ -73,6 +73,15 @@ export const RECYCLER_X = -8;
 export const SHOP_X = 13.5;
 export const CONSTRUCTION_X = 22;
 export const OVERWORLD_FLOOR_Y = -2;
+export const WISHING_WELL_X = 3;  // Between house (-2) and rope (8)
+
+// Armadillo NPC settings
+export const ARMADILLO_WALK_MIN_X = 1;
+export const ARMADILLO_WALK_MAX_X = 5;
+export const ARMADILLO_SPEED = 0.02;
+
+// Wishing Well passive income
+export const WISHING_WELL_GOLD_PER_DAY = 5;
 
 export const MAX_EQUIPPED_TOKENS = 3;
 

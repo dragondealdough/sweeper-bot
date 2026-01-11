@@ -38,6 +38,11 @@ interface KeyboardParams {
   depth: number;
   selectedTarget?: { x: number, y: number } | null;
   isInputBlocked?: boolean;
+  // Armadillo NPC
+  armadilloX?: number;
+  isArmadilloOpen?: boolean;
+  setIsArmadilloOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  wishingWellBuilt?: boolean;
 }
 
 export const useKeyboard = (params: KeyboardParams) => {
@@ -284,6 +289,10 @@ export const useKeyboard = (params: KeyboardParams) => {
               onConstructionClosed?.(); // Trigger tutorial callback when closing
               setIsConstructionOpen(false);
             }
+          }
+          // Armadillo NPC interaction
+          else if (pr.armadilloX !== undefined && pr.wishingWellBuilt && Math.abs(px - pr.armadilloX) < 1.5 && pr.setIsArmadilloOpen) {
+            pr.setIsArmadilloOpen(prev => !prev);
           }
         } else if (p.y >= 0 && !nearRope) {
           // In mine but not near rope

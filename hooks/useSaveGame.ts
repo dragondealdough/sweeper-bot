@@ -91,11 +91,16 @@ export const useSaveGame = () => {
                 return null;
             }
 
-            // Migrate inventory fields for old saves (add defaults for new token system)
+            // Migrate inventory fields for old saves (add defaults for new systems)
             if (!data.inventory.foundBlueprints) data.inventory.foundBlueprints = [];
             if (!data.inventory.ownedTokens) data.inventory.ownedTokens = [];
             if (!data.inventory.equippedTokens) data.inventory.equippedTokens = [];
             if (data.inventory.minesDisarmedTotal === undefined) data.inventory.minesDisarmedTotal = 0;
+            // Armor system migration
+            if (data.inventory.armorLevel === undefined) data.inventory.armorLevel = 0;
+            if (data.inventory.armorHitsRemaining === undefined) data.inventory.armorHitsRemaining = 0;
+            // Armadillo NPC migration
+            if (data.inventory.armadilloIntroSeen === undefined) data.inventory.armadilloIntroSeen = false;
 
             return data;
         } catch (e) {

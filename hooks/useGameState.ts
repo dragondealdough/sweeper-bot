@@ -12,13 +12,15 @@ export const useGameState = () => {
     silverBlocks: 0, stone: 0, disarmKits: 1, disarmCharges: 3, defusedMines: 0, scrapMetal: 0, gems: 0, coal: 0,
     deck: [], collection: [], wishingWellBuilt: false, wishingWellProgress: { stone: 0, silver: 0 },
     hasPickaxe: false,
-    foundBlueprints: [], ownedTokens: [], equippedTokens: [], minesDisarmedTotal: 0
+    foundBlueprints: [], ownedTokens: [], equippedTokens: [], minesDisarmedTotal: 0,
+    armorLevel: 0, armorHitsRemaining: 0, armadilloIntroSeen: false
   });
   const [ropeLength, setRopeLength] = useState(5);
   const [isShopOpen, setIsShopOpen] = useState(false);
   const [isRecyclerOpen, setIsRecyclerOpen] = useState(false);
   const [isInventoryOpen, setIsInventoryOpen] = useState(false);
   const [isConstructionOpen, setIsConstructionOpen] = useState(false);
+  const [isArmadilloOpen, setIsArmadilloOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [worldItems, setWorldItems] = useState<WorldItem[]>([]);
   const [recyclingDisplay, setRecyclingDisplay] = useState({ queue: 0, progress: 0 });
@@ -48,6 +50,7 @@ export const useGameState = () => {
     isRecyclerOpen, setIsRecyclerOpen,
     isInventoryOpen, setIsInventoryOpen,
     isConstructionOpen, setIsConstructionOpen,
+    isArmadilloOpen, setIsArmadilloOpen,
     message, setMessage,
     worldItems, setWorldItems,
     recyclingDisplay, setRecyclingDisplay,

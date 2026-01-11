@@ -14,6 +14,7 @@ interface OverworldSectionProps {
   SHOP_X: number;
   RECYCLER_X: number;
   CONSTRUCTION_X: number;
+  WISHING_WELL_X: number;
   ropeLength: number;
   inventory: Inventory;
   isShopOpen: boolean;
@@ -23,6 +24,7 @@ interface OverworldSectionProps {
   recyclingDisplay?: { queue: number; progress: number };
   tutorialState?: TutorialState;
   playerX?: number;
+  armadilloX?: number;
 }
 
 const OverworldSection: React.FC<OverworldSectionProps> = ({
@@ -33,6 +35,7 @@ const OverworldSection: React.FC<OverworldSectionProps> = ({
   SHOP_X,
   RECYCLER_X,
   CONSTRUCTION_X,
+  WISHING_WELL_X,
   inventory,
   isShopOpen,
   isRecyclerOpen,
@@ -41,6 +44,7 @@ const OverworldSection: React.FC<OverworldSectionProps> = ({
   recyclingDisplay = { queue: 0, progress: 0 },
   tutorialState,
   playerX = 0,
+  armadilloX = 3,
 }) => {
   // Convert tile X to pixel position (same as player positioning)
   const tileToPixel = (tileX: number) => tileX * GRID_CONFIG.TILE_SIZE + 4;
@@ -298,23 +302,48 @@ const OverworldSection: React.FC<OverworldSectionProps> = ({
           <div className="text-[10px] font-black text-orange-700 uppercase tracking-widest animate-pulse z-10">
             Construction Site
           </div>
-
-          {/* Wishing Well if built */}
-          {inventory.wishingWellBuilt && (
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center">
-              <div className="w-16 h-12 bg-stone-400 border-2 border-stone-500 rounded-t-xl relative">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-stone-600" />
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-8 bg-blue-400/50 border-t-2 border-stone-500" />
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-2 bg-stone-800" />
-                <div className="absolute -top-10 left-2 w-1 h-10 bg-stone-700" />
-                <div className="absolute -top-10 right-2 w-1 h-10 bg-stone-700" />
-                <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[10px] border-b-stone-800" />
-              </div>
-              <div className="text-[8px] font-bold text-white bg-blue-500/50 px-2 py-0.5 rounded-full mb-1">WISHING WELL</div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Wishing Well - between house and mine (only when built) */}
+      {inventory.wishingWellBuilt && (
+        <div
+          className="absolute z-20 transition-[filter] duration-[5000ms]"
+          style={{
+            left: tileCenterPixel(WISHING_WELL_X),
+            top: FLOOR_Y - 48,
+            transform: 'translateX(-50%)',
+            filter: dayTime < EVENING_THRESHOLD_MS ? 'brightness(0.7)' : 'none'
+          }}
+        >
+          <div className="flex flex-col items-center">
+            {/* Well structure */}
+            <div className="w-16 h-12 bg-stone-400 border-2 border-stone-500 rounded-t-xl relative">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-stone-600" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-8 bg-blue-400/50 border-t-2 border-stone-500" />
+              {/* Roof supports */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-2 bg-stone-800" />
+              <div className="absolute -top-10 left-2 w-1 h-10 bg-stone-700" />
+              <div className="absolute -top-10 right-2 w-1 h-10 bg-stone-700" />
+              <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[10px] border-b-stone-800" />
+            </div>
+            <div className="text-[8px] font-bold text-white bg-blue-500/50 px-2 py-0.5 rounded-full mt-1">WISHING WELL</div>
+          </div>
+        </div>
+      )}
+
+      {/* Armadillo NPC - only when wishing well is built */}
+      {inventory.wishingWellBuilt && (
+        <div
+          className="absolute z-25 transition-all duration-100"
+          style={{
+            left: `${armadilloX * GRID_CONFIG.TILE_SIZE + 4}px`,
+            top: FLOOR_Y - 24,
+          }}
+        >
+          <div className="text-2xl" style={{ transform: armadilloX > WISHING_WELL_X ? 'scaleX(-1)' : 'scaleX(1)' }}>🦔</div>
+        </div>
+      )}
 
       {/* Tutorial Floating Bubbles - positioned in world coordinates, at root level */}
       {tutorialState && (() => {

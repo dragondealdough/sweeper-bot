@@ -4,12 +4,14 @@ import { GameStatus, Direction, ItemType, FlagType } from './types';
 import {
   APP_VERSION, RECYCLE_TIME_MS, OVERWORLD_MIN_X, OVERWORLD_MAX_X,
   GRID_CONFIG, PHYSICS, COLORS, INITIAL_ROPE_LENGTH, SAFE_ROWS, DAY_DURATION_MS, EVENING_THRESHOLD_MS,
-  ROPE_X, HOUSE_X, RECYCLER_X, SHOP_X, CONSTRUCTION_X, OVERWORLD_FLOOR_Y
+  ROPE_X, HOUSE_X, RECYCLER_X, SHOP_X, CONSTRUCTION_X, OVERWORLD_FLOOR_Y, WISHING_WELL_X,
+  ARMADILLO_WALK_MIN_X, ARMADILLO_WALK_MAX_X, ARMADILLO_SPEED, WISHING_WELL_GOLD_PER_DAY
 } from './constants';
 import ShopOverlay from './components/ShopOverlay';
 import InventoryOverlay from './components/InventoryOverlay';
 import RecyclingOverlay from './components/RecyclingOverlay';
 import ConstructionOverlay from './components/ConstructionOverlay';
+import ArmadilloOverlay from './components/ArmadilloOverlay';
 import OptionsOverlay from './components/OptionsOverlay';
 import MainMenu from './components/MainMenu';
 import OverworldSection from './components/overworld/OverworldSection';
@@ -63,6 +65,11 @@ const App: React.FC = () => {
   const isMineModeRef = useRef(false);
   // Scale Ref for camera calculations (to avoid closure staleness)
   const scaleRef = useRef(1);
+
+  // Armadillo NPC walking state
+  const [armadilloX, setArmadilloX] = useState(WISHING_WELL_X);
+  const armadilloDirectionRef = useRef(1); // 1 = right, -1 = left
+  const armadilloPauseRef = useRef(0); // Pause timer
 
   // Check for save game on mount
   useEffect(() => {
@@ -367,7 +374,8 @@ const App: React.FC = () => {
       silverBlocks: 0, stone: 0, disarmKits: 1, disarmCharges: 3, defusedMines: 0, scrapMetal: 0, gems: 0, coal: 0,
       deck: [], collection: [], wishingWellBuilt: false, wishingWellProgress: { stone: 0, silver: 0 },
       hasPickaxe: false,
-      foundBlueprints: [], ownedTokens: [], equippedTokens: [], minesDisarmedTotal: 0
+      foundBlueprints: [], ownedTokens: [], equippedTokens: [], minesDisarmedTotal: 0,
+      armorLevel: 0, armorHitsRemaining: 0, armadilloIntroSeen: false
     });
     state.setWorldItems([]);
     state.recyclingRef.current = { queue: 0, timer: RECYCLE_TIME_MS };
@@ -582,7 +590,10 @@ const App: React.FC = () => {
     tutorialState: tutorial.tutorialState,
     depth: state.depth,
     selectedTarget: mining.selectedTarget,
-    isInputBlocked: tutorialGuard.isInputBlocked()
+    isInputBlocked: tutorialGuard.isInputBlocked(),
+    // Armadillo NPC
+    armadilloX, isArmadilloOpen: state.isArmadilloOpen, setIsArmadilloOpen: state.setIsArmadilloOpen,
+    wishingWellBuilt: state.inventory.wishingWellBuilt
   });
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -601,7 +612,7 @@ const App: React.FC = () => {
       tutorialState: tutorial.tutorialState
     }, delta);
 
-    if (state.isShopOpen || state.isRecyclerOpen || state.isInventoryOpen || state.isConstructionOpen) return;
+    if (state.isShopOpen || state.isRecyclerOpen || state.isInventoryOpen || state.isConstructionOpen || state.isArmadilloOpen) return;
 
     updatePhysics({
       playerRef: state.playerRef, keys: state.keys, canJumpRef: state.canJumpRef,
@@ -610,6 +621,32 @@ const App: React.FC = () => {
       gridRef: mining.gridRef, setGrid: mining.setGrid, checkRopeInteraction,
       setMessage: state.setMessage
     });
+
+    // Armadillo NPC walking logic (only when wishing well is built)
+    if (state.inventory.wishingWellBuilt) {
+      if (armadilloPauseRef.current > 0) {
+        armadilloPauseRef.current -= delta;
+      } else {
+        setArmadilloX(prev => {
+          let next = prev + (ARMADILLO_SPEED * armadilloDirectionRef.current);
+          // Bounce at walk boundaries
+          if (next >= ARMADILLO_WALK_MAX_X) {
+            next = ARMADILLO_WALK_MAX_X;
+            armadilloDirectionRef.current = -1;
+            armadilloPauseRef.current = 1500 + Math.random() * 2000; // Pause 1.5-3.5s
+          } else if (next <= ARMADILLO_WALK_MIN_X) {
+            next = ARMADILLO_WALK_MIN_X;
+            armadilloDirectionRef.current = 1;
+            armadilloPauseRef.current = 1500 + Math.random() * 2000;
+          }
+          // Random pause chance
+          if (Math.random() < 0.001) {
+            armadilloPauseRef.current = 1000 + Math.random() * 1500;
+          }
+          return next;
+        });
+      }
+    }
 
     // --- CAMERA LOGIC ---
     const currentScale = scaleRef.current || 1;
@@ -818,6 +855,7 @@ const App: React.FC = () => {
   const housePromptText = state.timeRef.current <= EVENING_THRESHOLD_MS ? "SLEEP [E]" : "DAYLIGHT REMAINING";
   const showRecyclerPrompt = state.player.y < 0 && Math.abs(state.player.x - RECYCLER_X) < 1.5 && !state.isRecyclerOpen;
   const showConstructionPrompt = state.player.y < 0 && Math.abs(state.player.x - CONSTRUCTION_X) < 2 && !state.isConstructionOpen;
+  const showArmadilloPrompt = state.player.y < 0 && state.inventory.wishingWellBuilt && Math.abs(state.player.x - armadilloX) < 1.5 && !state.isArmadilloOpen;
 
   return (
     <div
@@ -853,7 +891,7 @@ const App: React.FC = () => {
                 onContextMenu={handleContextMenu}
               >
                 <div className={`w-full h-full ${state.screenShake > 0 && settings.screenShake ? 'animate-shake' : ''}`}>
-                  <OverworldSection dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} DAY_DURATION_MS={DAY_DURATION_MS} ROPE_X={ROPE_X} HOUSE_X={HOUSE_X} SHOP_X={SHOP_X} RECYCLER_X={RECYCLER_X} CONSTRUCTION_X={CONSTRUCTION_X} ropeLength={state.ropeLength} inventory={state.inventory} isShopOpen={state.isShopOpen} isRecyclerOpen={state.isRecyclerOpen} isConstructionOpen={state.isConstructionOpen} recyclingDisplay={state.recyclingDisplay} tutorialState={tutorial.tutorialState} playerX={state.player.x} getSkyGradient={() => {
+                  <OverworldSection dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} DAY_DURATION_MS={DAY_DURATION_MS} ROPE_X={ROPE_X} HOUSE_X={HOUSE_X} SHOP_X={SHOP_X} RECYCLER_X={RECYCLER_X} CONSTRUCTION_X={CONSTRUCTION_X} WISHING_WELL_X={WISHING_WELL_X} ropeLength={state.ropeLength} inventory={state.inventory} isShopOpen={state.isShopOpen} isRecyclerOpen={state.isRecyclerOpen} isConstructionOpen={state.isConstructionOpen} recyclingDisplay={state.recyclingDisplay} tutorialState={tutorial.tutorialState} playerX={state.player.x} armadilloX={armadilloX} getSkyGradient={() => {
                     const r = state.dayTime / DAY_DURATION_MS;
                     if (r > 0.3) return `linear-gradient(to bottom, ${COLORS.SKY_TOP}, ${COLORS.SKY_BOTTOM})`;
                     return r > 0.15 ? 'linear-gradient(to bottom, #1e1b4b, #f97316)' : 'linear-gradient(to bottom, #0f172a, #312e81)';
@@ -918,6 +956,7 @@ const App: React.FC = () => {
       }} onClose={() => state.setIsRecyclerOpen(false)} onOpen={() => tutorial.checkRecyclerMines(state.inventory.defusedMines)} />}
       {state.isInventoryOpen && <InventoryOverlay inventory={state.inventory} setInventory={state.setInventory} onClose={() => state.setIsInventoryOpen(false)} />}
       {state.isConstructionOpen && <ConstructionOverlay inventory={state.inventory} onContribute={actionsWithGrid.handleContribute} onClose={() => { tutorial.onConstructionClosed(); state.setIsConstructionOpen(false); }} tutorialState={tutorial.tutorialState} onTutorialAdvance={tutorial.dismissMessage} isMobile={isMobile} />}
+      {state.isArmadilloOpen && <ArmadilloOverlay inventory={state.inventory} coins={state.coins} setInventory={state.setInventory} setCoins={state.setCoins} setMessage={state.setMessage} onClose={() => state.setIsArmadilloOpen(false)} />}
 
       {/* Explosion White Flash Overlay */}
       <div

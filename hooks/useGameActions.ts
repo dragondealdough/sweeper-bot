@@ -22,11 +22,13 @@ export const useGameActions = (
     const startPos = { x: HOUSE_X, y: OVERWORLD_FLOOR_Y, vx: 0, vy: 0, facing: Direction.DOWN, isClimbing: false };
     playerRef.current = startPos;
     setPlayer(startPos);
+    // Replenish armor each day
+    setInventory(prev => ({ ...prev, armorHitsRemaining: prev.armorLevel }));
     if (!forced) {
       setMessage("WELL RESTED - DAY " + (currentDayCount + 1));
       setTimeout(() => setMessage(null), 2000);
     }
-  }, [setDayTime, setDayCount, setPlayer, setMessage, timeRef, OVERWORLD_FLOOR_Y, playerRef]);
+  }, [setDayTime, setDayCount, setPlayer, setMessage, setInventory, timeRef, OVERWORLD_FLOOR_Y, playerRef]);
 
   const handlePassOut = useCallback((currentCoins: number, currentDayCount: number) => {
     setMessage("EXHAUSTION - SKIPPING TO NEXT DAY");
