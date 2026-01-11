@@ -1041,9 +1041,9 @@ const App: React.FC = () => {
 
       {/* Mobile Touch Controls */}
       <TouchControls
-        visible={isMobile && !state.isShopOpen && !state.isRecyclerOpen && !state.isInventoryOpen && !state.isConstructionOpen}
+        visible={isMobile && !state.isShopOpen && !state.isRecyclerOpen && !state.isInventoryOpen && !state.isConstructionOpen && !state.isArmadilloOpen}
         opacity={settings.controlOpacity / 100}
-        canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
+        canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || showArmadilloPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
         disabled={tutorialGuard.isInputBlocked()}
       />
 

@@ -94,7 +94,7 @@ export const useKeyboard = (params: KeyboardParams) => {
       else if (p.facing === Direction.RIGHT) tx += 1;
       const target = { x: tx, y: ty };
 
-      const isMenuOpen = isShopOpen || isRecyclerOpen || isInventoryOpen || isConstructionOpen;
+      const isMenuOpen = isShopOpen || isRecyclerOpen || isInventoryOpen || isConstructionOpen || pr.isArmadilloOpen;
 
       if (e.key.toLowerCase() === 'i' && status === GameStatus.PLAYING && !isShopOpen && !isRecyclerOpen && !isConstructionOpen) {
         setIsInventoryOpen(prev => !prev);
