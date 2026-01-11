@@ -84,10 +84,19 @@ export const useSaveGame = () => {
             const saved = localStorage.getItem(SAVE_KEY);
             if (!saved) return null;
             const data = JSON.parse(saved) as SaveGameData;
-            if (data.version !== SAVE_VERSION) {
-                console.warn('Save version mismatch, cannot load');
+
+            // Allow loading saves from version 1 or 2, migrate as needed
+            if (data.version < 1 || data.version > SAVE_VERSION) {
+                console.warn('Save version incompatible, cannot load');
                 return null;
             }
+
+            // Migrate inventory fields for old saves (add defaults for new token system)
+            if (!data.inventory.foundBlueprints) data.inventory.foundBlueprints = [];
+            if (!data.inventory.ownedTokens) data.inventory.ownedTokens = [];
+            if (!data.inventory.equippedTokens) data.inventory.equippedTokens = [];
+            if (data.inventory.minesDisarmedTotal === undefined) data.inventory.minesDisarmedTotal = 0;
+
             return data;
         } catch (e) {
             console.error('Failed to load game:', e);
