@@ -129,12 +129,13 @@ export const usePhysics = () => {
         const collected = updatedItems.filter(item => Math.abs(item.x - p.x) < 0.8 && Math.abs(item.y - p.y) < 0.8);
         if (collected.length > 0) {
           // Count items first (synchronously)
-          const counts = { scrap: 0, gem: 0, coal: 0, coin: 0, stone: 0 };
+          const counts = { scrap: 0, gem: 0, coal: 0, coin: 0, stone: 0, silver: 0 };
           collected.forEach(item => {
             if (item.type === 'SCRAP') counts.scrap++;
             if (item.type === 'GEM') counts.gem++;
             if (item.type === 'COAL') counts.coal++;
             if (item.type === 'STONE') counts.stone++;
+            if (item.type === 'SILVER') counts.silver++;
             if (item.type === 'COIN') counts.coin++;
           });
 
@@ -145,6 +146,7 @@ export const usePhysics = () => {
             newInv.gems += counts.gem;
             newInv.coal += counts.coal;
             newInv.stone += counts.stone;
+            newInv.silverBlocks += counts.silver;
             return newInv;
           });
 
@@ -157,6 +159,7 @@ export const usePhysics = () => {
           const messages: string[] = [];
           if (counts.scrap > 0) messages.push(`+${counts.scrap} SCRAP`);
           if (counts.stone > 0) messages.push(`+${counts.stone} STONE 🪨`);
+          if (counts.silver > 0) messages.push(`+${counts.silver} SILVER 🥈`);
           if (counts.gem > 0) messages.push(`+${counts.gem} GEM 💎`);
           if (counts.coal > 0) messages.push(`+${counts.coal} COAL`);
           if (counts.coin > 0) messages.push(`+${counts.coin} COIN`);

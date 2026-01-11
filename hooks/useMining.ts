@@ -180,13 +180,15 @@ export const useMining = (
                 const depthFactor = Math.floor(y / 5);
                 const hasStoneToken = inventory.equippedTokens.includes('STONE_TOKEN');
                 const stoneChance = (0.20 + (depthFactor * 0.01)) * (hasStoneToken ? 1.2 : 1.0);
+                const silverChance = 0.15 + (depthFactor * 0.008);  // 15% base, slightly rarer than stone
                 const gemChance = 0.10 + (depthFactor * 0.02);
                 const coalChance = 0.15 + (depthFactor * 0.025);
                 const rand = Math.random();
                 let dropType: ItemType | null = null;
                 if (rand < stoneChance) dropType = 'STONE';
-                else if (rand < stoneChance + gemChance) dropType = 'GEM';
-                else if (rand < stoneChance + gemChance + coalChance) dropType = 'COAL';
+                else if (rand < stoneChance + silverChance) dropType = 'SILVER';
+                else if (rand < stoneChance + silverChance + gemChance) dropType = 'GEM';
+                else if (rand < stoneChance + silverChance + gemChance + coalChance) dropType = 'COAL';
                 else if (Math.random() < 0.1) dropType = 'COIN';
 
                 if (dropType) {
@@ -312,13 +314,15 @@ export const useMining = (
                 const depthFactor = Math.floor(y / 5);
                 const hasStoneToken = inventory.equippedTokens.includes('STONE_TOKEN');
                 const stoneChance = (0.20 + (depthFactor * 0.01)) * (hasStoneToken ? 1.2 : 1.0);  // 20% base, +1% per 50m, +20% if token
+                const silverChance = 0.15 + (depthFactor * 0.008);  // 15% base, slightly rarer than stone
                 const gemChance = 0.10 + (depthFactor * 0.02);    // 10% base, +2% per 50m
                 const coalChance = 0.15 + (depthFactor * 0.025);  // 15% base, +2.5% per 50m
                 const rand = Math.random();
                 let dropType: ItemType | null = null;
                 if (rand < stoneChance) dropType = 'STONE';
-                else if (rand < stoneChance + gemChance) dropType = 'GEM';
-                else if (rand < stoneChance + gemChance + coalChance) dropType = 'COAL';
+                else if (rand < stoneChance + silverChance) dropType = 'SILVER';
+                else if (rand < stoneChance + silverChance + gemChance) dropType = 'GEM';
+                else if (rand < stoneChance + silverChance + gemChance + coalChance) dropType = 'COAL';
                 else if (Math.random() < 0.1) dropType = 'COIN';
 
                 if (dropType) {

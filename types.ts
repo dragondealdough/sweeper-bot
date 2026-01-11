@@ -5,7 +5,7 @@ export enum FlagType {
   MINE = 'MINE',
 }
 
-export type ItemType = 'COIN' | 'SILVER_BLOCK' | 'SCRAP' | 'GEM' | 'COAL' | 'STONE';
+export type ItemType = 'COIN' | 'SILVER_BLOCK' | 'SILVER' | 'SCRAP' | 'GEM' | 'COAL' | 'STONE';
 
 export enum Direction {
   UP = 'UP',
