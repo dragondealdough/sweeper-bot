@@ -66,10 +66,12 @@ const App: React.FC = () => {
   // Scale Ref for camera calculations (to avoid closure staleness)
   const scaleRef = useRef(1);
 
-  // Armadillo NPC walking state
-  const [armadilloX, setArmadilloX] = useState(WISHING_WELL_X);
+  // Armadillo NPC walking state - use ref for animation, state for UI updates
+  const armadilloXRef = useRef(WISHING_WELL_X);
+  const [armadilloRenderX, setArmadilloRenderX] = useState(WISHING_WELL_X);
   const armadilloDirectionRef = useRef(1); // 1 = right, -1 = left
   const armadilloPauseRef = useRef(0); // Pause timer
+  const armadilloRenderCountRef = useRef(0); // Counter for periodic render updates
 
   // Check for save game on mount
   useEffect(() => {
@@ -592,7 +594,7 @@ const App: React.FC = () => {
     selectedTarget: mining.selectedTarget,
     isInputBlocked: tutorialGuard.isInputBlocked(),
     // Armadillo NPC
-    armadilloX, isArmadilloOpen: state.isArmadilloOpen, setIsArmadilloOpen: state.setIsArmadilloOpen,
+    armadilloX: armadilloXRef.current, isArmadilloOpen: state.isArmadilloOpen, setIsArmadilloOpen: state.setIsArmadilloOpen,
     wishingWellBuilt: state.inventory.wishingWellBuilt
   });
 
@@ -627,24 +629,29 @@ const App: React.FC = () => {
       if (armadilloPauseRef.current > 0) {
         armadilloPauseRef.current -= delta;
       } else {
-        setArmadilloX(prev => {
-          let next = prev + (ARMADILLO_SPEED * armadilloDirectionRef.current);
-          // Bounce at walk boundaries
-          if (next >= ARMADILLO_WALK_MAX_X) {
-            next = ARMADILLO_WALK_MAX_X;
-            armadilloDirectionRef.current = -1;
-            armadilloPauseRef.current = 1500 + Math.random() * 2000; // Pause 1.5-3.5s
-          } else if (next <= ARMADILLO_WALK_MIN_X) {
-            next = ARMADILLO_WALK_MIN_X;
-            armadilloDirectionRef.current = 1;
-            armadilloPauseRef.current = 1500 + Math.random() * 2000;
-          }
-          // Random pause chance
-          if (Math.random() < 0.001) {
-            armadilloPauseRef.current = 1000 + Math.random() * 1500;
-          }
-          return next;
-        });
+        let next = armadilloXRef.current + (ARMADILLO_SPEED * armadilloDirectionRef.current);
+        // Bounce at walk boundaries
+        if (next >= ARMADILLO_WALK_MAX_X) {
+          next = ARMADILLO_WALK_MAX_X;
+          armadilloDirectionRef.current = -1;
+          armadilloPauseRef.current = 1500 + Math.random() * 2000;
+        } else if (next <= ARMADILLO_WALK_MIN_X) {
+          next = ARMADILLO_WALK_MIN_X;
+          armadilloDirectionRef.current = 1;
+          armadilloPauseRef.current = 1500 + Math.random() * 2000;
+        }
+        // Random pause chance
+        if (Math.random() < 0.001) {
+          armadilloPauseRef.current = 1000 + Math.random() * 1500;
+        }
+        armadilloXRef.current = next;
+
+        // Update render state every 10 frames (~6Hz) to avoid infinite loop
+        armadilloRenderCountRef.current++;
+        if (armadilloRenderCountRef.current >= 10) {
+          armadilloRenderCountRef.current = 0;
+          setArmadilloRenderX(next);
+        }
       }
     }
 
@@ -855,7 +862,7 @@ const App: React.FC = () => {
   const housePromptText = state.timeRef.current <= EVENING_THRESHOLD_MS ? "SLEEP [E]" : "DAYLIGHT REMAINING";
   const showRecyclerPrompt = state.player.y < 0 && Math.abs(state.player.x - RECYCLER_X) < 1.5 && !state.isRecyclerOpen;
   const showConstructionPrompt = state.player.y < 0 && Math.abs(state.player.x - CONSTRUCTION_X) < 2 && !state.isConstructionOpen;
-  const showArmadilloPrompt = state.player.y < 0 && state.inventory.wishingWellBuilt && Math.abs(state.player.x - armadilloX) < 1.5 && !state.isArmadilloOpen;
+  const showArmadilloPrompt = state.player.y < 0 && state.inventory.wishingWellBuilt && Math.abs(state.player.x - armadilloXRef.current) < 1.5 && !state.isArmadilloOpen;
 
   return (
     <div
@@ -891,7 +898,7 @@ const App: React.FC = () => {
                 onContextMenu={handleContextMenu}
               >
                 <div className={`w-full h-full ${state.screenShake > 0 && settings.screenShake ? 'animate-shake' : ''}`}>
-                  <OverworldSection dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} DAY_DURATION_MS={DAY_DURATION_MS} ROPE_X={ROPE_X} HOUSE_X={HOUSE_X} SHOP_X={SHOP_X} RECYCLER_X={RECYCLER_X} CONSTRUCTION_X={CONSTRUCTION_X} WISHING_WELL_X={WISHING_WELL_X} ropeLength={state.ropeLength} inventory={state.inventory} isShopOpen={state.isShopOpen} isRecyclerOpen={state.isRecyclerOpen} isConstructionOpen={state.isConstructionOpen} recyclingDisplay={state.recyclingDisplay} tutorialState={tutorial.tutorialState} playerX={state.player.x} armadilloX={armadilloX} getSkyGradient={() => {
+                  <OverworldSection dayTime={state.dayTime} dayCount={state.dayCount} EVENING_THRESHOLD_MS={EVENING_THRESHOLD_MS} DAY_DURATION_MS={DAY_DURATION_MS} ROPE_X={ROPE_X} HOUSE_X={HOUSE_X} SHOP_X={SHOP_X} RECYCLER_X={RECYCLER_X} CONSTRUCTION_X={CONSTRUCTION_X} WISHING_WELL_X={WISHING_WELL_X} ropeLength={state.ropeLength} inventory={state.inventory} isShopOpen={state.isShopOpen} isRecyclerOpen={state.isRecyclerOpen} isConstructionOpen={state.isConstructionOpen} recyclingDisplay={state.recyclingDisplay} tutorialState={tutorial.tutorialState} playerX={state.player.x} armadilloX={armadilloRenderX} getSkyGradient={() => {
                     const r = state.dayTime / DAY_DURATION_MS;
                     if (r > 0.3) return `linear-gradient(to bottom, ${COLORS.SKY_TOP}, ${COLORS.SKY_BOTTOM})`;
                     return r > 0.15 ? 'linear-gradient(to bottom, #1e1b4b, #f97316)' : 'linear-gradient(to bottom, #0f172a, #312e81)';
