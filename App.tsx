@@ -396,6 +396,9 @@ const App: React.FC = () => {
     // Advance to next day using sleep (forced)
     actionsWithGrid.handleSleep(true, state.dayCount);
 
+    // Reset camera zoom to overworld mode
+    isMineModeRef.current = false;
+
     // Regenerate mine grid for new day
     mining.initGrid();
 
@@ -952,7 +955,7 @@ const App: React.FC = () => {
       {(state.status === GameStatus.LOST || state.status === GameStatus.WON) && (
         <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-10 text-center animate-in fade-in zoom-in">
           <h2 className={`text-4xl font-black mb-4 uppercase ${state.status === GameStatus.LOST ? 'text-red-500' : 'text-green-500'}`}>{state.status === GameStatus.LOST ? 'Critical Failure' : 'Mission Complete'}</h2>
-          <p className="text-lg mb-12 text-stone-400">Final Log Depth: <span className="text-white">{state.depth * 10}m</span></p>
+          <p className="text-lg mb-12 text-stone-400">Final Log Depth: <span className="text-white">{state.depth}m</span></p>
           <button onClick={initGame} className="bg-white text-black px-16 py-4 font-black uppercase tracking-widest border-b-4 border-stone-400 hover:scale-105 transition-all">Re-Deploy</button>
         </div>
       )}

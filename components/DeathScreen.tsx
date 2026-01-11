@@ -101,10 +101,10 @@ const DeathScreen: React.FC<DeathScreenProps> = ({
                     className={`text-center mb-10 transition-all duration-500 ${showStats ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
                 >
                     <p className="text-stone-400 text-lg mb-3">
-                        Today's Distance: <span className="text-white font-bold">{deathDepth * 10}m</span>
+                        Today's Distance: <span className="text-white font-bold">{deathDepth}m</span>
                     </p>
                     <p className="text-stone-400 text-lg">
-                        Furthest Distance: <span className="text-amber-400 font-bold">{furthestDepth * 10}m</span>
+                        Furthest Distance: <span className="text-amber-400 font-bold">{furthestDepth}m</span>
                     </p>
                 </div>
 

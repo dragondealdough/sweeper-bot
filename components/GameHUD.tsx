@@ -141,7 +141,7 @@ const GameHUD: React.FC<GameHUDProps> = ({
                 <div className="absolute left-0 top-0 bottom-0 w-64 bg-stone-950 border-r border-stone-800 z-[80] p-6 flex flex-col font-mono select-none">
                     <div className="mb-6">
                         <div className="text-[10px] text-stone-500 uppercase tracking-widest mb-1">Current Depth</div>
-                        <div className="text-4xl font-black text-white tracking-tighter">{depth * 10}<span className="text-xs text-stone-600 ml-1">M</span></div>
+                        <div className="text-4xl font-black text-white tracking-tighter">{depth}<span className="text-xs text-stone-600 ml-1">M</span></div>
                     </div>
 
                     {/* Disarm Kit Status - Prominent Display */}
