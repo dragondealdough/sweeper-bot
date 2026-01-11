@@ -338,10 +338,36 @@ const OverworldSection: React.FC<OverworldSectionProps> = ({
           className="absolute z-25 transition-all duration-100"
           style={{
             left: `${armadilloX * GRID_CONFIG.TILE_SIZE + 4}px`,
-            top: FLOOR_Y - 24,
+            top: FLOOR_Y - 32,
           }}
         >
-          <div className="text-2xl" style={{ transform: armadilloX > WISHING_WELL_X ? 'scaleX(-1)' : 'scaleX(1)' }}>🦔</div>
+          {/* Interaction prompt */}
+          {Math.abs(playerX - armadilloX) < 1.5 && (
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-[8px] font-bold px-2 py-0.5 rounded whitespace-nowrap animate-bounce">
+              TALK [E]
+            </div>
+          )}
+          {/* Armadillo character - square body with hat */}
+          <div
+            className="relative flex flex-col items-center"
+            style={{ transform: armadilloX > WISHING_WELL_X ? 'scaleX(-1)' : 'scaleX(1)' }}
+          >
+            {/* Hat */}
+            <div className="w-6 h-2 bg-amber-800 rounded-t-sm border border-amber-950 mb-[-2px] z-10" />
+            <div className="w-10 h-1 bg-amber-700 rounded-sm border border-amber-900" />
+            {/* Square body (like player but square) */}
+            <div className="w-8 h-8 bg-amber-600 border-2 border-amber-800 shadow-lg flex items-center justify-center rounded-sm">
+              {/* Eyes */}
+              <div className="flex gap-1.5">
+                <div className="w-1.5 h-1.5 bg-white rounded-full">
+                  <div className="w-0.5 h-0.5 bg-black rounded-full mt-0.5 ml-0.5" />
+                </div>
+                <div className="w-1.5 h-1.5 bg-white rounded-full">
+                  <div className="w-0.5 h-0.5 bg-black rounded-full mt-0.5 ml-0.5" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
