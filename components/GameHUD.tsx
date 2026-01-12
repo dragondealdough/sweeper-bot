@@ -127,11 +127,13 @@ const GameHUD: React.FC<GameHUDProps> = ({
             </div >
 
             {message && (
-                <div className={`absolute top-24 inset-x-0 mx-auto max-w-[90%] w-fit z-[100] text-white px-4 py-2 rounded font-bold uppercase text-sm text-center shadow-lg border-2 ${message.includes('+')
-                    ? 'bg-emerald-600/95 border-emerald-400 animate-pulse'
-                    : 'bg-red-500/90 border-red-400 animate-bounce'
-                    }`}>
-                    {message}
+                <div className="fixed top-20 left-0 right-0 z-[100] flex justify-center pointer-events-none px-4">
+                    <div className={`text-white px-4 py-2 rounded font-bold uppercase text-sm text-center shadow-lg border-2 max-w-[90%] pointer-events-auto ${message.includes('+')
+                        ? 'bg-emerald-600/95 border-emerald-400 animate-pulse'
+                        : 'bg-red-500/90 border-red-400 animate-bounce'
+                        }`}>
+                        {message}
+                    </div>
                 </div>
             )
             }
