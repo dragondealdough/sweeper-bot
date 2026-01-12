@@ -650,7 +650,8 @@ const App: React.FC = () => {
         armadilloRenderCountRef.current++;
         if (armadilloRenderCountRef.current >= 10) {
           armadilloRenderCountRef.current = 0;
-          setArmadilloRenderX(next);
+          // Temporarily disable render update to fix crash
+          // setArmadilloRenderX(next);
         }
       }
     }
@@ -1048,9 +1049,9 @@ const App: React.FC = () => {
 
       {/* Mobile Touch Controls */}
       <TouchControls
-        visible={isMobile && !state.isShopOpen && !state.isRecyclerOpen && !state.isInventoryOpen && !state.isConstructionOpen && !state.isArmadilloOpen}
+        visible={isMobile && !state.isShopOpen && !state.isRecyclerOpen && !state.isInventoryOpen && !state.isConstructionOpen}
         opacity={settings.controlOpacity / 100}
-        canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || showArmadilloPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
+        canInteract={showRopePrompt || showShopPrompt || showRecyclerPrompt || showConstructionPrompt || (showHousePrompt && state.timeRef.current <= EVENING_THRESHOLD_MS)}
         disabled={tutorialGuard.isInputBlocked()}
       />
 
