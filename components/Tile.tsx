@@ -54,6 +54,13 @@ const Tile: React.FC<TileProps> = ({ tile, isTargeted, isHighlighted, isSelected
           {neighborMines}
         </span>
       );
+    } else {
+      // Show "0" for safe tiles with no adjacent mines
+      content = (
+        <span className="font-bold text-sm text-stone-600/50 select-none">
+          0
+        </span>
+      );
     }
   } else {
     if (flag === FlagType.MINE) {
